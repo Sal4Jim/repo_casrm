@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CASRM - Gestión de Gastos</title> 
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Fuente Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Estilos personalizados externos -->
+  <link rel="stylesheet" href="styles-gastos.css">
+</head>
+<body class="bg-blue-50">
+
+  <!-- Header -->
+  <header class="header py-4 px-6 text-white">
+    <div class="container mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-ice-cream text-yellow-300 text-2xl"></i>
+        <h1 class="text-xl md:text-2xl font-bold">CASRM</h1>
+      </div>
+      <div class="hidden md:flex space-x-4">
+        <a href="javascript:void(0)" class="hover:text-blue-200 transition">Inicio</a>
+        <a href="javascript:void(0)" class="hover:text-blue-200 transition font-semibold">Gestión de Gastos</a>
+        <a href="javascript:void(0)" class="hover:text-blue-200 transition">Clientes</a>
+        <a href="javascript:void(0)" class="hover:text-blue-200 transition">Inventario</a>
+      </div>
+      <div>
+        <button class="md:hidden focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-800">Gestión de Gastos</h2>
+        <p class="text-gray-600">Administre los gastos de su heladería</p>
+      </div>
+      <div class="mt-4 md:mt-0">
+        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm">
+          <i class="far fa-calendar-alt mr-1"></i> Mayo 2025
+        </span>
+      </div>
+    </div>
+
+    <!-- Botón para agregar gasto -->
+    <div class="flex justify-end mb-6">
+      <button id="toggle-form-btn" class="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
+        <i class="fas fa-ice-cream mr-2"></i> Agregar Gasto
+      </button>
+    </div>
+
+    <!-- Formulario de gasto (oculto por defecto) -->
+    <div id="gasto-form-container" class="hidden">
+      <div class="form-card mb-10 p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fas fa-file-invoice-dollar ice-cream-icon mr-2"></i> Registro de Gastos
+        </h3>
+        <form id="gasto-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="col-span-1 md:col-span-2">
+            <label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de insumos para helados" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="monto" class="block text-sm font-medium text-gray-700 mb-1">Monto (S/.)</label>
+            <input type="number" id="monto" name="monto" placeholder="0.00" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+            <input type="date" id="fecha" name="fecha" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="persona" class="block text-sm font-medium text-gray-700 mb-1">Persona Responsable</label>
+            <input type="text" id="persona" name="persona" placeholder="Nombre del responsable" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select id="categoria" name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Seleccionar categoría</option>
+              <option value="insumos">Insumos</option>
+              <option value="equipamiento">Equipamiento</option>
+              <option value="servicios">Servicios</option>
+              <option value="local">Local/Alquiler</option>
+              <option value="marketing">Marketing</option>
+              <option value="personal">Personal</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          
+          <div class="col-span-1 md:col-span-2 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+            <button type="button" id="btn-limpiar" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
+              <i class="fas fa-eraser mr-2"></i> Limpiar Formulario
+            </button>
+            <button type="submit" id="btn-guardar" class="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
+              <i class="fas fa-save mr-2"></i> Guardar Gasto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Tabla de gastos -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="p-6 bg-white border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <h3 class="text-xl font-semibold text-gray-800 flex items-center mb-4 sm:mb-0">
+          <i class="fas fa-list-ul ice-cream-icon mr-2"></i> Lista de Gastos
+        </h3>
+        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+          <div class="relative">
+            <input type="text" placeholder="Buscar gastos..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+          </div>
+          <div class="relative">
+            <button class="flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition">
+              <i class="fas fa-filter mr-2 text-gray-600"></i>
+              <span class="text-gray-700">Filtros</span>
+              <i class="fas fa-chevron-down ml-2 text-gray-600"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr class="table-row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Compra de azúcar y leche</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">S/. 450.00</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">24/05/2025</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">María Gonzales</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
+                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+            <tr class="table-row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Reparación congelador</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">S/. 850.00</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">22/05/2025</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Roberto Méndez</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Equipamiento</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
+                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+            <tr class="table-row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Pago alquiler local</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">S/. 1,200.00</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">19/05/2025</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Carlos López</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Local</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
+                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+            <tr class="table-row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Compra de barquillos</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">S/. 320.00</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">15/05/2025</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Lucía Torres</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
+                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+            <tr class="table-row">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">S/. 500.00</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">10/05/2025</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">Jorge Ramirez</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Marketing</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
+                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Paginación -->
+      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <a href="javascript:void(0)" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Anterior
+          </a>
+          <a href="javascript:void(0)" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+            Siguiente
+          </a>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">14</span> gastos
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Anterior</span>
+                <i class="fas fa-chevron-left"></i>
+              </a>
+              <a href="javascript:void(0)" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                1
+              </a>
+              <a href="javascript:void(0)" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                2
+              </a>
+              <a href="javascript:void(0)" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                3
+              </a>
+              <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">Siguiente</span>
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal de confirmación de eliminación -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+      <div class="relative bg-white rounded-lg max-w-md mx-auto p-6">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center">
+            <div class="bg-red-100 rounded-full p-3 flex-shrink-0">
+              <i class="fas fa-trash-alt text-red-600"></i>
+            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 ml-3">Eliminar Gasto</h3>
+          </div>
+          <button type="button" class="delete-close-btn text-gray-400 hover:text-gray-500 focus:outline-none">
+            <span class="sr-only">Close</span>
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="mt-4">
+          <p class="text-sm text-gray-500">
+            ¿Está seguro que desea eliminar este gasto? Esta acción no se puede deshacer.
+          </p>
+        </div>
+        <div class="mt-5 sm:mt-6 flex space-x-2 justify-end">
+          <button type="button" class="delete-close-btn inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none">
+            Cancelar
+          </button>
+          <button type="button" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none">
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Toast de éxito -->
+    <div id="success-toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center">
+      <i class="fas fa-check-circle mr-3 text-xl"></i>
+      <div>
+        <p class="font-medium">¡Operación exitosa!</p>
+        <p class="text-sm">El gasto ha sido guardado correctamente.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-blue-800 text-white py-6 mt-10">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <div class="flex items-center">
+            <i class="fas fa-ice-cream text-yellow-300 text-2xl mr-2"></i>
+            <span class="text-xl font-bold">CASRM</span>
+          </div>
+          <p class="text-sm text-blue-200 mt-1">Especialistas en productos para heladerías desde 2010</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:space-x-12">
+          <div class="mb-4 md:mb-0">
+            <h4 class="font-semibold mb-2">Enlaces Rápidos</h4>
+            <ul class="text-blue-200 space-y-1">
+              <li><a href="javascript:void(0)" class="hover:text-white">Inicio</a></li>
+              <li><a href="javascript:void(0)" class="hover:text-white">Productos</a></li>
+              <li><a href="javascript:void(0)" class="hover:text-white">Contáctanos</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-2">Síguenos</h4>
+            <div class="flex space-x-3">
+              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
+                <i class="fab fa-twitter"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-blue-700 mt-6 pt-4 text-center text-blue-300 text-sm">
+        <p>© 2025 CASRM - Todos los derechos reservados</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal -->
+  <script id="app-script">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set current date by default
+      const today = new Date();
+      const formattedDate = today.toISOString().substr(0, 10);
+      document.getElementById('fecha').value = formattedDate;
+      
+      // Toggle form visibility
+      const toggleFormBtn = document.getElementById('toggle-form-btn');
+      const formContainer = document.getElementById('gasto-form-container');
+
+      toggleFormBtn.addEventListener('click', function() {
+        if (formContainer.classList.contains('hidden')) {
+          formContainer.classList.remove('hidden');
+          toggleFormBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Cerrar Formulario';
+        } else {
+          formContainer.classList.add('hidden');
+          toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+        }
+      });
+      
+      // Form clear button
+      document.getElementById('btn-limpiar').addEventListener('click', function() {
+        document.getElementById('gasto-form').reset();
+        document.getElementById('fecha').value = formattedDate;
+        
+        // Hide form after clearing and reset button text
+        formContainer.classList.add('hidden');
+        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+      });
+      
+      // Form submit handler
+      document.getElementById('gasto-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Form validation
+        const descripcion = document.getElementById('descripcion').value;
+        const monto = document.getElementById('monto').value;
+        const fecha = document.getElementById('fecha').value;
+        const persona = document.getElementById('persona').value;
+        const categoria = document.getElementById('categoria').value;
+        
+        if (!descripcion || !monto || !fecha || !persona || !categoria) {
+          alert('Por favor complete todos los campos obligatorios');
+          return;
+        }
+        
+        // In a real implementation, we would send the data to the server
+        // For this prototype, we'll just show a success toast
+        showSuccessToast();
+        document.getElementById('gasto-form').reset();
+        document.getElementById('fecha').value = formattedDate;
+        
+        // Hide form after submission and reset button text
+        formContainer.classList.add('hidden');
+        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+      });
+      
+      // Delete confirmation modal handling
+      const deleteButtons = document.querySelectorAll('.fa-trash-alt');
+      const deleteModal = document.getElementById('delete-modal');
+      const closeModalButtons = document.querySelectorAll('.delete-close-btn');
+      
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          deleteModal.classList.remove('hidden');
+        });
+      });
+      
+      closeModalButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          deleteModal.classList.add('hidden');
+        });
+      });
+      
+      // Success toast handling
+      function showSuccessToast() {
+        const toast = document.getElementById('success-toast');
+        toast.classList.remove('hidden');
+        
+        setTimeout(function() {
+          toast.classList.add('hidden');
+        }, 3000);
+      }
+      
+      // Edit functionality
+      const editButtons = document.querySelectorAll('.fa-edit');
+      
+      editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // In a real implementation, we would fetch the data from the server
+          // For this prototype, we'll just fill the form with sample data
+          const row = button.closest('tr');
+          const columns = row.querySelectorAll('td');
+          
+          document.getElementById('descripcion').value = columns[0].textContent.trim();
+          document.getElementById('monto').value = columns[1].textContent.trim().replace('S/. ', '').replace(',', '');
+          
+          // Convert date format
+          const dateParts = columns[2].textContent.trim().split('/');
+          const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          document.getElementById('fecha').value = formattedEditDate;
+          
+          document.getElementById('persona').value = columns[3].textContent.trim();
+          
+          // Extract category
+          const categoryText = columns[4].querySelector('span').textContent.trim();
+          const categorySelect = document.getElementById('categoria');
+          
+          for (let i = 0; i < categorySelect.options.length; i++) {
+            if (categorySelect.options[i].text === categoryText) {
+              categorySelect.selectedIndex = i;
+              break;
+            }
+          }
+          
+          // Scroll to form
+          document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
