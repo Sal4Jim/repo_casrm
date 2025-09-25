@@ -1,0 +1,127 @@
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fa;
+    background-image: url('https://cdn.pixabay.com/photo/2019/04/26/14/33/pattern-4157736_1280.png');
+    background-size: 300px;
+    background-blend-mode: soft-light;
+}
+
+.logo {
+    font-family: 'Pacifico', cursive;
+    color: #e83e8c;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-btn {
+    transition: all 0.3s ease;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-btn:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.btn-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.btn-pink {
+    background-color: #ffd1dc;
+    border: 2px solid #ffb6c1;
+}
+
+.btn-mint {
+    background-color: #c1ffd7;
+    border: 2px solid #98e8c1;
+}
+
+.btn-yellow {
+    background-color: #fff2cc;
+    border: 2px solid #ffe699;
+}
+
+.btn-lavender {
+    background-color: #e6e6fa;
+    border: 2px solid #d8bfd8;
+}
+
+.btn-blue {
+    background-color: #ccf2ff;
+    border: 2px solid #99e6ff;
+}
+
+.btn-peach {
+    background-color: #ffe5cc;
+    border: 2px solid #ffcc99;
+}
+
+.ice-cream-pattern {
+    position: relative;
+}
+
+.ice-cream-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+    background-repeat: repeat;
+    z-index: 0;
+}
+
+.btn-content {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.floating-ice-cream {
+    position: absolute;
+    z-index: -1;
+    opacity: 0.2;
+    animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* Estilos para los íconos de ordenamiento */
+th {
+    cursor: pointer;
+    user-select: none;
+}
+
+th .fa-sort {
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+th:hover .fa-sort {
+    opacity: 1;
+}
+
+th .fa-sort-up,
+th .fa-sort-down {
+    opacity: 1;
+    color: var(--primary);
+}
