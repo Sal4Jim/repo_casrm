@@ -34,10 +34,34 @@ body {
 /* =========================================================
    HEADER
    ========================================================= */
-.header {
+/* .header {
   background: var(--bg-navbar);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+ */
+.navbar {
+    background: var(--bg-navbar);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+.navbar-brand,
+.navbar .nav-link {
+    color: var(--text-navbar) !important;
+    font-weight: 500;
+}
+.navbar-brand i {
+    color: #f6e05e;
+    margin-right: 0.5rem;
+}
+.navbar .nav-link.active {
+    font-weight: 600;
+    color: #f6e05e !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+.navbar .nav-link:hover {
+    color: #f6e05e !important;
+}
+
 
 /* =========================================================
    BOTONES PERSONALIZADOS
