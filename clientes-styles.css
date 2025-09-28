@@ -1,292 +1,277 @@
+/* 
+   =========================================================
+   VARIABLES DE COLOR - SOLO LO NECESARIO 
+   =========================================================
+*/
 :root {
-  --mint-green: #a8e6cf;
-  --soft-pink: #ffb7c5;
-  --vanilla-cream: #fff6e9;
-  --soft-orange: #ffccb6;
-  --dark-text: #2c3e50;
+    --bg-body: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-navbar: linear-gradient(135deg, #4a6fa5, #3a5a80);
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --text-navbar: #ffffff;
+    --border-color: #e2e8f0;
+    --border-color-dark: #cbd5e0;
+    --btn-primary-bg: #4a6fa5;
+    --btn-primary-bg-hover: #3a5a80;
+    --btn-secondary-bg: #a0aec0;
+    --btn-secondary-bg-hover: #718096;
+    --table-header-bg: #f1f5f9;
+    --footer-bg: #2d3748;
+    --footer-text: #e2e8f0;
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --input-text: #2d3748;
+    --input-placeholder: #a0aec0;
 }
 
+/* 
+   =========================================================
+   ESTILOS GENERALES 
+   =========================================================
+*/
 body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #f8f9fa;
-  color: var(--dark-text);
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    padding-top: 80px;
+    margin: 0;
 }
 
+/* 
+   =========================================================
+   BARRA DE NAVEGACIÓN 
+   =========================================================
+*/
 .navbar {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--bg-navbar);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
-
-.navbar-brand {
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: white;
+.navbar-brand,
+.navbar .nav-link {
+    color: var(--text-navbar) !important;
+    font-weight: 500;
 }
-
 .navbar-brand i {
-    color: #f1c40f;
+    color: #f6e05e;
     margin-right: 0.5rem;
 }
-.ice-cream-icon {
-    display: inline-block;
-    animation: float 3s ease-in-out infinite;
+.navbar .nav-link.active {
+    font-weight: 600;
+    color: #f6e05e !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+.navbar .nav-link:hover {
+    color: #f6e05e !important;
 }
 
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-}
-
-.btn-primary {
-  background-color: var(--mint-green);
-  border-color: var(--mint-green);
-  color: var(--dark-text);
-}
-
-.btn-primary:hover {
-  background-color: #8cd9be;
-  border-color: #8cd9be;
-  color: var(--dark-text);
-}
-
-.btn-danger {
-  background-color: var(--soft-pink);
-  border-color: var(--soft-pink);
-  color: var(--dark-text);
-}
-
-.btn-danger:hover {
-  background-color: #f29fb1;
-  border-color: #f29fb1;
-  color: var(--dark-text);
-}
-
-.btn-info {
-  background-color: #a0d2eb;
-  border-color: #a0d2eb;
-  color: var(--dark-text);
-}
-
-.btn-info:hover {
-  background-color: #8bc2e0;
-  border-color: #8bc2e0;
-  color: var(--dark-text);
-}
-
-.btn-warning {
-  background-color: var(--soft-orange);
-  border-color: var(--soft-orange);
-  color: var(--dark-text);
-}
-
-.btn-warning:hover {
-  background-color: #f8b99b;
-  border-color: #f8b99b;
-  color: var(--dark-text);
-}
-
+/* 
+   =========================================================
+   TARJETAS 
+   =========================================================
+*/
 .card {
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  border: none;
-  overflow: hidden;
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
 }
-
 .card-header {
-  background-color: var(--vanilla-cream);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 15px 20px;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.2rem 1rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
+/* 
+   =========================================================
+   BOTONES 
+   =========================================================
+*/
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
+}
+.btn-primary:hover {
+    background-color: var(--btn-primary-bg-hover);
+    border-color: var(--btn-primary-bg-hover);
+}
+.btn-secondary {
+    background-color: var(--btn-secondary-bg);
+    border-color: var(--btn-secondary-bg);
+}
+.btn-secondary:hover {
+    background-color: var(--btn-secondary-bg-hover);
+    border-color: var(--btn-secondary-bg-hover);
+}
+.btn-danger {
+    background-color: #e53e3e;
+    border-color: #e53e3e;
+}
+.btn-danger:hover {
+    background-color: #c53030;
+    border-color: #c53030;
+}
+.btn-info {
+    background-color: #319795;
+    border-color: #319795;
+    color: white;
+}
+.btn-info:hover {
+    background-color: #2c7a7a;
+    border-color: #2c7a7a;
+}
+.btn-warning {
+    background-color: #d69e2e;
+    border-color: #d69e2e;
+    color: white;
+}
+.btn-warning:hover {
+    background-color: #b7791f;
+    border-color: #b7791f;
+}
+
+/* 
+   =========================================================
+   TABLA DE CLIENTES 
+   =========================================================
+*/
 .table {
-  color: var(--dark-text);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-collapse: collapse;
 }
-
 .table th {
-  background-color: var(--vanilla-cream);
-  font-weight: 500;
-  border-top: none;
+    background-color: var(--table-header-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color-dark);
+    padding: 12px 10px;
+}
+.table td {
+    border-color: var(--border-color);
+    vertical-align: middle;
+    padding: 12px 10px;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(74, 111, 165, 0.08);
 }
 
-.customer-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
+/* 
+   =========================================================
+   COLUMNA DE ACCIONES (SIN MODIFICAR ANCHO) 
+   =========================================================
+*/
+.actions-column {
+    width: 220px; /* Ancho original */
 }
 
-.customer-row:hover {
-  background-color: rgba(168, 230, 207, 0.1);
+/* 
+   =========================================================
+   BÚSQUEDA 
+   =========================================================
+*/
+.search-box {
+    position: relative;
+}
+.search-box input[type="text"] {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+}
+.search-box input[type="text"]:focus {
+    outline: none;
+    border-color: var(--btn-primary-bg);
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.25);
+}
+.search-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
 }
 
-.action-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  margin: 0 2px;
-}
-
-.badge-status {
-  padding: 5px 10px;
-  border-radius: 12px;
-  font-weight: 500;
-  font-size: 0.8rem;
-}
-
-.badge-active {
-  background-color: #a8e6cf;
-  color: #2c3e50;
-}
-
-.badge-inactive {
-  background-color: #d3d3d3;
-  color: #6c757d;
-}
-
-.badge-regular {
-  background-color: #a0d2eb;
-  color: #2c3e50;
-}
-
-.badge-wholesale {
-  background-color: #b6cffa;
-  color: #2c3e50;
-}
-
-.badge-vip {
-  background-color: #ffccb6;
-  color: #2c3e50;
-}
-
-.search-container {
-  background-color: white;
-  border-radius: 30px;
-  overflow: hidden;
-  border: 1px solid #ced4da;
-  transition: all 0.3s;
-}
-
-.search-container:focus-within {
-  box-shadow: 0 0 0 0.25rem rgba(168, 230, 207, 0.25);
-  border-color: var(--mint-green);
-}
-
-.search-input {
-  border: none;
-  outline: none;
-  box-shadow: none;
-}
-
-.search-icon {
-  color: #6c757d;
-  padding: 0 15px;
-}
-
-.pagination .page-item.active .page-link {
-  background-color: var(--mint-green);
-  border-color: var(--mint-green);
-  color: var(--dark-text);
-}
-
-.pagination .page-link {
-  color: var(--dark-text);
-}
-
-.sort-icon {
-  cursor: pointer;
-  margin-left: 5px;
-  opacity: 0.5;
-}
-
-.sort-icon.active {
-  opacity: 1;
-}
-
-.customer-detail-card {
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-}
-
-.customer-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: var(--mint-green);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: white;
-  margin: 0 auto 15px;
-}
-
-.modal-content {
-  border-radius: 15px;
-  border: none;
-  overflow: hidden;
-}
-
+/* 
+   =========================================================
+   MODAL 
+   =========================================================
+*/
 .modal-header {
-  background-color: var(--vanilla-cream);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: var(--bg-navbar);
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
-.modal-footer {
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+/* 
+   =========================================================
+   FOOTER 
+   =========================================================
+*/
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
 }
 
-.form-control, .form-select {
-  border-radius: 10px;
-  padding: 10px 15px;
+/* 
+   =========================================================
+   RESPONSIVO (MÓVILES) 
+   =========================================================
+*/
+@media (max-width: 768px) {
+    .card {
+        border-radius: 0;
+        margin: 0 -12px;
+    }
+    .actions-column {
+        width: 90px; /* Ancho original en móvil */
+    }
+    .table-responsive {
+        border-radius: 0;
+    }
+    .navbar .container {
+        flex-wrap: wrap;
+    }
 }
-
-/* Responsive styles */
-@media (max-width: 767px) {
-  .table-responsive {
-    border: none;
-  }
-
-  .customer-card {
-    margin-bottom: 15px;
-  }
-
-  .card-header {
-    padding: 12px 15px;
-  }
-
-  .card-body {
-    padding: 15px;
-  }
-
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-  }
+/* 
+   =========================================================
+   ESTILOS PARA EL MODAL DE DETALLES DEL CLIENTE
+   =========================================================
+*/
+.customer-avatar {
+    width: 100px;
+    height: 100px;
+    border: 2px solid var(--border-color);
 }
-
-/* Ice cream theme elements */
-.ice-cream-bg {
-  background: linear-gradient(135deg, #a8e6cf 0%, #ffb7c5 100%);
+.modal .card {
+    border: 1px solid var(--border-color);
+    box-shadow: none;
 }
-
-.ice-cream-icon {
-  width: 24px;
-  height: 24px;
+.modal .card-body {
+    padding: 1rem;
 }
-
-/* Customer card for mobile view */
-.customer-card {
-  border-radius: 12px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  border-left: 4px solid var(--mint-green);
+.modal .card-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
 }
-
-.customer-card.inactive {
-  border-left-color: #d3d3d3;
+.list-group-item {
+    border-color: var(--border-color);
 }
