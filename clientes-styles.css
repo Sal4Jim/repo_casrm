@@ -12,7 +12,17 @@ body {
   color: var(--dark-text);
 }
 
-.navbar {
+/* Header */
+.header {
+  background-color: #4299e1;
+  background-image: linear-gradient(to right, #4299e1, #38b2ac);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: white;
+}
+
+/* .navbar {
     background: linear-gradient(135deg, #3498db, #2980b9);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -26,7 +36,8 @@ body {
 .navbar-brand i {
     color: #f1c40f;
     margin-right: 0.5rem;
-}
+} */
+
 .ice-cream-icon {
     display: inline-block;
     animation: float 3s ease-in-out infinite;
