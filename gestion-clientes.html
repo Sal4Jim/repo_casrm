@@ -2,281 +2,135 @@
 <html lang="es">
 
 <head>
+    <!-- Codificación de caracteres para soportar acentos y caracteres especiales -->
     <meta charset="utf-8">
+    <!-- Hace que el diseño sea adaptable a móviles (responsive) -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Título que aparecerá en la pestaña del navegador -->
     <title>CASRM - Sistema de Gestión de Clientes</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Framework CSS de Bootstrap para estilos y componentes -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    <!-- Título que aparecerá en la pestaña del navegador -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
+    <!-- Fuente personalizada Poppins desde Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-    <!-- Archivo CSS Externo -->
-    <link rel="stylesheet" href="clientes-styles.css">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="gestion-clientes.css">
 </head>
 
 <body>
-    <!-- Navbar -->
-    <header class="header py-4 px-6 text-white">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fas fa-ice-cream text-yellow-300 text-2xl"></i>
-                <h1 class="text-xl md:text-2xl font-bold">CASRM</h1>
-            </div>
-            <div class="hidden md:flex space-x-4">
-                <a href="javascript:void(0)" class="hover:text-blue-200 transition">Inicio</a>
-                <a href="javascript:void(0)" class="hover:text-blue-200 transition font-semibold">Gestión de Gastos</a>
-                <a href="javascript:void(0)" class="hover:text-blue-200 transition">Clientes</a>
-                <a href="javascript:void(0)" class="hover:text-blue-200 transition">Inventario</a>
-            </div>
-            <div>
-                <button class="md:hidden focus:outline-none">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>  
-    </header>
-
-    <!-- Main Content -->
-    <div class="container-fluid py-4">
-        <div class="row mb-4">
-            <div class="col-lg-6 mb-3 mb-lg-0">
-                <h1 class="h3">Gestión de Clientes</h1>
-                <p class="text-muted">Administre su base de clientes de heladería</p>
-            </div>
-            <div class="col-lg-6">
-                <div class="d-flex flex-column flex-sm-row justify-content-lg-end gap-2">
-                    <div class="search-container flex-grow-1 flex-lg-grow-0" style="max-width: 300px;">
-                        <div class="input-group">
-                            <span class="input-group-text search-icon bg-transparent border-0">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" class="form-control search-input" id="customerSearch"
-                                placeholder="Buscar por nombre o identificación...">
-                        </div>
-                    </div>
-                    <select class="form-select flex-grow-1 flex-lg-grow-0" id="sortOptions" style="max-width: 240px;">
-                        <option value="nameAsc">Nombre (A-Z)</option>
-                        <option value="nameDesc">Nombre (Z-A)</option>
-                        <option value="lastContactDesc">Último Contacto (Reciente)</option>
-                        <option value="lastContactAsc">Último Contacto (Antiguo)</option>
-                        <option value="lastPurchaseDesc">Última Compra (Reciente)</option>
-                        <option value="lastPurchaseAsc">Última Compra (Antiguo)</option>
-                    </select>
-                </div>
+    <!-- Barra de navegación superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <!-- Logo + nombre CASRM -->
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-ice-cream ice-cream-icon"></i> CASRM
+            </a>
+            <!-- Botón hamburguesa para pantallas pequeñas -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- Menú de navegación -->
+            <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="gestion-clientes.html">Gestionar Clientes</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestión Gastos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li>
+                </ul>
             </div>
         </div>
+    </nav>
+>>>>>>> origin/develop
 
-        <!-- Customer List Card -->
+    <!-- Contenedor principal -->
+    <div class="container mb-5">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Lista de Clientes</h5>
-                <div>
-                    <div class="dropdown d-inline-block me-2">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" id="filterDropdown"
-                            data-bs-toggle="dropdown">
-                            <i class="fas fa-filter"></i> Filtros
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <h6 class="dropdown-header">Tipo de Cliente</h6>
-                            <div class="dropdown-item">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="typeRegular" checked>
-                                    <label class="form-check-label" for="typeRegular">Regular</label>
-                                </div>
-                            </div>
-                            <div class="dropdown-item">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="typeWholesale" checked>
-                                    <label class="form-check-label" for="typeWholesale">Mayorista</label>
-                                </div>
-                            </div>
-                            <div class="dropdown-item">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="typeVIP" checked>
-                                    <label class="form-check-label" for="typeVIP">VIP</label>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header">Estado</h6>
-                            <div class="dropdown-item">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="statusActive" checked>
-                                    <label class="form-check-label" for="statusActive">Activo</label>
-                                </div>
-                            </div>
-                            <div class="dropdown-item">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="statusInactive" checked>
-                                    <label class="form-check-label" for="statusInactive">Inactivo</label>
-                                </div>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item">
-                                <button class="btn btn-sm btn-primary w-100">Aplicar Filtros</button>
-                            </div>
+            <!-- Encabezado de la tarjeta con título y botón "Nuevo" -->
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <h4 class="mb-0"><i class="fas fa-users me-2"></i> Gestión de Clientes</h4>
+                <button id="btnNuevo" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal">
+                    <i class="fas fa-plus-circle me-2"></i> Nuevo
+                </button>
+            </div>
+
+            <!-- Cuerpo de la tarjeta -->
+            <div class="card-body">
+                <!-- Caja de búsqueda -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" class="form-control"
+                                placeholder="Buscar por nombre, RUC, ciudad o teléfono">
+                            <i class="fas fa-search"></i>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-outline-secondary me-2">
-                        <i class="fas fa-download"></i> Exportar
-                    </button>
-                    <!-- ✅ BOTÓN AÑADIDO AQUÍ -->
-                    <button class="btn btn-sm btn-primary" id="newCustomerBtn">
-                        <i class="fas fa-plus-circle me-1"></i> Añadir Cliente
-                    </button>
                 </div>
-            </div>
-            <div class="card-body p-0">
-                <!-- Desktop & Tablet View -->
-                <div class="table-responsive d-none d-md-block">
-                    <table class="table table-hover mb-0">
+
+                <!-- Tabla de clientes -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Identificación</th>
+                                <th>RUC</th>
                                 <th>Ciudad</th>
-                                <th>Tipo de Cliente</th>
-                                <th>Estado</th>
-                                <th>Último Contacto</th>
-                                <th>Última Compra</th>
-                                <th class="text-center">Acciones</th>
+                                <th>Teléfono</th> <!-- Nueva columna -->
+                                <th class="actions-column">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="customer-row">
-                                <td>Ana Rodríguez</td>
-                                <td>7647382910</td>
+                        <tbody id="clientsTable">
+                            <!-- Fila de ejemplo: Cliente Juan Pérez -->
+                            <tr>
+                                <td>Juan Pérez</td>
+                                <td>10456789012</td>
                                 <td>Lima</td>
-                                <td><span class="badge badge-status badge-regular">Regular</span></td>
-                                <td><span class="badge badge-status badge-active">Activo</span></td>
-                                <td>24/05/2025</td>
-                                <td>20/05/2025</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning action-btn" data-bs-toggle="tooltip"
-                                        title="Nueva Venta">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info action-btn" data-bs-toggle="tooltip"
-                                        title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip"
-                                        title="Editar">
+                                <td>+51 987 654 321</td>
+                                <td>
+                                    <!-- Botones de acciones -->
+                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
+                                        data-bs-target="#clientModal" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip"
-                                        title="Eliminar">
+                                    <button class="btn btn-sm btn-danger me-1" data-action="delete">
                                         <i class="fas fa-trash"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-info me-1" data-action="info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    <!-- Botón nuevo: Agregar Venta -->
+                                    <button class="btn btn-sm btn-warning" data-action="add-sale">
+                                        <i class="fas fa-shopping-cart"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <tr class="customer-row">
-                                <td>Carlos López</td>
-                                <td>9984621035</td>
+                            <!-- Fila de ejemplo: Empresa Heladería Dulce Frío -->
+                            <tr>
+                                <td>Heladería Dulce Frío</td>
+                                <td>20123456789</td>
                                 <td>Arequipa</td>
-                                <td><span class="badge badge-status badge-vip">VIP</span></td>
-                                <td><span class="badge badge-status badge-active">Activo</span></td>
-                                <td>22/05/2025</td>
-                                <td>22/05/2025</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning action-btn" data-bs-toggle="tooltip"
-                                        title="Nueva Venta">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info action-btn" data-bs-toggle="tooltip"
-                                        title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip"
-                                        title="Editar">
+                                <td>+51 912 345 678</td>
+                                <td>
+                                    <!-- Botones de acciones -->
+                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
+                                        data-bs-target="#clientModal" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip"
-                                        title="Eliminar">
+                                    <button class="btn btn-sm btn-danger me-1" data-action="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            <tr class="customer-row">
-                                <td>Sofía Martínez</td>
-                                <td>6573941028</td>
-                                <td>Cuzco</td>
-                                <td><span class="badge badge-status badge-wholesale">Mayorista</span></td>
-                                <td><span class="badge badge-status badge-active">Activo</span></td>
-                                <td>18/05/2025</td>
-                                <td>15/05/2025</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning action-btn" data-bs-toggle="tooltip"
-                                        title="Nueva Venta">
+                                    <button class="btn btn-sm btn-info me-1" data-action="info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                    <!-- Botón nuevo: Agregar Venta -->
+                                    <button class="btn btn-sm btn-warning" data-action="add-sale">
                                         <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info action-btn" data-bs-toggle="tooltip"
-                                        title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip"
-                                        title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip"
-                                        title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="customer-row">
-                                <td>Pedro Sánchez</td>
-                                <td>2349867501</td>
-                                <td>Puno</td>
-                                <td><span class="badge badge-status badge-regular">Regular</span></td>
-                                <td><span class="badge badge-status badge-inactive">Inactivo</span></td>
-                                <td>03/04/2025</td>
-                                <td>28/03/2025</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning action-btn" data-bs-toggle="tooltip"
-                                        title="Nueva Venta">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info action-btn" data-bs-toggle="tooltip"
-                                        title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip"
-                                        title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip"
-                                        title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="customer-row">
-                                <td>Laura Gómez</td>
-                                <td>8765432190</td>
-                                <td>Chimbote</td>
-                                <td><span class="badge badge-status badge-vip">VIP</span></td>
-                                <td><span class="badge badge-status badge-active">Activo</span></td>
-                                <td>20/05/2025</td>
-                                <td>19/05/2025</td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-warning action-btn" data-bs-toggle="tooltip"
-                                        title="Nueva Venta">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info action-btn" data-bs-toggle="tooltip"
-                                        title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary action-btn" data-bs-toggle="tooltip"
-                                        title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger action-btn" data-bs-toggle="tooltip"
-                                        title="Eliminar">
-                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -284,703 +138,170 @@
                     </table>
                 </div>
 
-                <!-- Mobile View -->
-                <div class="d-md-none">
-                    <div class="customer-card p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">Ana Rodríguez</h5>
-                                <p class="text-muted mb-1"><small>ID: 7647382910</small></p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge badge-status badge-regular">Regular</span>
-                                    <span class="badge badge-status badge-active">Activo</span>
-                                </div>
-                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Madrid</p>
-                                <p class="mb-0"><i class="fas fa-phone-alt me-1"></i> Último contacto: 24/05/2025</p>
-                                <p class="mb-0"><i class="fas fa-shopping-bag me-1"></i> Última compra: 20/05/2025</p>
-                            </div>
-                        </div>
-                        <div class="action-buttons mt-3">
-                            <button class="btn btn-sm btn-warning me-1">
-                                <i class="fas fa-shopping-cart"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-sm btn-info me-1">
-                                <i class="fas fa-eye"></i> Detalles
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="customer-card p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">Carlos López</h5>
-                                <p class="text-muted mb-1"><small>ID: 9984621035</small></p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge badge-status badge-vip">VIP</span>
-                                    <span class="badge badge-status badge-active">Activo</span>
-                                </div>
-                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Barcelona</p>
-                                <p class="mb-0"><i class="fas fa-phone-alt me-1"></i> Último contacto: 22/05/2025</p>
-                                <p class="mb-0"><i class="fas fa-shopping-bag me-1"></i> Última compra: 22/05/2025</p>
-                            </div>
-                        </div>
-                        <div class="action-buttons mt-3">
-                            <button class="btn btn-sm btn-warning me-1">
-                                <i class="fas fa-shopping-cart"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-sm btn-info me-1">
-                                <i class="fas fa-eye"></i> Detalles
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="customer-card p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">Sofía Martínez</h5>
-                                <p class="text-muted mb-1"><small>ID: 6573941028</small></p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge badge-status badge-wholesale">Mayorista</span>
-                                    <span class="badge badge-status badge-active">Activo</span>
-                                </div>
-                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Valencia</p>
-                                <p class="mb-0"><i class="fas fa-phone-alt me-1"></i> Último contacto: 18/05/2025</p>
-                                <p class="mb-0"><i class="fas fa-shopping-bag me-1"></i> Última compra: 15/05/2025</p>
-                            </div>
-                        </div>
-                        <div class="action-buttons mt-3">
-                            <button class="btn btn-sm btn-warning me-1">
-                                <i class="fas fa-shopping-cart"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-sm btn-info me-1">
-                                <i class="fas fa-eye"></i> Detalles
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="customer-card inactive p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">Pedro Sánchez</h5>
-                                <p class="text-muted mb-1"><small>ID: 2349867501</small></p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge badge-status badge-regular">Regular</span>
-                                    <span class="badge badge-status badge-inactive">Inactivo</span>
-                                </div>
-                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Sevilla</p>
-                                <p class="mb-0"><i class="fas fa-phone-alt me-1"></i> Último contacto: 03/04/2025</p>
-                                <p class="mb-0"><i class="fas fa-shopping-bag me-1"></i> Última compra: 28/03/2025</p>
-                            </div>
-                        </div>
-                        <div class="action-buttons mt-3">
-                            <button class="btn btn-sm btn-warning me-1">
-                                <i class="fas fa-shopping-cart"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-sm btn-info me-1">
-                                <i class="fas fa-eye"></i> Detalles
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="customer-card p-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h5 class="mb-1">Laura Gómez</h5>
-                                <p class="text-muted mb-1"><small>ID: 8765432190</small></p>
-                                <div class="d-flex gap-2 mb-2">
-                                    <span class="badge badge-status badge-vip">VIP</span>
-                                    <span class="badge badge-status badge-active">Activo</span>
-                                </div>
-                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1"></i> Bilbao</p>
-                                <p class="mb-0"><i class="fas fa-phone-alt me-1"></i> Último contacto: 20/05/2025</p>
-                                <p class="mb-0"><i class="fas fa-shopping-bag me-1"></i> Última compra: 19/05/2025</p>
-                            </div>
-                        </div>
-                        <div class="action-buttons mt-3">
-                            <button class="btn btn-sm btn-warning me-1">
-                                <i class="fas fa-shopping-cart"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-sm btn-info me-1">
-                                <i class="fas fa-eye"></i> Detalles
-                            </button>
-                            <button class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-danger">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <p class="text-muted mb-0">Mostrando 5 de 24 clientes</p>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="javascript:void(0)">Anterior</a>
-                            </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="javascript:void(0)">1</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)">2</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)">3</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="javascript:void(0)">Siguiente</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+                <!-- Paginación -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
             </div>
         </div>
     </div>
 
-    <!-- Customer Detail Modal -->
-    <div class="modal fade" id="customerDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <!-- Modal para crear/editar cliente -->
+    <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
+                <!-- Encabezado del modal -->
                 <div class="modal-header">
-                    <h5 class="modal-title">Detalle del Cliente</h5>
+                    <h5 class="modal-title" id="clientModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i> Nuevo Cliente
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <!-- Cuerpo del modal con formulario -->
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center mb-4 mb-md-0">
-                            <div class="customer-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <h4>Carlos López</h4>
-                            <span class="badge badge-status badge-vip mb-2">VIP</span>
-                            <span class="badge badge-status badge-active mb-3">Activo</span>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-warning">
-                                    <i class="fas fa-shopping-cart me-2"></i> Nueva Venta
-                                </button>
-                                <button class="btn btn-primary">
-                                    <i class="fas fa-edit me-2"></i> Editar Cliente
-                                </button>
-                            </div>
+                    <form id="clientForm">
+                        <div class="mb-3">
+                            <label for="clientName" class="form-label">Nombre*</label>
+                            <input type="text" class="form-control" id="clientName" required>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card customer-detail-card mb-3">
-                                <div class="card-header">
-                                    <h6 class="mb-0">Información General</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-sm-6 mb-3">
-                                            <p class="text-muted mb-1">Identificación</p>
-                                            <p class="fw-medium mb-0">9984621035</p>
-                                        </div>
-                                        <div class="col-sm-6 mb-3">
-                                            <p class="text-muted mb-1">Ciudad</p>
-                                            <p class="fw-medium mb-0">Barcelona</p>
-                                        </div>
-                                        <div class="col-sm-6 mb-3">
-                                            <p class="text-muted mb-1">Email</p>
-                                            <p class="fw-medium mb-0">carlos.lopez@ejemplo.com</p>
-                                        </div>
-                                        <div class="col-sm-6 mb-3">
-                                            <p class="text-muted mb-1">Teléfono</p>
-                                            <p class="fw-medium mb-0">+34 612 345 678</p>
-                                        </div>
-                                        <div class="col-sm-6 mb-3">
-                                            <p class="text-muted mb-1">Último Contacto</p>
-                                            <p class="fw-medium mb-0">22/05/2025</p>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <p class="text-muted mb-1">Última Compra</p>
-                                            <p class="fw-medium mb-0">22/05/2025</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card customer-detail-card mb-3">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0">Historial de Compras</h6>
-                                    <span class="badge bg-primary">4 compras</span>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">Compra #1082</h6>
-                                                    <p class="text-muted mb-0"><small>22/05/2025</small></p>
-                                                </div>
-                                                <div class="text-end">
-                                                    <h6 class="text-success mb-1">€87.50</h6>
-                                                    <button class="btn btn-sm btn-outline-secondary">Ver
-                                                        detalles</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">Compra #1071</h6>
-                                                    <p class="text-muted mb-0"><small>15/05/2025</small></p>
-                                                </div>
-                                                <div class="text-end">
-                                                    <h6 class="text-success mb-1">€124.00</h6>
-                                                    <button class="btn btn-sm btn-outline-secondary">Ver
-                                                        detalles</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">Compra #1054</h6>
-                                                    <p class="text-muted mb-0"><small>03/05/2025</small></p>
-                                                </div>
-                                                <div class="text-end">
-                                                    <h6 class="text-success mb-1">€58.75</h6>
-                                                    <button class="btn btn-sm btn-outline-secondary">Ver
-                                                        detalles</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="list-group-item">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h6 class="mb-1">Compra #1039</h6>
-                                                    <p class="text-muted mb-0"><small>22/04/2025</small></p>
-                                                </div>
-                                                <div class="text-end">
-                                                    <h6 class="text-success mb-1">€95.25</h6>
-                                                    <button class="btn btn-sm btn-outline-secondary">Ver
-                                                        detalles</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card customer-detail-card">
-                                <div class="card-header">
-                                    <h6 class="mb-0">Notas de Contacto</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="mb-0">Preferencias específicas</h6>
-                                            <span class="text-muted small">22/05/2025</span>
-                                        </div>
-                                        <p class="mb-0">Cliente prefiere helados de sabores cítricos y sin nueces por
-                                            alergias.</p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="mb-0">Pedido especial para evento</h6>
-                                            <span class="text-muted small">15/05/2025</span>
-                                        </div>
-                                        <p class="mb-0">Interesado en catering para evento corporativo el próximo mes
-                                            (30-40 personas).</p>
-                                    </div>
-                                    <div>
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="mb-0">Primera visita</h6>
-                                            <span class="text-muted small">22/04/2025</span>
-                                        </div>
-                                        <p class="mb-0">Conoció la tienda por recomendación. Muy satisfecho con la
-                                            atención.</p>
-                                    </div>
-                                    <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>
-                                            Agregar Nota</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="clientRUC" class="form-label">RUC*</label>
+                            <input type="text" class="form-control" id="clientRUC" required>
                         </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- New/Edit Customer Modal -->
-    <div class="modal fade" id="customerFormModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="customerFormTitle">Nuevo Cliente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="customerForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="customerName" class="form-label">Nombre Completo *</label>
-                                <input type="text" class="form-control" id="customerName" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerID" class="form-label">Número de Identificación *</label>
-                                <input type="text" class="form-control" id="customerID" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerEmail" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="customerEmail">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerPhone" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="customerPhone">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerCity" class="form-label">Ciudad</label>
-                                <input type="text" class="form-control" id="customerCity">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerAddress" class="form-label">Dirección</label>
-                                <input type="text" class="form-control" id="customerAddress">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerType" class="form-label">Tipo de Cliente *</label>
-                                <select class="form-select" id="customerType" required>
-                                    <option value="">Seleccionar...</option>
-                                    <option value="regular">Regular</option>
-                                    <option value="wholesale">Mayorista</option>
-                                    <option value="vip">VIP</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="customerStatus" class="form-label">Estado *</label>
-                                <select class="form-select" id="customerStatus" required>
-                                    <option value="active">Activo</option>
-                                    <option value="inactive">Inactivo</option>
-                                </select>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="customerNotes" class="form-label">Notas</label>
-                                <textarea class="form-control" id="customerNotes" rows="3"></textarea>
-                            </div>
+                        <div class="mb-3">
+                            <label for="clientCity" class="form-label">Ciudad*</label>
+                            <input type="text" class="form-control" id="clientCity" required>
+                        </div>
+                        <!-- Nuevo campo Teléfono -->
+                        <div class="mb-3">
+                            <label for="clientPhone" class="form-label">Teléfono*</label>
+                            <input type="text" class="form-control" id="clientPhone" required>
                         </div>
                     </form>
                 </div>
+                <!-- Pie del modal con botones -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="saveCustomerBtn">Guardar Cliente</button>
+                    <button type="button" class="btn btn-primary" id="btnSave">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>¿Está seguro que desea eliminar este cliente? Esta acción no se puede deshacer.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
-                </div>
+    <!-- Modal de Detalles del Cliente -->
+    <!-- Modal de Detalles del Cliente con Historial de Compras -->
+<div class="modal fade" id="customerDetailModal" tabindex="-1" aria-labelledby="customerDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerDetailModalLabel">
+                    <i class="fas fa-user me-2"></i> Detalle del Cliente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-
-    <!-- New Sale Modal -->
-    <div class="modal fade" id="newSaleModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nueva Venta</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info" role="alert">
-                        <i class="fas fa-info-circle me-2"></i> Este es un prototipo. La funcionalidad completa de
-                        ventas se implementará en una versión posterior.
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Columna izquierda: Avatar y acciones rápidas -->
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <div class="customer-avatar rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3">
+                            <i class="fas fa-user fa-3x text-secondary"></i>
+                        </div>
+                        <h5 class="mb-2" id="detailName">Nombre del Cliente</h5>
+                        <p class="text-muted mb-3" id="detailCity">Ciudad</p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-warning btn-sm w-100" id="btnNewSaleFromDetail">
+                                <i class="fas fa-shopping-cart me-1"></i> Nueva Venta
+                            </button>
+                            <button class="btn btn-primary btn-sm w-100" id="btnEditFromDetail">
+                                <i class="fas fa-edit me-1"></i> Editar Cliente
+                            </button>
+                        </div>
                     </div>
-                    <form id="saleForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Cliente</label>
-                                <input type="text" class="form-control" value="Carlos López" disabled>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="saleDate" class="form-label">Fecha</label>
-                                <input type="date" class="form-control" id="saleDate" value="2025-05-25">
-                            </div>
-                        </div>
-                        <h6 class="mt-4 mb-3">Productos</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th style="width: 15%;">Cantidad</th>
-                                        <th style="width: 20%;">Precio</th>
-                                        <th style="width: 20%;">Subtotal</th>
-                                        <th style="width: 5%;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <select class="form-select">
-                                                <option>Helado de Chocolate - 1L</option>
-                                                <option>Helado de Vainilla - 1L</option>
-                                                <option>Helado de Fresa - 1L</option>
-                                                <option>Helado de Menta - 1L</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="number" class="form-control" value="2"></td>
-                                        <td><input type="text" class="form-control" value="12.50 €" disabled></td>
-                                        <td><input type="text" class="form-control" value="25.00 €" disabled></td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-danger action-btn">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <select class="form-select">
-                                                <option>Barquillas - Pack 50u</option>
-                                                <option>Cucuruchos - Pack 50u</option>
-                                                <option>Topping Chocolate - 500ml</option>
-                                                <option>Topping Caramelo - 500ml</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="number" class="form-control" value="1"></td>
-                                        <td><input type="text" class="form-control" value="8.75 €" disabled></td>
-                                        <td><input type="text" class="form-control" value="8.75 €" disabled></td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-danger action-btn">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="5">
-                                            <button type="button" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-plus me-1"></i> Agregar Producto
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="saleNotes" class="form-label">Notas</label>
-                                    <textarea class="form-control" id="saleNotes" rows="3"></textarea>
+
+                    <!-- Columna derecha: Información detallada + Historial de compras -->
+                    <div class="col-md-8">
+                        <!-- Información General -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Información General</h6>
+                                <div class="row">
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted">RUC</small>
+                                        <p class="mb-0 fw-medium" id="detailRUC">-</p>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted">Teléfono</small>
+                                        <p class="mb-0 fw-medium" id="detailPhone">-</p>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted">Email</small>
+                                        <p class="mb-0 fw-medium" id="detailEmail">-</p>
+                                    </div>
+                                    <div class="col-sm-6 mb-2">
+                                        <small class="text-muted">Último contacto</small>
+                                        <p class="mb-0 fw-medium" id="detailLastContact">-</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Subtotal:</span>
-                                            <span>33.75 €</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>IVA (21%):</span>
-                                            <span>7.09 €</span>
-                                        </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="fw-bold">Total:</span>
-                                            <span class="fw-bold">40.84 €</span>
+                        </div>
+
+                        <!-- Historial de Compras -->
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Historial de Compras</h6>
+                                <span class="badge bg-primary" id="purchaseCount">0 compras</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" id="purchaseList">
+                                    <!-- Ejemplo de compra (se reemplazará con datos reales) -->
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">Compra #1082</h6>
+                                                <p class="text-muted mb-0"><small>22/05/2025</small></p>
+                                            </div>
+                                            <div class="text-end">
+                                                <h6 class="text-success mb-1">S/ 87.50</h6>
+                                                <button class="btn btn-sm btn-outline-secondary">Ver detalles</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </form>
+
+                        <!-- Notas -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0">Notas</h6>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-plus me-1"></i> Agregar
+                                    </button>
+                                </div>
+                                <p class="mb-0 text-muted fst-italic" id="detailNotes">Sin notas registradas.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">Registrar Venta</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Scripts -->
+    <!-- Footer de la página -->
+    <footer class="text-center p-3 mt-5">
+        <div class="container">
+            <p class="mb-0">© 2025 CASRM - Sistema de Gestión para Productos de Heladería</p>
+        </div>
+    </footer>
+
+    <!-- Scripts: Bootstrap + jQuery + JS propio -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script id="app-script">
-        $(document).ready(function () {
-            // Initialize tooltips
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-
-            // Customer Detail Modal
-            $(document).on('click', '.btn-info', function () {
-                $('#customerDetailModal').modal('show');
-            });
-
-            // New Customer Button
-            $('#newCustomerBtn').click(function () {
-                $('#customerFormTitle').text('Nuevo Cliente');
-                $('#customerForm')[0].reset();
-                $('#customerFormModal').modal('show');
-            });
-
-            // Edit Customer Button
-            $(document).on('click', '.btn-primary:not(#saveCustomerBtn)', function () {
-                $('#customerFormTitle').text('Editar Cliente');
-                $('#customerFormModal').modal('show');
-                // In a real app, we would load customer data here
-                // This is just a placeholder to show form pre-filling
-                $('#customerName').val('Carlos López');
-                $('#customerID').val('9984621035');
-                $('#customerEmail').val('carlos.lopez@ejemplo.com');
-                $('#customerPhone').val('+34 612 345 678');
-                $('#customerCity').val('Barcelona');
-                $('#customerType').val('vip');
-                $('#customerStatus').val('active');
-            });
-
-            // Delete Customer Button
-            $(document).on('click', '.btn-danger:not(#confirmDeleteBtn)', function () {
-                $('#deleteConfirmModal').modal('show');
-            });
-
-            // New Sale Button
-            $(document).on('click', '.btn-warning', function () {
-                $('#newSaleModal').modal('show');
-            });
-
-            // Save Customer Button
-            $('#saveCustomerBtn').click(function () {
-                const form = document.getElementById('customerForm');
-                if (form.checkValidity()) {
-                    $('#customerFormModal').modal('hide');
-                    // Show a success message (in a real app, this would save to the backend)
-                    const toast = `
-              <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
-                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="toast-header bg-success text-white">
-                    <strong class="me-auto">CASRM</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                  </div>
-                  <div class="toast-body">
-                    Cliente guardado exitosamente.
-                  </div>
-                </div>
-              </div>
-            `;
-                    $('body').append(toast);
-                    setTimeout(() => {
-                        $('.toast').toast('hide');
-                        setTimeout(() => $('.toast').parent().remove(), 500);
-                    }, 3000);
-                } else {
-                    form.reportValidity();
-                }
-            });
-
-            // Customer Search
-            $('#customerSearch').on('keyup', function () {
-                const value = $(this).val().toLowerCase();
-                $('.customer-row, .customer-card').filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                });
-            });
-
-            // Sorting function (for demo)
-            $('#sortOptions').change(function () {
-                // In a real app, this would re-sort the data
-                // For the prototype, we're just showing a toast notification
-                const sortOption = $(this).val();
-                let sortMessage = '';
-                switch (sortOption) {
-                    case 'nameAsc':
-                        sortMessage = 'Ordenado por Nombre (A-Z)';
-                        break;
-                    case 'nameDesc':
-                        sortMessage = 'Ordenado por Nombre (Z-A)';
-                        break;
-                    case 'lastContactDesc':
-                        sortMessage = 'Ordenado por Último Contacto (Reciente)';
-                        break;
-                    case 'lastContactAsc':
-                        sortMessage = 'Ordenado por Último Contacto (Antiguo)';
-                        break;
-                    case 'lastPurchaseDesc':
-                        sortMessage = 'Ordenado por Última Compra (Reciente)';
-                        break;
-                    case 'lastPurchaseAsc':
-                        sortMessage = 'Ordenado por Última Compra (Antiguo)';
-                        break;
-                }
-                const toast = `
-            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
-              <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header bg-info text-white">
-                  <strong class="me-auto">CASRM</strong>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">
-                  ${sortMessage}
-                </div>
-              </div>
-            </div>
-          `;
-                $('body').append(toast);
-                setTimeout(() => {
-                    $('.toast').toast('hide');
-                    setTimeout(() => $('.toast').parent().remove(), 500);
-                }, 3000);
-            });
-
-            // Store last search and sort in localStorage (for demo purposes)
-            window.addEventListener('beforeunload', function () {
-                localStorage.setItem('casrm_lastSearch', $('#customerSearch').val());
-                localStorage.setItem('casrm_lastSort', $('#sortOptions').val());
-            });
-
-            // Load last search and sort
-            const lastSearch = localStorage.getItem('casrm_lastSearch');
-            const lastSort = localStorage.getItem('casrm_lastSort');
-            if (lastSearch) {
-                $('#customerSearch').val(lastSearch);
-                $('#customerSearch').trigger('keyup');
-            }
-            if (lastSort) {
-                $('#sortOptions').val(lastSort);
-            }
-        });
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="scripts/gestion-clientes.js"></script>
 </body>
 
 </html>
