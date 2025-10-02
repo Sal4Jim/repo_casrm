@@ -37,8 +37,8 @@
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="gestion-clientes.html">Gestionar Clientes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestión Gastos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="gestion-gastos.html">Gestión Gastos</a></li>
                     <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li>
                 </ul>
             </div>
@@ -51,18 +51,13 @@
     <div class="flex flex-col md:flex-row justify-between items-center mb-8">
       <div>
         <h2 class="text-3xl font-bold text-gray-800">Gestión de Gastos</h2>
-        <p class="text-gray-600">Administre los gastos de su heladería</p>
-      </div>
-      <div class="mt-4 md:mt-0">
-        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm">
-          <i class="far fa-calendar-alt mr-1"></i> Mayo 2025
-        </span>
+        <p class="text-gray-600">Registro de los gastos recurrentes</p>
       </div>
     </div>
 
     <!-- Botón para agregar gasto -->
     <div class="flex justify-end mb-6">
-      <button id="toggle-form-btn" class="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
+      <button id="toggle-form-btn" class="px-5 py-2 text-white rounded-lg transition flex items-center justify-center btn-primary" >
         <i class="fas fa-ice-cream mr-2"></i> Agregar Gasto
       </button>
     </div>
@@ -112,8 +107,8 @@
             <button type="button" id="btn-limpiar" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
               <i class="fas fa-eraser mr-2"></i> Limpiar Formulario
             </button>
-            <button type="submit" id="btn-guardar" class="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center">
-              <i class="fas fa-save mr-2"></i> Guardar Gasto
+            <button type="submit" id="btn-guardar" class="px-5 py-2 text-white rounded-lg transition flex items-center justify-center btn-primary" >
+            <i class="fas fa-save mr-2"></i> Guardar Gasto
             </button>
           </div>
         </form>
@@ -348,39 +343,6 @@
   <!-- Footer -->
   <footer class="bg-blue-800 text-white py-6 mt-10">
     <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-          <div class="flex items-center">
-            <i class="fas fa-ice-cream text-yellow-300 text-2xl mr-2"></i>
-            <span class="text-xl font-bold">CASRM</span>
-          </div>
-          <p class="text-sm text-blue-200 mt-1">Especialistas en productos para heladerías desde 2010</p>
-        </div>
-        <div class="flex flex-col md:flex-row md:space-x-12">
-          <div class="mb-4 md:mb-0">
-            <h4 class="font-semibold mb-2">Enlaces Rápidos</h4>
-            <ul class="text-blue-200 space-y-1">
-              <li><a href="javascript:void(0)" class="hover:text-white">Inicio</a></li>
-              <li><a href="javascript:void(0)" class="hover:text-white">Productos</a></li>
-              <li><a href="javascript:void(0)" class="hover:text-white">Contáctanos</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="font-semibold mb-2">Síguenos</h4>
-            <div class="flex space-x-3">
-              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
-                <i class="fab fa-facebook-f"></i>
-              </a>
-              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
-                <i class="fab fa-instagram"></i>
-              </a>
-              <a href="javascript:void(0)" class="text-blue-200 hover:text-white">
-                <i class="fab fa-twitter"></i>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="border-t border-blue-700 mt-6 pt-4 text-center text-blue-300 text-sm">
         <p>© 2025 CASRM - Todos los derechos reservados</p>
       </div>
@@ -388,127 +350,6 @@
   </footer>
 
   <!-- Script principal -->
-  <script id="app-script">
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set current date by default
-      const today = new Date();
-      const formattedDate = today.toISOString().substr(0, 10);
-      document.getElementById('fecha').value = formattedDate;
-      
-      // Toggle form visibility
-      const toggleFormBtn = document.getElementById('toggle-form-btn');
-      const formContainer = document.getElementById('gasto-form-container');
-
-      toggleFormBtn.addEventListener('click', function() {
-        if (formContainer.classList.contains('hidden')) {
-          formContainer.classList.remove('hidden');
-          toggleFormBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Cerrar Formulario';
-        } else {
-          formContainer.classList.add('hidden');
-          toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
-        }
-      });
-      
-      // Form clear button
-      document.getElementById('btn-limpiar').addEventListener('click', function() {
-        document.getElementById('gasto-form').reset();
-        document.getElementById('fecha').value = formattedDate;
-        
-        // Hide form after clearing and reset button text
-        formContainer.classList.add('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
-      });
-      
-      // Form submit handler
-      document.getElementById('gasto-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Form validation
-        const descripcion = document.getElementById('descripcion').value;
-        const monto = document.getElementById('monto').value;
-        const fecha = document.getElementById('fecha').value;
-        const persona = document.getElementById('persona').value;
-        const categoria = document.getElementById('categoria').value;
-        
-        if (!descripcion || !monto || !fecha || !persona || !categoria) {
-          alert('Por favor complete todos los campos obligatorios');
-          return;
-        }
-        
-        // In a real implementation, we would send the data to the server
-        // For this prototype, we'll just show a success toast
-        showSuccessToast();
-        document.getElementById('gasto-form').reset();
-        document.getElementById('fecha').value = formattedDate;
-        
-        // Hide form after submission and reset button text
-        formContainer.classList.add('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
-      });
-      
-      // Delete confirmation modal handling
-      const deleteButtons = document.querySelectorAll('.fa-trash-alt');
-      const deleteModal = document.getElementById('delete-modal');
-      const closeModalButtons = document.querySelectorAll('.delete-close-btn');
-      
-      deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          deleteModal.classList.remove('hidden');
-        });
-      });
-      
-      closeModalButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          deleteModal.classList.add('hidden');
-        });
-      });
-      
-      // Success toast handling
-      function showSuccessToast() {
-        const toast = document.getElementById('success-toast');
-        toast.classList.remove('hidden');
-        
-        setTimeout(function() {
-          toast.classList.add('hidden');
-        }, 3000);
-      }
-      
-      // Edit functionality
-      const editButtons = document.querySelectorAll('.fa-edit');
-      
-      editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          // In a real implementation, we would fetch the data from the server
-          // For this prototype, we'll just fill the form with sample data
-          const row = button.closest('tr');
-          const columns = row.querySelectorAll('td');
-          
-          document.getElementById('descripcion').value = columns[0].textContent.trim();
-          document.getElementById('monto').value = columns[1].textContent.trim().replace('S/. ', '').replace(',', '');
-          
-          // Convert date format
-          const dateParts = columns[2].textContent.trim().split('/');
-          const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-          document.getElementById('fecha').value = formattedEditDate;
-          
-          document.getElementById('persona').value = columns[3].textContent.trim();
-          
-          // Extract category
-          const categoryText = columns[4].querySelector('span').textContent.trim();
-          const categorySelect = document.getElementById('categoria');
-          
-          for (let i = 0; i < categorySelect.options.length; i++) {
-            if (categorySelect.options[i].text === categoryText) {
-              categorySelect.selectedIndex = i;
-              break;
-            }
-          }
-          
-          // Scroll to form
-          document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
-        });
-      });
-    });
-  </script>
+<script src="scripts/gestion-gastos.js"></script>
 </body>
 </html>
