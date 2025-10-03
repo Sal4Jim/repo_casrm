@@ -89,20 +89,6 @@
             <input type="text" id="persona" name="persona" placeholder="Nombre del responsable" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
           </div>
           
-          <div>
-            <label for="categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select id="categoria" name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              <option value="">Seleccionar categoría</option>
-              <option value="insumos">Insumos</option>
-              <option value="equipamiento">Equipamiento</option>
-              <option value="servicios">Servicios</option>
-              <option value="local">Local/Alquiler</option>
-              <option value="marketing">Marketing</option>
-              <option value="personal">Personal</option>
-              <option value="otros">Otros</option>
-            </select>
-          </div>
-          
           <div class="col-span-1 md:col-span-2 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
             <button type="button" id="btn-limpiar" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
               <i class="fas fa-eraser mr-2"></i> Limpiar Formulario
@@ -144,8 +130,6 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -162,13 +146,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">María Gonzales</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-              </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
@@ -182,13 +159,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Roberto Méndez</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Equipamiento</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
               </td>
             </tr>
             <tr class="table-row">
@@ -204,13 +174,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Carlos López</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Local</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-              </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
@@ -223,19 +186,12 @@
                 <div class="text-sm text-gray-900">15/05/2025</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Lucía Torres</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+                <div class="text-sm text-gray-900">Lucía Torres Davila</div>
               </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital</div>
+                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital sssssssssssssssssssssSSdebemos colocar un maximo de 95 caracteres</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">S/. 500.00</div>
@@ -244,14 +200,7 @@
                 <div class="text-sm text-gray-900">10/05/2025</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Jorge Ramirez</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Marketing</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+                <div class="text-sm text-gray-900">Jimmy Montoya Melendez</div>
               </td>
             </tr>
           </tbody>
@@ -260,14 +209,6 @@
       
       <!-- Paginación -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-          <a href="javascript:void(0)" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Anterior
-          </a>
-          <a href="javascript:void(0)" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Siguiente
-          </a>
-        </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
@@ -279,7 +220,7 @@
               <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">Anterior</span>
                 <i class="fas fa-chevron-left"></i>
-              </a>
+              </a>  
               <a href="javascript:void(0)" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                 1
               </a>
@@ -295,37 +236,6 @@
               </a>
             </nav>
           </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Modal de confirmación de eliminación -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div class="relative bg-white rounded-lg max-w-md mx-auto p-6">
-        <div class="flex items-start justify-between">
-          <div class="flex items-center">
-            <div class="bg-red-100 rounded-full p-3 flex-shrink-0">
-              <i class="fas fa-trash-alt text-red-600"></i>
-            </div>
-            <h3 class="text-lg leading-6 font-medium text-gray-900 ml-3">Eliminar Gasto</h3>
-          </div>
-          <button type="button" class="delete-close-btn text-gray-400 hover:text-gray-500 focus:outline-none">
-            <span class="sr-only">Close</span>
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="mt-4">
-          <p class="text-sm text-gray-500">
-            ¿Está seguro que desea eliminar este gasto? Esta acción no se puede deshacer.
-          </p>
-        </div>
-        <div class="mt-5 sm:mt-6 flex space-x-2 justify-end">
-          <button type="button" class="delete-close-btn inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none">
-            Cancelar
-          </button>
-          <button type="button" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none">
-            Eliminar
-          </button>
         </div>
       </div>
     </div>
