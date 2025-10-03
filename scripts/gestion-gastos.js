@@ -37,9 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const monto = document.getElementById('monto').value;
             const fecha = document.getElementById('fecha').value;
             const persona = document.getElementById('persona').value;
-            const categoria = document.getElementById('categoria').value;
             
-            if (!descripcion || !monto || !fecha || !persona || !categoria) {
+            if (!descripcion || !monto || !fecha || !persona) {
             alert('Por favor complete todos los campos obligatorios');
             return;
             }
@@ -101,17 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fecha').value = formattedEditDate;
             
             document.getElementById('persona').value = columns[3].textContent.trim();
-            
-          // Extract category
-            const categoryText = columns[4].querySelector('span').textContent.trim();
-            const categorySelect = document.getElementById('categoria');
-            
-            for (let i = 0; i < categorySelect.options.length; i++) {
-                if (categorySelect.options[i].text === categoryText) {
-                categorySelect.selectedIndex = i;
-                break;
-                }
-            }
             
             // Scroll to form
             document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
