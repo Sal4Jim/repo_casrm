@@ -1,58 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<!-- =============== SECCIÓN: CABEZERA (HEAD) =============== -->
 <head>
-    <!-- Codificación de caracteres para soportar acentos y caracteres especiales -->
     <meta charset="utf-8">
-    <!-- Hace que el diseño sea adaptable a móviles (responsive) -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Título que aparecerá en la pestaña del navegador -->
     <title>CASRM - Sistema de Gestión de Clientes</title>
-    <!-- Bootstrap CSS -->
+
+    <!-- Estilos de Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Framework CSS de Bootstrap para estilos y componentes -->
+
+    <!-- Estilos de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Título que aparecerá en la pestaña del navegador -->
+
+    <!-- Íconos de Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fuente personalizada Poppins desde Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Estilos personalizados -->
+
+    <!-- Fuente personalizada: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos personalizados del módulo de gestión de clientes -->
     <link rel="stylesheet" href="gestion-clientes.css">
 </head>
 
+<!-- =============== SECCIÓN: CUERPO (BODY) =============== -->
 <body>
-    <!-- Barra de navegación superior -->
+
+    <!-- =============== SECCIÓN: BARRA DE NAVEGACIÓN =============== -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <!-- Logo + nombre CASRM -->
             <a class="navbar-brand" href="index.html">
                 <i class="fas fa-ice-cream ice-cream-icon"></i> CASRM
             </a>
-            <!-- Botón hamburguesa para pantallas pequeñas -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!-- Menú de navegación -->
             <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="gestion-clientes.html">Gestionar Clientes</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link active" href="gestion-clientes.html">Gestionar Clientes</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestión Gastos</a></li>
                     <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li>
                 </ul>
             </div>
         </div>
     </nav>
->>>>>>> origin/develop
 
-    <!-- Contenedor principal -->
+    <!-- =============== SECCIÓN: CONTENIDO PRINCIPAL =============== -->
     <div class="container mb-5">
         <div class="card">
-            <!-- Encabezado de la tarjeta con título y botón "Nuevo" -->
+            <!-- Encabezado de la tarjeta -->
             <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                 <h4 class="mb-0"><i class="fas fa-users me-2"></i> Gestión de Clientes</h4>
                 <button id="btnNuevo" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientModal">
@@ -62,7 +61,7 @@
 
             <!-- Cuerpo de la tarjeta -->
             <div class="card-body">
-                <!-- Caja de búsqueda -->
+                <!-- Barra de búsqueda -->
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="search-box">
@@ -81,19 +80,18 @@
                                 <th>Nombre</th>
                                 <th>RUC</th>
                                 <th>Ciudad</th>
-                                <th>Teléfono</th> <!-- Nueva columna -->
+                                <th>Teléfono</th>
                                 <th class="actions-column">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="clientsTable">
-                            <!-- Fila de ejemplo: Cliente Juan Pérez -->
+                            <!-- Ejemplo de fila de cliente (datos estáticos para demostración) -->
                             <tr>
                                 <td>Juan Pérez</td>
                                 <td>10456789012</td>
                                 <td>Lima</td>
                                 <td>+51 987 654 321</td>
                                 <td>
-                                    <!-- Botones de acciones -->
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
                                         data-bs-target="#clientModal" data-action="edit">
                                         <i class="fas fa-edit"></i>
@@ -104,20 +102,17 @@
                                     <button class="btn btn-sm btn-info me-1" data-action="info">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    <!-- Botón nuevo: Agregar Venta -->
                                     <button class="btn btn-sm btn-warning" data-action="add-sale">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <!-- Fila de ejemplo: Empresa Heladería Dulce Frío -->
                             <tr>
                                 <td>Heladería Dulce Frío</td>
                                 <td>20123456789</td>
                                 <td>Arequipa</td>
                                 <td>+51 912 345 678</td>
                                 <td>
-                                    <!-- Botones de acciones -->
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
                                         data-bs-target="#clientModal" data-action="edit">
                                         <i class="fas fa-edit"></i>
@@ -128,7 +123,6 @@
                                     <button class="btn btn-sm btn-info me-1" data-action="info">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    <!-- Botón nuevo: Agregar Venta -->
                                     <button class="btn btn-sm btn-warning" data-action="add-sale">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
@@ -138,7 +132,7 @@
                     </table>
                 </div>
 
-                <!-- Paginación -->
+                <!-- Paginación (dinámica en implementación real) -->
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center" id="pagination"></ul>
                 </nav>
@@ -146,40 +140,56 @@
         </div>
     </div>
 
-    <!-- Modal para crear/editar cliente -->
+    <!-- =============== SECCIÓN: MODAL - FORMULARIO DE CLIENTE (NUEVO/EDICIÓN) =============== -->
     <div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <!-- Encabezado del modal -->
                 <div class="modal-header">
                     <h5 class="modal-title" id="clientModalLabel">
                         <i class="fas fa-plus-circle me-2"></i> Nuevo Cliente
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- Cuerpo del modal con formulario -->
                 <div class="modal-body">
                     <form id="clientForm">
-                        <div class="mb-3">
-                            <label for="clientName" class="form-label">Nombre*</label>
-                            <input type="text" class="form-control" id="clientName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="clientRUC" class="form-label">RUC*</label>
-                            <input type="text" class="form-control" id="clientRUC" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="clientCity" class="form-label">Ciudad*</label>
-                            <input type="text" class="form-control" id="clientCity" required>
-                        </div>
-                        <!-- Nuevo campo Teléfono -->
-                        <div class="mb-3">
-                            <label for="clientPhone" class="form-label">Teléfono*</label>
-                            <input type="text" class="form-control" id="clientPhone" required>
+                        <div class="row">
+                            <!-- Columna izquierda: Datos básicos -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="clientName" class="form-label">Nombre*</label>
+                                    <input type="text" class="form-control" id="clientName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clientRUC" class="form-label">RUC*</label>
+                                    <input type="text" class="form-control" id="clientRUC" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clientCity" class="form-label">Ciudad*</label>
+                                    <input type="text" class="form-control" id="clientCity" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clientPhone" class="form-label">Teléfono*</label>
+                                    <input type="text" class="form-control" id="clientPhone" required>
+                                </div>
+                            </div>
+                            <!-- Columna derecha: Datos adicionales -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="clientAddress" class="form-label">Dirección*</label>
+                                    <input type="text" class="form-control" id="clientAddress" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clientDNI" class="form-label">DNI*</label>
+                                    <input type="text" class="form-control" id="clientDNI" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="clientAgency" class="form-label">Agencia*</label>
+                                    <input type="text" class="form-control" id="clientAgency" required>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
-                <!-- Pie del modal con botones -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnSave">Guardar</button>
@@ -187,121 +197,126 @@
             </div>
         </div>
     </div>
-    <!-- Modal de Detalles del Cliente -->
-    <!-- Modal de Detalles del Cliente con Historial de Compras -->
-<div class="modal fade" id="customerDetailModal" tabindex="-1" aria-labelledby="customerDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="customerDetailModalLabel">
-                    <i class="fas fa-user me-2"></i> Detalle del Cliente
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <!-- Columna izquierda: Avatar y acciones rápidas -->
-                    <div class="col-md-4 text-center mb-4 mb-md-0">
-                        <div class="customer-avatar rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3">
-                            <i class="fas fa-user fa-3x text-secondary"></i>
-                        </div>
-                        <h5 class="mb-2" id="detailName">Nombre del Cliente</h5>
-                        <p class="text-muted mb-3" id="detailCity">Ciudad</p>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-warning btn-sm w-100" id="btnNewSaleFromDetail">
-                                <i class="fas fa-shopping-cart me-1"></i> Nueva Venta
-                            </button>
-                            <button class="btn btn-primary btn-sm w-100" id="btnEditFromDetail">
-                                <i class="fas fa-edit me-1"></i> Editar Cliente
-                            </button>
-                        </div>
-                    </div>
 
-                    <!-- Columna derecha: Información detallada + Historial de compras -->
-                    <div class="col-md-8">
-                        <!-- Información General -->
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3">Información General</h6>
-                                <div class="row">
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted">RUC</small>
-                                        <p class="mb-0 fw-medium" id="detailRUC">-</p>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted">Teléfono</small>
-                                        <p class="mb-0 fw-medium" id="detailPhone">-</p>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted">Email</small>
-                                        <p class="mb-0 fw-medium" id="detailEmail">-</p>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted">Último contacto</small>
-                                        <p class="mb-0 fw-medium" id="detailLastContact">-</p>
+    <!-- =============== SECCIÓN: MODAL - DETALLE DEL CLIENTE =============== -->
+    <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-labelledby="customerDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customerDetailModalLabel">
+                        <i class="fas fa-user me-2"></i> Detalle del Cliente
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Panel izquierdo: Avatar y acciones rápidas -->
+                        <div class="col-md-4 text-center mb-4 mb-md-0">
+                            <div class="customer-avatar rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3">
+                                <i class="fas fa-user fa-3x text-secondary"></i>
+                            </div>
+                            <h5 class="mb-2" id="detailName">Nombre del Cliente</h5>
+                            <p class="text-muted mb-3" id="detailCity">Ciudad</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning btn-sm w-100" id="btnNewSaleFromDetail">
+                                    <i class="fas fa-shopping-cart me-1"></i> Nueva Venta
+                                </button>
+                                <button class="btn btn-primary btn-sm w-100" id="btnEditFromDetail">
+                                    <i class="fas fa-edit me-1"></i> Editar Cliente
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panel derecho: Información detallada -->
+                        <div class="col-md-8">
+                            <!-- Información general -->
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="fw-bold mb-3">Información General</h6>
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-2">
+                                            <small class="text-muted">RUC</small>
+                                            <p class="mb-0 fw-medium" id="detailRUC">-</p>
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <small class="text-muted">Teléfono</small>
+                                            <p class="mb-0 fw-medium" id="detailPhone">-</p>
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <small class="text-muted">Email</small>
+                                            <p class="mb-0 fw-medium" id="detailEmail">-</p>
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <small class="text-muted">Último contacto</small>
+                                            <p class="mb-0 fw-medium" id="detailLastContact">-</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Historial de Compras -->
-                        <div class="card mb-3">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">Historial de Compras</h6>
-                                <span class="badge bg-primary" id="purchaseCount">0 compras</span>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="list-group list-group-flush" id="purchaseList">
-                                    <!-- Ejemplo de compra (se reemplazará con datos reales) -->
-                                    <div class="list-group-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h6 class="mb-1">Compra #1082</h6>
-                                                <p class="text-muted mb-0"><small>22/05/2025</small></p>
-                                            </div>
-                                            <div class="text-end">
-                                                <h6 class="text-success mb-1">S/ 87.50</h6>
-                                                <button class="btn btn-sm btn-outline-secondary">Ver detalles</button>
+                            <!-- Historial de compras -->
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Historial de Compras</h6>
+                                    <span class="badge bg-primary" id="purchaseCount">0 compras</span>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush" id="purchaseList">
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Compra #1082</h6>
+                                                    <p class="text-muted mb-0"><small>22/05/2025</small></p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <h6 class="text-success mb-1">S/ 87.50</h6>
+                                                    <button class="btn btn-sm btn-outline-secondary">Ver detalles</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Notas -->
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="fw-bold mb-0">Notas</h6>
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-plus me-1"></i> Agregar
-                                    </button>
+                            <!-- Notas del cliente -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="fw-bold mb-0">Notas</h6>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-plus me-1"></i> Agregar
+                                        </button>
+                                    </div>
+                                    <p class="mb-0 text-muted fst-italic" id="detailNotes">Sin notas registradas.</p>
                                 </div>
-                                <p class="mb-0 text-muted fst-italic" id="detailNotes">Sin notas registradas.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-    <!-- Footer de la página -->
+    <!-- =============== SECCIÓN: PIE DE PÁGINA =============== -->
     <footer class="text-center p-3 mt-5">
         <div class="container">
             <p class="mb-0">© 2025 CASRM - Sistema de Gestión para Productos de Heladería</p>
         </div>
     </footer>
 
-    <!-- Scripts: Bootstrap + jQuery + JS propio -->
+    <!-- =============== SECCIÓN: SCRIPTS =============== -->
+    <!-- Bootstrap JS (con Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="scripts/gestion-clientes.js"></script>
-</body>
 
+    <!-- jQuery (usado para lógica adicional en el futuro) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Script personalizado para la gestión de clientes -->
+    <script src="scripts/gestion-clientes.js"></script>
+
+</body>
 </html>

@@ -65,6 +65,21 @@ body {
 .navbar .nav-link:hover {
     color: #f6e05e !important;
 }
+/* 
+   =========================================================
+   ANIMACIONES
+   =========================================================
+*/
+.ice-cream-icon {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite; /* Flotación suave del ícono */
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
 
 /* 
    =========================================================
