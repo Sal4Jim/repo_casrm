@@ -89,20 +89,6 @@
             <input type="text" id="persona" name="persona" placeholder="Nombre del responsable" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
           </div>
           
-          <div>
-            <label for="categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-            <select id="categoria" name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-              <option value="">Seleccionar categoría</option>
-              <option value="insumos">Insumos</option>
-              <option value="equipamiento">Equipamiento</option>
-              <option value="servicios">Servicios</option>
-              <option value="local">Local/Alquiler</option>
-              <option value="marketing">Marketing</option>
-              <option value="personal">Personal</option>
-              <option value="otros">Otros</option>
-            </select>
-          </div>
-          
           <div class="col-span-1 md:col-span-2 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
             <button type="button" id="btn-limpiar" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center justify-center">
               <i class="fas fa-eraser mr-2"></i> Limpiar Formulario
@@ -144,7 +130,6 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
@@ -161,9 +146,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">María Gonzales</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
@@ -183,9 +165,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Roberto Méndez</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Equipamiento</span>
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
                 <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
@@ -203,9 +182,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Carlos López</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Local</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
@@ -225,9 +201,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Lucía Torres</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Insumos</span>
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
                 <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
@@ -245,9 +218,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Jorge Ramirez</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Marketing</span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>

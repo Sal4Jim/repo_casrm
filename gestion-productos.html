@@ -1,83 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<!-- =============== SECCIÓN: CABEZERA (HEAD) =============== -->
 <head>
-    <!-- Codificación de caracteres y configuración de la ventana de visualización -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Título de la página -->
     <title>CASRM - Sistema de Gestión de Productos para Helados</title>
 
-    <!-- Enlace a Bootstrap CSS (versión 5.3.2) para estilos responsivos -->
+    <!-- Estilos de Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Enlace a Font Awesome para íconos -->
+    <!-- Íconos de Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Enlace a la fuente personalizada 'Poppins' desde Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <!-- Fuente personalizada: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Enlace al CSS de Choices.js (librería para selects personalizados) -->
+    <!-- Librería Choices.js para selects mejorados -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 
-    <!-- Enlaces a archivos CSS personalizados del proyecto -->
+    <!-- Estilos personalizados del módulo de gestión de productos -->
     <link rel="stylesheet" href="gestion-productos.css">
 </head>
 
+<!-- =============== SECCIÓN: CUERPO (BODY) =============== -->
 <body>
 
-    <!-- Barra de navegación fija en la parte superior -->
+    <!-- =============== SECCIÓN: BARRA DE NAVEGACIÓN =============== -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <!-- Logo y nombre de la aplicación -->
             <a class="navbar-brand" href="index.html">
                 <i class="fas fa-ice-cream ice-cream-icon"></i> CASRM
             </a>
-
-            <!-- Botón para colapsar el menú en dispositivos móviles -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <!-- Contenido colapsable del menú de navegación -->
             <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
-                <!-- Lista de enlaces de navegación -->
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="gestion-productos.html">Gestionar Productos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="agregar-venta.html">Agregar Venta</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="gestion-gastos.html">Gestión Gastos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="reportes.html">Reportes y utilidades</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="gestion-productos.html">Gestionar Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestión Gastos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Contenedor principal con margen inferior para evitar que el footer se superponga -->
+    <!-- =============== SECCIÓN: CONTENIDO PRINCIPAL =============== -->
     <div class="container mb-5">
-        <!-- Tarjeta que contiene toda la sección de gestión de productos -->
         <div class="card">
-            <!-- Encabezado de la tarjeta con título y botones de acción -->
+            <!-- Encabezado de la tarjeta -->
             <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                 <h4 class="mb-0"><i class="fas fa-boxes me-2"></i> Gestión de Productos</h4>
                 <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center">
-                    <!-- Botón para abrir el modal de nuevo producto -->
                     <button id="btnNuevo" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
                         <i class="fas fa-plus-circle me-2"></i> Nuevo
                     </button>
@@ -86,10 +63,9 @@
 
             <!-- Cuerpo de la tarjeta -->
             <div class="card-body">
-                <!-- Fila con campos de búsqueda y filtro -->
+                <!-- Filtros: búsqueda y categoría -->
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3 mb-md-0">
-                        <!-- Campo de búsqueda de productos -->
                         <div class="search-box">
                             <input type="text" id="searchInput" class="form-control"
                                 placeholder="Buscar por nombre, presentación o proveedor">
@@ -97,7 +73,6 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <!-- Menú desplegable para filtrar por categoría -->
                         <select id="categoryFilter" class="form-select filter-dropdown choices-select">
                             <option value="">Todas las categorías</option>
                             <option value="BARQUILLOS" selected>BARQUILLOS</option>
@@ -108,12 +83,11 @@
                     </div>
                 </div>
 
-                <!-- Tabla con la lista de productos -->
+                <!-- Tabla de productos -->
                 <div class="table-responsive">
                     <table class="table table-hover table-striped">
                         <thead>
                             <tr>
-                                <!-- Encabezados con íconos para ordenar (implementado en JS) -->
                                 <th id="sort-name">Nombre <i class="fas fa-sort"></i></th>
                                 <th id="sort-category">Categoría <i class="fas fa-sort"></i></th>
                                 <th>Subcategoría</th>
@@ -125,7 +99,7 @@
                             </tr>
                         </thead>
                         <tbody id="productsTable">
-                            <!-- Filas de ejemplo de productos -->
+                            <!-- Ejemplo de productos (datos estáticos para demostración) -->
                             <tr data-sort-category="BARQUILLOS" data-sort-name="PINOCHO" data-sort-stock="400">
                                 <td>PINOCHO</td>
                                 <td><span class="category-badge">BARQUILLOS</span></td>
@@ -135,26 +109,22 @@
                                 <td>12</td>
                                 <td>400</td>
                                 <td>
-                                    <!-- Botón para editar (abre modal) -->
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
                                         data-bs-target="#productModal" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <!-- Botón para eliminar -->
                                     <button class="btn btn-sm btn-danger" data-action="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <tr data-sort-category="BARQUILLOS" data-sort-name="CROCANTE MINI" data-sort-stock="0"
-                                class="stock-row">
+                            <tr data-sort-category="BARQUILLOS" data-sort-name="CROCANTE MINI" data-sort-stock="0" class="stock-row">
                                 <td>CROCANTE MINI</td>
                                 <td><span class="category-badge">BARQUILLOS</span></td>
                                 <td><span class="subcategory-badge">Mini</span></td>
                                 <td>caja</td>
                                 <td>8</td>
                                 <td>9</td>
-                                <!-- Stock en cero: clase de advertencia -->
                                 <td class="stock-warning">0</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
@@ -172,7 +142,6 @@
                                 <td><span class="subcategory-badge">Premium</span></td>
                                 <td>caja</td>
                                 <td>15</td>
-                                <!-- Precio de venta menor que compra: advertencia -->
                                 <td class="price-warning">14</td>
                                 <td>120</td>
                                 <td>
@@ -189,7 +158,7 @@
                     </table>
                 </div>
 
-                <!-- Paginación (generada dinámicamente por JavaScript) -->
+                <!-- Paginación (dinámica en implementación real) -->
                 <nav aria-label="Page navigation" class="mt-4">
                     <ul class="pagination justify-content-center" id="pagination"></ul>
                 </nav>
@@ -197,33 +166,30 @@
         </div>
     </div>
 
-    <!-- Modal para crear o editar un producto -->
+    <!-- =============== SECCIÓN: MODAL - FORMULARIO DE PRODUCTO (NUEVO/EDICIÓN) =============== -->
     <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <!-- Encabezado del modal -->
                 <div class="modal-header">
                     <h5 class="modal-title" id="productModalLabel">
                         <i class="fas fa-plus-circle me-2"></i> Nuevo Producto
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <!-- Cuerpo del modal con formulario -->
                 <div class="modal-body">
                     <form id="productForm">
-                        <!-- Fila: Nombre y Proveedor -->
+                        <!-- Nombre del producto -->
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-12">
                                 <label for="productName" class="form-label">Nombre*</label>
                                 <input type="text" class="form-control" id="productName" required>
                             </div>
                         </div>
 
-                        <!-- Fila: Categoría (con opción para crear nueva) y Subcategoría -->
+                        <!-- Categoría y subcategoría -->
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="productCategory" class="form-label">Categoría*</label> 
+                                <label for="productCategory" class="form-label">Categoría*</label>
                                 <div class="input-group">
                                     <select class="form-select" id="productCategory" required>
                                         <option value="" selected disabled>Seleccione categoría</option>
@@ -234,53 +200,53 @@
                                         <option value="new">+ Crear nueva categoría</option>
                                     </select>
                                 </div>
-                                <!-- Campo oculto inicialmente para nueva categoría -->
-                                <div id="newCategoryGroup" style="display: none;">
-                                    <input type="text" class="form-control mt-2" id="newCategory"
+                                <div id="newCategoryGroup" class="mt-2" style="display: none;">
+                                    <input type="text" class="form-control" id="newCategory"
                                         placeholder="Nombre de nueva categoría">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="productSubcategory" class="form-label">Subcategoría</label>
-                                <input type="text" class="form-control" id="productSubcategory">
+                                <input type="text" class="form-control" id="productSubcategory"
+                                    placeholder="Ej: Chocolate, Vainilla...">
                             </div>
                         </div>
 
-                        <!-- Fila: Presentación, Precio de Compra y Precio de Venta -->
+                        <!-- Presentación y stock -->
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="productPresentation" class="form-label">Presentación*</label>
-                                <input type="text" class="form-control" id="productPresentation" required>
+                                <input type="text" class="form-control" id="productPresentation"
+                                    placeholder="Ej: 1 kg, 500 g, 12 unidades..." required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
+                                <label for="productStock" class="form-label">Stock*</label>
+                                <input type="number" class="form-control" id="productStock" min="0"
+                                    placeholder="Cantidad disponible" required>
+                            </div>
+                        </div>
+
+                        <!-- Precios de compra y venta -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="productBuyPrice" class="form-label">Precio de Compra*</label>
                                 <div class="input-group">
                                     <span class="input-group-text">S/.</span>
                                     <input type="number" class="form-control" id="productBuyPrice" min="0" step="0.01"
-                                        required>
+                                        placeholder="0.00" required>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="productSellPrice" class="form-label">Precio de Venta*</label>
                                 <div class="input-group">
                                     <span class="input-group-text">S/.</span>
                                     <input type="number" class="form-control" id="productSellPrice" min="0" step="0.01"
-                                        required>
+                                        placeholder="0.00" required>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Fila: Stock -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="productStock" class="form-label">Stock*</label>
-                                <input type="number" class="form-control" id="productStock" min="0" required>
                             </div>
                         </div>
                     </form>
                 </div>
-
-                <!-- Pie del modal con botones de acción -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnSave">Guardar</button>
@@ -289,26 +255,25 @@
         </div>
     </div>
 
-    <!-- Pie de página centrado -->
+    <!-- =============== SECCIÓN: PIE DE PÁGINA =============== -->
     <footer class="text-center p-3 mt-5">
         <div class="container">
             <p class="mb-0">© 2025 CASRM - Sistema de Gestión para Productos de Heladería</p>
         </div>
     </footer>
 
-    <!-- Scripts necesarios para funcionalidad interactiva -->
-
-    <!-- Bootstrap JS (incluye Popper.js) -->
+    <!-- =============== SECCIÓN: SCRIPTS =============== -->
+    <!-- Bootstrap JS (con Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- jQuery (usado por Choices.js y scripts personalizados) -->
+    <!-- jQuery (para lógica personalizada) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Choices.js (para mejorar los selects) -->
+    <!-- Choices.js (mejora selects) -->
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
-    <!-- Script personalizado de lógica de gestión de productos -->
-    <script src="scripts/gestion.js"></script>
-</body>
+    <!-- Script personalizado para la gestión de productos -->
+    <script src="scripts/gestion-productos.js"></script>
 
+</body>
 </html>
