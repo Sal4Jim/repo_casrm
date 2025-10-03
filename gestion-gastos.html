@@ -130,7 +130,6 @@
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -147,10 +146,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">María Gonzales</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-              </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
@@ -164,10 +159,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Roberto Méndez</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
               </td>
             </tr>
             <tr class="table-row">
@@ -183,10 +174,6 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">Carlos López</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-              </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
@@ -199,16 +186,12 @@
                 <div class="text-sm text-gray-900">15/05/2025</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Lucía Torres</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
-                <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+                <div class="text-sm text-gray-900">Lucía Torres Davila</div>
               </td>
             </tr>
             <tr class="table-row">
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital</div>
+                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital sssssssssssssssssssssSSdebemos colocar un maximo de 95 caracteres</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">S/. 500.00</div>
@@ -217,12 +200,12 @@
                 <div class="text-sm text-gray-900">10/05/2025</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Jorge Ramirez</div>
-              </td>
+                <div class="text-sm text-gray-900">Jimmy Montoya Melendez</div>
+              </td><!-- 
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-edit"></i></button>
                 <button class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </table>
@@ -230,14 +213,6 @@
       
       <!-- Paginación -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-          <a href="javascript:void(0)" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Anterior
-          </a>
-          <a href="javascript:void(0)" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-            Siguiente
-          </a>
-        </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
@@ -249,7 +224,7 @@
               <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                 <span class="sr-only">Anterior</span>
                 <i class="fas fa-chevron-left"></i>
-              </a>
+              </a>  
               <a href="javascript:void(0)" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                 1
               </a>
@@ -270,7 +245,7 @@
     </div>
     
     <!-- Modal de confirmación de eliminación -->
-    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+<!--     <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div class="relative bg-white rounded-lg max-w-md mx-auto p-6">
         <div class="flex items-start justify-between">
           <div class="flex items-center">
@@ -298,7 +273,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </div> -->
     
     <!-- Toast de éxito -->
     <div id="success-toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center">
