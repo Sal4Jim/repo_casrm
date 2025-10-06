@@ -6,7 +6,7 @@ $(document).on('click', '[data-action="info"]', function() {
     $('#detailCity').text('Lima');
     $('#detailPhone').text('+51 987 654 321');
     $('#detailEmail').text('juan@example.com');
-    $('#detailLastContact').text('24/05/2025');
+    $('#detailAgency').text('chalom');
     $('#detailNotes').text('Cliente frecuente. Prefiere entregas por la tarde.');
 
     $('#customerDetailModal').modal('show');
