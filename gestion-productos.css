@@ -363,28 +363,3 @@ footer {
     color: var(--footer-text);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
-
-/* 
-   =========================================================
-   ESTILOS RESPONSIVOS (DISPOSITIVOS MÓVILES)
-   =========================================================
-*/
-@media (max-width: 768px) {
-    .card {
-        border-radius: 0;
-        margin: 0 -12px; /* Ocupa todo el ancho en móvil */
-    }
-
-    .actions-column {
-        width: 90px;
-    }
-
-    .table-responsive {
-        border-radius: 0;
-    }
-
-    .navbar .container {
-        flex-wrap: wrap;
-    }
-}
-
