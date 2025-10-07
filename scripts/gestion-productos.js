@@ -23,11 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
             opt.textContent = cat.nombre;
             categorySelect.appendChild(opt);
         });
-        // Opción para crear nueva categoría
-        const optNew = document.createElement('option');
-        optNew.value = "new";
-        optNew.textContent = "+ Crear nueva categoría";
-        categorySelect.appendChild(optNew);
     }
 
     // Inicializa el select al cargar
