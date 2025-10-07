@@ -1,6 +1,6 @@
 /* 
    =========================================================
-   VARIABLES DE COLOR - SOLO LO NECESARIO 
+   VARIABLES DE COLOR - PALETA UNIFICADA
    =========================================================
 */
 :root {
@@ -12,10 +12,6 @@
     --text-navbar: #ffffff;
     --border-color: #e2e8f0;
     --border-color-dark: #cbd5e0;
-    --btn-primary-bg: #4a6fa5;
-    --btn-primary-bg-hover: #3a5a80;
-    --btn-secondary-bg: #a0aec0;
-    --btn-secondary-bg-hover: #718096;
     --table-header-bg: #f1f5f9;
     --footer-bg: #2d3748;
     --footer-text: #e2e8f0;
@@ -23,6 +19,18 @@
     --input-border: #e2e8f0;
     --input-text: #2d3748;
     --input-placeholder: #a0aec0;
+
+    /* Botones - colores unificados con variables */
+    --btn-primary-bg: #4a6fa5;
+    --btn-primary-bg-hover: #3a5a80;
+    --btn-secondary-bg: #a0aec0;
+    --btn-secondary-bg-hover: #718096;
+    --btn-danger-bg: #e53e3e;
+    --btn-danger-bg-hover: #c53030;
+    --btn-info-bg: #319795;
+    --btn-info-bg-hover: #2c7a7a;
+    --btn-warning-bg: #d69e2e;
+    --btn-warning-bg-hover: #b7791f;
 }
 
 /* 
@@ -65,6 +73,7 @@ body {
 .navbar .nav-link:hover {
     color: #f6e05e !important;
 }
+
 /* 
    =========================================================
    ANIMACIONES
@@ -72,7 +81,7 @@ body {
 */
 .ice-cream-icon {
     display: inline-block;
-    animation: float 3s ease-in-out infinite; /* Flotación suave del ícono */
+    animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -108,44 +117,51 @@ body {
 .btn-primary {
     background-color: var(--btn-primary-bg);
     border-color: var(--btn-primary-bg);
+    color: white;
 }
 .btn-primary:hover {
     background-color: var(--btn-primary-bg-hover);
     border-color: var(--btn-primary-bg-hover);
 }
+
 .btn-secondary {
     background-color: var(--btn-secondary-bg);
     border-color: var(--btn-secondary-bg);
+    color: white;
 }
 .btn-secondary:hover {
     background-color: var(--btn-secondary-bg-hover);
     border-color: var(--btn-secondary-bg-hover);
 }
+
 .btn-danger {
-    background-color: #e53e3e;
-    border-color: #e53e3e;
+    background-color: var(--btn-danger-bg);
+    border-color: var(--btn-danger-bg);
+    color: white;
 }
 .btn-danger:hover {
-    background-color: #c53030;
-    border-color: #c53030;
+    background-color: var(--btn-danger-bg-hover);
+    border-color: var(--btn-danger-bg-hover);
 }
+
 .btn-info {
-    background-color: #319795;
-    border-color: #319795;
+    background-color: var(--btn-info-bg);
+    border-color: var(--btn-info-bg);
     color: white;
 }
 .btn-info:hover {
-    background-color: #2c7a7a;
-    border-color: #2c7a7a;
+    background-color: var(--btn-info-bg-hover);
+    border-color: var(--btn-info-bg-hover);
 }
+
 .btn-warning {
-    background-color: #d69e2e;
-    border-color: #d69e2e;
+    background-color: var(--btn-warning-bg);
+    border-color: var(--btn-warning-bg);
     color: white;
 }
 .btn-warning:hover {
-    background-color: #b7791f;
-    border-color: #b7791f;
+    background-color: var(--btn-warning-bg-hover);
+    border-color: var(--btn-warning-bg-hover);
 }
 
 /* 
@@ -176,11 +192,11 @@ body {
 
 /* 
    =========================================================
-   COLUMNA DE ACCIONES (SIN MODIFICAR ANCHO) 
+   COLUMNA DE ACCIONES 
    =========================================================
 */
 .actions-column {
-    width: 220px; /* Ancho original */
+    width: 220px;
 }
 
 /* 
@@ -215,7 +231,7 @@ body {
 
 /* 
    =========================================================
-   MODAL 
+   MODAL - ESTILOS GENERALES
    =========================================================
 */
 .modal-header {
@@ -237,37 +253,7 @@ body {
 
 /* 
    =========================================================
-   FOOTER 
-   =========================================================
-*/
-footer {
-    background-color: var(--footer-bg);
-    color: var(--footer-text);
-}
-
-/* 
-   =========================================================
-   RESPONSIVO (MÓVILES) 
-   =========================================================
-*/
-@media (max-width: 768px) {
-    .card {
-        border-radius: 0;
-        margin: 0 -12px;
-    }
-    .actions-column {
-        width: 90px; /* Ancho original en móvil */
-    }
-    .table-responsive {
-        border-radius: 0;
-    }
-    .navbar .container {
-        flex-wrap: wrap;
-    }
-}
-/* 
-   =========================================================
-   ESTILOS PARA EL MODAL DE DETALLES DEL CLIENTE
+   MODAL - DETALLE DEL CLIENTE
    =========================================================
 */
 .customer-avatar {
@@ -289,4 +275,15 @@ footer {
 }
 .list-group-item {
     border-color: var(--border-color);
+}
+
+/* 
+   =========================================================
+   PIE DE PÁGINA (FOOTER)
+   =========================================================
+*/
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
