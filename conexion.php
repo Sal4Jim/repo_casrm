@@ -3,7 +3,7 @@
 $host = 'localhost';     
 $usuario = 'root';       
 $contrasena = '';        
-$base_datos = 'casrm_db'; 
+$base_datos = 'casrm_db.'; 
 
 try {
     $conexion = new PDO("mysql:host=$host;dbname=$base_datos;charset=utf8mb4", $usuario, $contrasena);
