@@ -62,4 +62,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         addCategoryForm.addEventListener('submit', refreshChoices);
     }
+
+    // Buscador por nombre de producto
+    const searchInput = document.getElementById('searchInput');
+    const productsTable = document.getElementById('productsTable');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const rows = productsTable.querySelectorAll('tr');
+        rows.forEach(row => {
+            const productName = row.querySelector('td')?.textContent.toLowerCase() || '';
+            if (productName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
 });
