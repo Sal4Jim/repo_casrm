@@ -4,7 +4,19 @@ document.addEventListener('DOMContentLoaded', function() {
         { categoria_id: 1, nombre: "BARQUILLOS" },
         { categoria_id: 2, nombre: "BASES" },
         { categoria_id: 3, nombre: "TOPPINGS" },
-        { categoria_id: 4, nombre: "CONOS" }
+        { categoria_id: 4, nombre: "CONOS" },
+        { categoria_id: 5, nombre: "BASES" },
+        { categoria_id: 6, nombre: "CONOS" },
+        { categoria_id: 7, nombre: "CONOS" },
+        { categoria_id: 8, nombre: "BASES" },
+        { categoria_id: 9, nombre: "CONOS" },
+        { categoria_id: 10, nombre: "CONO MARMOLEADO" },
+        { categoria_id: 11, nombre: "CONOS" },
+        { categoria_id: 12, nombre: "PREMEZCLA FRESA" },
+        { categoria_id: 13, nombre: "PREMEZCLA CHOCOLATE" },
+        { categoria_id: 14, nombre: "PREMEZCLA VAINILLA" },
+        { categoria_id: 15, nombre: "PREMEZCLA MENTA" },
+        { categoria_id: 16, nombre: "CONOS GEMELOS" },
     ];
 
     // Referencias
