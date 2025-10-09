@@ -10,6 +10,7 @@
     /* Fondo de las tarjetas (cards) */
     --bg-card: #ffffff;
 
+    
     /* Degradado para la barra de navegación (navbar) */
     --bg-navbar: linear-gradient(135deg, #4a6fa5, #3a5a80);
 

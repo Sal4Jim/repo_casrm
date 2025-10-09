@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 
     <!-- Estilos personalizados -->
-    <link rel="stylesheet" href="gestion-productos.css">
+    <link rel="stylesheet" href="css/gestion-productos.css">
 </head>
 
 <body>
@@ -106,9 +106,10 @@
                                 <td>400</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
+                                        data-bs-target="#productModalModificado" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    <!-- Aquí se debe conectar el boton Eliminar a una instruccion "DELETE" hacia la bd -->
                                     <button class="btn btn-sm btn-danger" data-action="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -124,9 +125,10 @@
                                 <td class="stock-warning">0</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
+                                        data-bs-target="#productModalModificado" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    <!-- Aquí se debe conectar el boton Eliminar a una instruccion "DELETE" hacia la bd -->
                                     <button class="btn btn-sm btn-danger" data-action="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -141,9 +143,10 @@
                                 <td>120</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
+                                        data-bs-target="#productModalModificado" data-action="edit">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    <!-- Aquí se debe conectar el boton Eliminar a una instruccion "DELETE" hacia la bd -->
                                     <button class="btn btn-sm btn-danger" data-action="delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -180,20 +183,75 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="productCategory" class="form-label">Categoría*</label>
+                                <select class="form-select" id="productCategory" required>
+                                    <option value="" selected disabled>Seleccione categoría</option>
+                                    <!-- Las opciones se llenan dinámicamente desde JS -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="productPresentation" class="form-label">Presentación*</label>
+                                <input type="text" class="form-control" id="productPresentation"
+                                    placeholder="Ej: 1 kg, 500 g, 12 unidades..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productStock" class="form-label">Stock*</label>
+                                <input type="number" class="form-control" id="productStock" min="0"
+                                    placeholder="Cantidad disponible" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="productBuyPrice" class="form-label">Precio de Compra*</label>
                                 <div class="input-group">
-                                    <select class="form-select" id="productCategory" required>
-                                        <option value="" selected disabled>Seleccione categoría</option>
-                                        <option value="BARQUILLOS">BARQUILLOS</option>
-                                        <option value="BASES">BASES</option>
-                                        <option value="TOPPINGS">TOPPINGS</option>
-                                        <option value="CONOS">CONOS</option>
-                                        <option value="new">+ Crear nueva categoría</option>
-                                    </select>
+                                    <span class="input-group-text">S/.</span>
+                                    <input type="number" class="form-control" id="productBuyPrice" min="0" step="0.01"
+                                        placeholder="0.00" required>
                                 </div>
-                                <div id="newCategoryGroup" class="mt-2" style="display: none;">
-                                    <input type="text" class="form-control" id="newCategory"
-                                        placeholder="Nombre de nueva categoría">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productSellPrice" class="form-label">Precio de Venta*</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">S/.</span>
+                                    <input type="number" class="form-control" id="productSellPrice" min="0" step="0.01"
+                                        placeholder="0.00" required>
                                 </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSave">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Modificar producto -->
+    <div class="modal fade" id="productModalModificado" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i> Modificar Producto
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="productName" class="form-label">Nombre*</label>
+                                <input type="text" class="form-control" id="productName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productCategory" class="form-label">Categoría*</label>
+                                <select class="form-select" id="productCategory" required>
+                                    <option value="" selected disabled>Seleccione categoría</option>
+                                    <!-- Las opciones se llenan dinámicamente desde JS -->
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -278,7 +336,7 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <!-- Tu script personalizado -->
-    <script src="scripts/gestion-productos.js"></script>
+    <script src="js/gestion-productos.js"></script>
 
 </body>
 </html>
