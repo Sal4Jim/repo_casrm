@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        
         // Form clear button
         document.getElementById('btn-limpiar').addEventListener('click', function() {
             document.getElementById('gasto-form').reset();
