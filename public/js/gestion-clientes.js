@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             detailModal.show();
         });
     });
+    
 
     // === BOTÓN: Editar cliente (abre el mismo modal que "Nuevo", pero en modo edición) ===
     document.querySelectorAll('[data-action="edit"]').forEach(button => {

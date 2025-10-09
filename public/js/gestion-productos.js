@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             categorySelect.appendChild(opt);
         });
     }
+    
 
     // Inicializa el select al cargar
     actualizarSelectCategorias();
