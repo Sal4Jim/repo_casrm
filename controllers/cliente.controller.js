@@ -1,18 +1,16 @@
 const { pool } = require('../config/database');
 
-// Función para crear un cliente (con callback)
 const createCliente = (req, res) => {
   const { nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id } = req.body;
 
-  // Validaciones básicas
-  if (!nombre || !email) {
+  // ✅ NUEVA VALIDACIÓN: nombre, telefono y ciudad son obligatorios
+  if (!nombre || !telefono || !ciudad) {
     return res.status(400).json({
       success: false,
-      error: "Los campos 'nombre' y 'email' son obligatorios."
+      error: "Los campos 'nombre', 'teléfono' y 'ciudad' son obligatorios."
     });
   }
 
-  // 1. Obtener conexión del pool
   pool.getConnection((err, connection) => {
     if (err) {
       console.error("❌ Error obteniendo conexión:", err.message);
@@ -22,28 +20,24 @@ const createCliente = (req, res) => {
       });
     }
 
-    // 2. Consulta SQL para insertar
     const sql = `
       INSERT INTO clientes (
         nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id, fecha_log
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
 
-    // 3. Valores a insertar
     const values = [
       nombre.trim(),
-      direccion ? direccion.trim() : null,
-      ruc ? ruc.trim() : null,
-      ciudad ? ciudad.trim() : null,
-      telefono ? telefono.trim() : null,
-      agencia ? agencia.trim() : null,
-      email.trim(),
-      nota_id !== undefined ? parseInt(nota_id) : null
+      direccion ? direccion.trim() : null,       // ← Opcional
+      ruc ? ruc.trim() : null,                   // ← Opcional  
+      ciudad.trim(),                             // ← Obligatorio
+      telefono.trim(),                           // ← Obligatorio
+      agencia ? agencia.trim() : null,           // ← Opcional
+      email ? email.trim() : null,               // ← Opcional (antes era obligatorio)
+      nota_id !== undefined ? parseInt(nota_id) : null  // ← Opcional
     ];
 
-    // 4. Ejecutar la consulta
     connection.execute(sql, values, (error, results) => {
-      // 5. IMPORTANTE: Siempre liberar la conexión
       connection.release();
 
       if (error) {
@@ -54,7 +48,6 @@ const createCliente = (req, res) => {
         });
       }
 
-      // 6. Éxito - Responder al frontend
       console.log("✅ Cliente creado exitosamente, ID:", results.insertId);
       res.status(201).json({
         success: true,
