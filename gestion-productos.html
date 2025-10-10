@@ -35,7 +35,7 @@
             </button>
             <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li> -->
                     <li class="nav-item"><a class="nav-link active" href="gestion-productos.html">Gestionar Productos</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestionar Gastos</a></li>
@@ -64,21 +64,12 @@
             <div class="card-body">
                 <!-- Filtros -->
                 <div class="row mb-4">
-                    <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="mb-3 mb-md-0">
                         <div class="search-box">
                             <input type="text" id="searchInput" class="form-control"
-                                placeholder="Buscar por nombre, presentación o proveedor">
+                                placeholder="Buscar por Nombre del Producto">
                             <i class="fas fa-search"></i>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <select id="categoryFilter" class="form-select filter-dropdown choices-select">
-                            <option value="">Todas las categorías</option>
-                            <option value="BARQUILLOS" selected>BARQUILLOS</option>
-                            <option value="BASES">BASES</option>
-                            <option value="TOPPINGS">TOPPINGS</option>
-                            <option value="CONOS">CONOS</option>
-                        </select>
                     </div>
                 </div>
 
@@ -97,58 +88,7 @@
                             </tr>
                         </thead>
                         <tbody id="productsTable">
-                            <tr data-sort-category="BARQUILLOS" data-sort-name="PINOCHO" data-sort-stock="400">
-                                <td>PINOCHO</td>
-                                <td><span class="category-badge">BARQUILLOS</span></td>
-                                <td>pqt</td>
-                                <td>10</td>
-                                <td>12</td>
-                                <td>400</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" data-action="delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr data-sort-category="BARQUILLOS" data-sort-name="CROCANTE MINI" data-sort-stock="0"
-                                class="stock-row">
-                                <td>CROCANTE MINI</td>
-                                <td><span class="category-badge">BARQUILLOS</span></td>
-                                <td>caja</td>
-                                <td>8</td>
-                                <td>9</td>
-                                <td class="stock-warning">0</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" data-action="delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr data-sort-category="BARQUILLOS" data-sort-name="CONO GRANDE" data-sort-stock="120">
-                                <td>CONO GRANDE</td>
-                                <td><span class="category-badge">BARQUILLOS</span></td>
-                                <td>caja</td>
-                                <td>15</td>
-                                <td class="price-warning">14</td>
-                                <td>120</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productModal" data-action="edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" data-action="delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            <!-- Las filas de productos se generan dinámicamente desde JS -->
                         </tbody>
                     </table>
                 </div>

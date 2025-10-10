@@ -35,11 +35,11 @@
             <!-- Menú de navegación -->
             <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li> -->
                     <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a></li>
                     <li class="nav-item"><a class="nav-link active" href="gestion-gastos.html">Gestión Gastos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes y utilidades</a></li> -->
                 </ul>
             </div>
         </div>
@@ -134,107 +134,22 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr class="table-row">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Compra de azúcar y leche</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">S/. 450.00</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">24/05/2025</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">María Gonzales</div>
-              </td>
-            </tr>
-            <tr class="table-row">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Reparación congelador</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">S/. 850.00</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">22/05/2025</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Roberto Méndez</div>
-              </td>
-            </tr>
-            <tr class="table-row">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Pago alquiler local</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">S/. 1,200.00</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">19/05/2025</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Carlos López</div>
-              </td>
-            </tr>
-            <tr class="table-row">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Compra de barquillos</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">S/. 320.00</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">15/05/2025</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Lucía Torres Davila</div>
-              </td>
-            </tr>
-            <tr class="table-row">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">Servicio de marketing digital sssssssssssssssssssssSSdebemos colocar un maximo de 95 caracteres</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">S/. 500.00</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">10/05/2025</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Jimmy Montoya Melendez</div>
-              </td>
-            </tr>
+            <!-- Las filas de gastos se generan dinámicamente desde JS -->
           </tbody>
         </table>
       </div>
       
-      <!-- Paginación -->
+      <!-- Paginación dinámica -->
       <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
             <p class="text-sm text-gray-700">
-              Mostrando <span class="font-medium">1</span> a <span class="font-medium">5</span> de <span class="font-medium">14</span> gastos
+              <!-- Info de paginación generada por JS -->
             </p>
           </div>
           <div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-              <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span class="sr-only">Anterior</span>
-                <i class="fas fa-chevron-left"></i>
-              </a>  
-              <a href="javascript:void(0)" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                1
-              </a>
-              <a href="javascript:void(0)" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                2
-              </a>
-              <a href="javascript:void(0)" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                3
-              </a>
-              <a href="javascript:void(0)" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <span class="sr-only">Siguiente</span>
-                <i class="fas fa-chevron-right"></i>
-              </a>
+              <!-- Controles de paginación generados por JS -->
             </nav>
           </div>
         </div>
