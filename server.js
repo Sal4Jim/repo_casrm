@@ -1,48 +1,43 @@
-// server.js
 const express = require('express');
-const mysql = require('mysql2/promise');
+const clientesRoutes = require('./routes/clientes.routes');
+const { testConnection } = require('./config/database');
 
 const app = express();
-const PORT = 3000;
 
-// Configuración de la base de datos
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '', 
-  database: 'casrm_db'
-};
+// Middleware para archivos estáticos
+app.use(express.static('public'));
 
-// Endpoint simple para probar conexión
-app.get('/test-db', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.execute('SELECT 1 + 1 AS result');
-    await connection.end();
-    
-    res.json({
-      success: true,
-      message: "✅ Conexión exitosa",
-      result: rows[0].result
-    });
-    
-  } catch (error) {
-    res.json({
-      success: false,
-      error: error.message
-    });
-  }
+// Middleware para parsear JSON
+app.use(express.json());
+
+// Rutas de la API
+app.use('/api/clientes', clientesRoutes);
+
+// Ruta de prueba para la base de datos (con callback)
+app.get('/test-db', (req, res) => {
+  testConnection((result) => {
+    res.json(result);
+  });
 });
 
-// Ruta principal
-app.get('/', (req, res) => {
-  res.send(`
-    <h1>Prueba Conexión MySQL</h1>
-    <p>Abre: <a href="/test-db">/test-db</a></p>
-  `);
+// Ruta de prueba del servidor
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Servidor funcionando correctamente' });
 });
+
+const PORT = process.env.PORT || 3000;
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`Servidor en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  
+  // Probar conexión a la base de datos al iniciar
+  console.log('🔌 Probando conexión a la base de datos...');
+  testConnection((result) => {
+    if (result.success) {
+      console.log('✅ Base de datos conectada correctamente');
+    } else {
+      console.log('❌ Error conectando a base de datos:', result.error);
+    }
+  });
 });
