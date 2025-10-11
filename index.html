@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASRM - Sistema de Gestión de Helados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
+    <div class="floating-ice-cream" style="top: 10%; left: 10%;">
+        <i class="fas fa-ice-cream text-6xl text-pink-300"></i>
+    </div>
+    <div class="floating-ice-cream" style="top: 15%; right: 15%; animation-delay: 1s;">
+        <i class="fas fa-ice-cream text-6xl text-blue-300"></i>
+    </div>
+    <div class="floating-ice-cream" style="bottom: 10%; left: 20%; animation-delay: 2s;">
+        <i class="fas fa-ice-cream text-6xl text-green-300"></i>
+    </div>
+    <div class="floating-ice-cream" style="bottom: 15%; right: 10%; animation-delay: 3s;">
+        <i class="fas fa-ice-cream text-6xl text-yellow-300"></i>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-xl p-6 md:p-10 max-w-5xl w-full relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-300 via-blue-300 to-green-300"></div>
+
+        <div class="flex items-center justify-start mb-8">
+            <div class="logo text-5xl md:text-6xl mr-3">CASRM</div>
+            <i class="fas fa-ice-cream text-pink-400 text-3xl md:text-4xl"></i>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 dashboard-container">
+            <!-- Gestionar Productos Button -->
+            <a href="gestion-productos.html"
+                class="dashboard-btn btn-pink p-6 flex flex-col items-center justify-center min-h-[180px] text-center no-underline text-inherit">
+                <div class="btn-content">
+                    <i class="fas fa-ice-cream btn-icon text-pink-600"></i>
+                    <h3 class="text-xl font-bold text-pink-700">Gestionar Productos</h3>
+                    <p class="text-sm text-pink-600 mt-2">Inventario y catálogo de helados</p>
+                </div>
+            </a>
+
+            <!-- Gestionar Clientes Button -->
+            <a href="gestion-clientes.html"
+                class="dashboard-btn btn-mint p-6 flex flex-col items-center justify-center min-h-[180px] text-center no-underline text-inherit">
+                <div class="btn-content">
+                    <i class="fas fa-users btn-icon text-green-600"></i>
+                    <h3 class="text-xl font-bold text-green-700">Gestionar Clientes</h3>
+                    <p class="text-sm text-green-600 mt-2">Registro e informacion de clientes</p>
+                </div>
+            </a>
+
+            <!-- Gestión de Gastos Button -->
+            <a href="gestion-gastos.html"
+                class="dashboard-btn btn-lavender p-6 flex flex-col items-center justify-center min-h-[180px] text-center no-underline text-inherit">
+                <div class="btn-content">
+                    <i class="fas fa-file-invoice-dollar btn-icon text-purple-600"></i>
+                    <h3 class="text-xl font-bold text-purple-700">Gestión de Gastos</h3>
+                    <p class="text-sm text-purple-600 mt-2">Registro y control de gastos</p>
+                </div>
+            </a>
+
+            <!-- Reportes y Utilidad Button -->
+            <button
+                class="dashboard-btn btn-blue p-6 flex flex-col items-center justify-center min-h-[180px] text-center">
+                <div class="btn-content">
+                    <i class="fas fa-chart-pie btn-icon text-blue-600"></i>
+                    <h3 class="text-xl font-bold text-blue-700">Reportes y Utilidad</h3>
+                    <p class="text-sm text-blue-600 mt-2">Análisis de rendimiento</p>
+                </div>
+            </button>
+
+            <!-- Más Opciones Button -->
+            <button
+                class="dashboard-btn btn-peach p-6 flex flex-col items-center justify-center min-h-[180px] text-center">
+                <div class="btn-content">
+                    <i class="fas fa-ellipsis-h btn-icon text-orange-600"></i>
+                    <h3 class="text-xl font-bold text-orange-700">Más Opciones</h3>
+                    <p class="text-sm text-orange-600 mt-2">Configuración y herramientas</p>
+                </div>
+            </button>
+        </div>
+
+        <div class="mt-10 text-center text-sm text-gray-500">
+            <p>© 2025 CASRM - Sistema de Gestión para Productos de Helado</p>
+        </div>
+    </div>
+
+</body>
+
+</html>
