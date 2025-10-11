@@ -27,7 +27,7 @@ const createCliente = (req, res) => {
     `;
 
     const values = [
-      nombre.trim(),
+      nombre.trim(),                             // ← Obligatorio
       direccion ? direccion.trim() : null,       // ← Opcional
       ruc ? ruc.trim() : null,                   // ← Opcional  
       ciudad.trim(),                             // ← Obligatorio
