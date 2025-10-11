@@ -12,16 +12,27 @@ document.addEventListener('DOMContentLoaded', function () {
         btnGuardar.addEventListener('click', guardarCliente);
     }
 
-    // === BOTÓN: Nuevo cliente (limpiar formulario) ===
+    // === BOTÓN: Nuevo cliente (limpiar formulario y resetear botón) ===
     const nuevoClienteBtn = document.querySelector('[data-bs-target="#clientModal"]');
     if (nuevoClienteBtn) {
         nuevoClienteBtn.addEventListener('click', function () {
             document.getElementById('clienteForm')?.reset();
+            document.getElementById('clienteId').value = '';
+
+            // ✅ Restaurar TÍTULO y BOTÓN a "Nuevo"
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) {
+                modalTitle.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Nuevo Cliente';
+            }
+            if (btnGuardar) {
+                btnGuardar.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
+            }
         });
     }
 
     // === FUNCIÓN PARA GUARDAR CLIENTE ===
     function guardarCliente() {
+        const clienteId = document.getElementById('clienteId')?.value;
         const cliente = {
             nombre: document.getElementById('nombre')?.value.trim(),
             ruc: document.getElementById('ruc')?.value.trim(),
@@ -39,52 +50,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setButtonLoading(btnGuardar, true);
 
-        axios.post('/api/clientes', cliente)
-            .then(function (response) {
-                if (response.data.success) {
-                    showToast(
-                        `<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> guardado exitosamente`,
-                        'success'
-                    );
-                    setTimeout(() => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
-                        if (modal) modal.hide();
-                        document.getElementById('clienteForm')?.reset();
-                        cargarClientes(1); // Recargar página 1 sin notificación
-                    }, 1500);
-                }
-            })
-            .catch(function (error) {
-                let mensaje = "Error al guardar el cliente";
-                if (error.response?.data?.error) {
-                    mensaje = error.response.data.error;
-                } else if (error.request) {
-                    mensaje = "No se pudo conectar con el servidor";
-                }
-                showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
-            })
-            .finally(function () {
-                setButtonLoading(btnGuardar, false);
-            });
-    }
-
-    // === FUNCIÓN PARA CARGAR CLIENTES CON PAGINACIÓN ===
-    function cargarClientes(page = 1, showNotification = false) {
-        currentPage = page; // ✅ Actualiza la variable global
-        axios.get(`/api/clientes?page=${page}&limit=${itemsPerPage}`)
-            .then(function (response) {
-                if (response.data.success) {
-                    actualizarTablaClientes(response.data.clientes);
-                    renderPagination(response.data.totalPages, page);
-                    if (showNotification) {
-                        showToast(`<i class="fas fa-users me-2"></i> ${response.data.total} clientes cargados`, 'success');
+        if (clienteId) {
+            // ✏️ Modo EDICIÓN
+            axios.put(`/api/clientes/${clienteId}`, cliente)
+                .then(response => {
+                    if (response.data.success) {
+                        showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> actualizado exitosamente`, 'success');
+                        setTimeout(() => {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                            if (modal) modal.hide();
+                            document.getElementById('clienteForm')?.reset();
+                            document.getElementById('clienteId').value = ''; // Limpiar ID
+                            cargarClientes(currentPage); // Recargar página actual
+                        }, 1500);
                     }
-                }
-            })
-            .catch(function (error) {
-                console.error('Error cargando clientes:', error);
-                showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar clientes', 'error');
-            });
+                })
+                .catch(error => {
+                    let mensaje = "Error al actualizar el cliente";
+                    if (error.response?.data?.error) {
+                        mensaje = error.response.data.error;
+                    }
+                    showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+                })
+                .finally(() => {
+                    setButtonLoading(btnGuardar, false);
+                    // Restaurar texto del botón
+                    if (btnGuardar) {
+                        btnGuardar.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
+                    }
+                });
+        } else {
+            // ➕ Modo CREACIÓN
+            axios.post('/api/clientes', cliente)
+                .then(response => {
+                    if (response.data.success) {
+                        showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> guardado exitosamente`, 'success');
+                        setTimeout(() => {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                            if (modal) modal.hide();
+                            document.getElementById('clienteForm')?.reset();
+                            cargarClientes(1);
+                        }, 1500);
+                    }
+                })
+                .catch(error => {
+                    let mensaje = "Error al guardar el cliente";
+                    if (error.response?.data?.error) {
+                        mensaje = error.response.data.error;
+                    } else if (error.request) {
+                        mensaje = "No se pudo conectar con el servidor";
+                    }
+                    showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+                })
+                .finally(() => {
+                    setButtonLoading(btnGuardar, false);
+                });
+        }
     }
 
     // === ACTUALIZAR TABLA ===
@@ -109,25 +130,25 @@ document.addEventListener('DOMContentLoaded', function () {
         clientes.forEach(cliente => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${cliente.nombre || '<span class="text-muted">No especificado</span>'}</td>
-                <td>${cliente.ruc || '<span class="text-muted">-</span>'}</td>
-                <td>${cliente.ciudad || '<span class="text-muted">-</span>'}</td>
-                <td>${cliente.telefono || '<span class="text-muted">-</span>'}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#clientModal">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger me-1">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                    <button class="btn btn-sm btn-warning">
-                        <i class="fas fa-shopping-cart"></i>
-                    </button>
-                </td>
-            `;
+               <td>${cliente.nombre || '<span class="text-muted">No especificado</span>'}</td>
+               <td>${cliente.ruc || '<span class="text-muted">-</span>'}</td>
+               <td>${cliente.ciudad || '<span class="text-muted">-</span>'}</td>
+               <td>${cliente.telefono || '<span class="text-muted">-</span>'}</td>
+            <td>
+               <button class="btn btn-sm btn-primary me-1 edit-btn" data-bs-toggle="modal" data-bs-target="#clientModal" data-cliente-id="${cliente.cliente_id}">
+               <i class="fas fa-edit"></i>
+               </button>
+               <button class="btn btn-sm btn-danger me-1 delete-btn" data-cliente-id="${cliente.cliente_id}">
+               <i class="fas fa-trash"></i>
+               </button>
+               <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+               <i class="fas fa-info-circle"></i>
+               </button>
+               <button class="btn btn-sm btn-warning">
+               <i class="fas fa-shopping-cart"></i>
+               </button>
+            </td>`
+                ;
             tbody.appendChild(row);
         });
     }
@@ -255,4 +276,79 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 400);
         });
     }
+
+    // === MANEJAR EDICIÓN DE CLIENTE === (¡AHORA DENTRO DEL DOMContentLoaded!)
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.edit-btn')) {
+            const button = e.target.closest('.edit-btn');
+            const clienteId = button.getAttribute('data-cliente-id');
+
+            // Cargar datos del cliente
+            axios.get(`/api/clientes/${clienteId}`)
+                .then(response => {
+                    if (response.data.success) {
+                        const cliente = response.data.cliente;
+                        document.getElementById('clienteId').value = cliente.cliente_id || '';
+                        document.getElementById('nombre').value = cliente.nombre || '';
+                        document.getElementById('ruc').value = cliente.ruc || '';
+                        document.getElementById('ciudad').value = cliente.ciudad || '';
+                        document.getElementById('telefono').value = cliente.telefono || '';
+                        document.getElementById('direccion').value = cliente.direccion || '';
+                        document.getElementById('email').value = cliente.email || '';
+                        document.getElementById('agencia').value = cliente.agencia || '';
+
+                        // ✅ Cambiar TÍTULO y BOTÓN a "Editar"
+                        const modalTitle = document.getElementById('modalTitle');
+                        if (modalTitle) {
+                            modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Cliente';
+                        }
+                        if (btnGuardar) {
+                            btnGuardar.innerHTML = '<i class="fas fa-sync-alt me-2"></i> Actualizar';
+                        }
+                    }
+                })
+                .catch(error => {
+                    showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar cliente', 'error');
+                });
+        }
+    });
+ // === MANEJAR ELIMINACIÓN DE CLIENTE ===
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.delete-btn')) {
+        const button = e.target.closest('.delete-btn');
+        const clienteId = button.getAttribute('data-cliente-id');
+        const clienteNombre = button.closest('tr').querySelector('td:first-child').textContent.trim();
+
+        // Confirmación con SweetAlert2
+        Swal.fire({
+            title: '¿Estás seguro?',
+            html: `Vas a eliminar al cliente <strong>${clienteNombre}</strong>.<br>Esta acción no se puede deshacer.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // ✅ Solo eliminar si el usuario confirma
+                axios.delete(`/api/clientes/${clienteId}`)
+                    .then(response => {
+                        if (response.data.success) {
+                            showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> eliminado exitosamente`, 'success');
+                            cargarClientes(currentPage); // Recargar la tabla
+                        }
+                    })
+                    .catch(error => {
+                        let mensaje = "Error al eliminar el cliente";
+                        if (error.response?.data?.error) {
+                            mensaje = error.response.data.error;
+                        } else if (error.response?.status === 404) {
+                            mensaje = "Cliente no encontrado";
+                        }
+                        showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+                    });
+            }
+        });
+    }
+   }) 
 });

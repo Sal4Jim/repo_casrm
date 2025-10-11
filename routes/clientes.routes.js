@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const clienteController = require('../controllers/cliente.controller');
 
-// ✅ Ruta para OBTENER todos los clientes (GET)
 router.get('/', clienteController.getAllClientes);
-
-// ✅ Ruta para CREAR un cliente (POST)
 router.post('/', clienteController.createCliente);
+router.put('/:id', clienteController.updateCliente);
+router.get('/:id', clienteController.getClienteById);
+router.delete('/:id', clienteController.deleteCliente);
 
 module.exports = router;
