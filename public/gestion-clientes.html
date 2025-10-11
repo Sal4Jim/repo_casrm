@@ -60,16 +60,14 @@
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="search-box">
-                            <input type="text" class="form-control"
-                                placeholder="Buscar por nombre, RUC, ciudad o teléfono">
-                            <i class="fas fa-search"></i>
+                            <input type="text" class="form-control" placeholder="Buscar cliente...">
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabla de clientes -->
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped">
+                    <table class="table table-hover table-striped" id="clientsTable">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -80,51 +78,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Juan Pérez</td>
-                                <td>10456789012</td>
-                                <td>Lima</td>
-                                <td>+51 987 654 321</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#clientModal">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger me-1">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal"
-                                        data-bs-target="#customerDetailModal">
-                                        <i class="fas fa-info-circle"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Heladería Dulce Frío</td>
-                                <td>20123456789</td>
-                                <td>Arequipa</td>
-                                <td>+51 912 345 678</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                                        data-bs-target="#clientModal">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger me-1">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-info me-1">
-                                        <i class="fas fa-info-circle"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
                     </table>
+                    <!-- Ejemplo debajo de la tabla -->
+                    <nav aria-label="Paginación de clientes" class="mt-3">
+                        <ul id="pagination" class="pagination justify-content-center"></ul>
+                    </nav>
                 </div>
 
                 <!-- Paginación (placeholder) -->
@@ -152,33 +110,33 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Nombre*</label>
-                                    <input type="text" class="form-control" id="nombre" required>
+                                    <input type="text" class="form-control" id="nombre">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">RUC O DNI</label>
-                                    <input type="text" class="form-control" id="ruc" required>
+                                    <input type="text" class="form-control" id="ruc">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Ciudad*</label>
-                                    <input type="text" class="form-control" id="ciudad" required>
+                                    <input type="text" class="form-control" id="ciudad">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Teléfono*</label>
-                                    <input type="text" class="form-control" id="telefono" required>
+                                    <input type="text" class="form-control" id="telefono">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="direccion" required>
+                                    <input type="text" class="form-control" id="direccion">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Correo</label>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Agencia</label>
-                                    <input type="text" class="form-control" id="agencia" required>
+                                    <input type="text" class="form-control" id="agencia">
                                 </div>
                             </div>
                         </div>
@@ -192,7 +150,7 @@
         </div>
     </div>
     <!-- Sistema de notificaciones toast  -->
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
     <!-- Modal: Detalle del cliente -->
     <div class="modal fade" id="customerDetailModal" tabindex="-1" aria-hidden="true">
