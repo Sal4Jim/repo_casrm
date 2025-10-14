@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const productsTable = document.getElementById('productsTable');
     const pagination = document.getElementById('pagination');
     const searchInput = document.getElementById('searchInput');
+    const productForm = document.getElementById('productForm');
+    const btnSave = document.getElementById('btnSave');
 
     let categorias = [];
     let productos = [];
@@ -109,6 +111,78 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(err => console.error('Error al crear categoría:', err));
     });
 
+    // Evento para guardar nuevo producto
+    btnSave.addEventListener('click', function() {
+        const nombre = document.getElementById('productName').value.trim();
+        const categoria = document.getElementById('productCategory').value;
+        const presentacion = document.getElementById('productPresentation').value.trim();
+        const precioCompra = parseFloat(document.getElementById('productBuyPrice').value);
+        const precioVenta = parseFloat(document.getElementById('productSellPrice').value);
+        const stock = parseInt(document.getElementById('productStock').value);
+
+        if (!nombre || !categoria || !presentacion || !precioCompra || !precioVenta || !stock) {
+            alert('Por favor, complete todos los campos obligatorios');
+            return;
+        }
+
+        // Si seleccionó "Crear nueva categoría", no permitir crear producto
+        if (categoria === 'new') {
+            alert('Por favor, seleccione una categoría válida o cree una nueva categoría primero');
+            return;
+        }
+
+        // Enviar nuevo producto a la API
+        const categoriaSeleccionada = categorias.find(cat => cat.nombre === categoria);
+        if (!categoriaSeleccionada) {
+            alert('Categoría no encontrada');
+            return;
+        }
+
+        const nuevoProducto = {
+            nombre,
+            categoria_id: categoriaSeleccionada.categoria_id,
+            presentacion,
+            precio_compra: precioCompra,
+            precio_venta: precioVenta,
+            stock
+        };
+
+        fetch('/api/productos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(nuevoProducto)
+        })
+        .then(response => response.json())
+        .then(productoCreado => {
+            // Agregar producto al array local
+            productos.push(productoCreado);
+            // Actualizar tabla
+            mostrarProductos();
+            // Cerrar modal y limpiar formulario
+            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            modal.hide();
+            productForm.reset();
+            alert('Producto creado exitosamente');
+        })
+        .catch(err => {
+            console.error('Error al crear producto:', err);
+            alert('Error al crear producto');
+        });
+    });
+
+    // Manejar cambio en el select de categoría
+    categorySelect.addEventListener('change', function() {
+        if (this.value === 'new') {
+            // Abrir modal de nueva categoría
+            const modal = new bootstrap.Modal(document.getElementById('modalCategoria'));
+            modal.show();
+            // Limpiar selección
+            this.value = '';
+        }
+    });
+
     const productosPorPagina = 5;
     let paginaActual = 1;
 
@@ -132,17 +206,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const fila = document.createElement('tr');
             fila.innerHTML = `
                 <td>${prod.nombre}</td>
-                <td><span class="category-badge">${prod.categoria_nombre || prod.categoria}</span></td>
+                <td><span class="category-badge">${prod.categoria_nombre}</span></td>
                 <td>${prod.presentacion}</td>
                 <td>S/. ${prod.precio_compra}</td>
                 <td>S/. ${prod.precio_venta}</td>
                 <td${prod.stock == 0 ? ' class="stock-warning"' : ''}>${prod.stock}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                        data-bs-target="#productModal" data-action="edit">
+                        data-bs-target="#productModal" data-action="edit" data-id="${prod.producto_id}">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" data-action="delete">
+                    <button class="btn btn-sm btn-danger" data-action="delete" data-id="${prod.producto_id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
