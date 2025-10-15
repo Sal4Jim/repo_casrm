@@ -139,7 +139,7 @@ const getAllClientes = (req, res) => {
             page,
             totalPages,
             limit,
-            search // 👈 Opcional: para depuración
+            search 
           });
         }
       );
