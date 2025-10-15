@@ -1,38 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Simulación de categorías existentes (como si vinieran de la BD)
-    let categorias = [
-        { categoria_id: 1, nombre: "BARQUILLOS" },
-        { categoria_id: 2, nombre: "BASES" },
-        { categoria_id: 3, nombre: "TOPPINGS" },
-        { categoria_id: 4, nombre: "CONOS" },
-        { categoria_id: 5, nombre: "BASES" },
-        { categoria_id: 6, nombre: "CONOS" },
-        { categoria_id: 7, nombre: "CONOS" },
-        { categoria_id: 8, nombre: "BASES" },
-        { categoria_id: 9, nombre: "CONOS" },
-        { categoria_id: 10, nombre: "CONO MARMOLEADO" },
-        { categoria_id: 11, nombre: "CONOS" },
-        { categoria_id: 12, nombre: "PREMEZCLA FRESA" },
-        { categoria_id: 13, nombre: "PREMEZCLA CHOCOLATE" },
-        { categoria_id: 14, nombre: "PREMEZCLA VAINILLA" },
-        { categoria_id: 15, nombre: "PREMEZCLA MENTA" },
-        { categoria_id: 16, nombre: "CONOS GEMELOS" },
-    ];
-
-    // Simulación de productos como si vinieran de la base de datos
-    let productos = [
-        { nombre: "PINOCHO", categoria: "BARQUILLOS", presentacion: "pqt", compra: 10, venta: 12, stock: 400 },
-        { nombre: "CROCANTE MINI", categoria: "BARQUILLOS", presentacion: "caja", compra: 8, venta: 9, stock: 0 },
-        { nombre: "CONO GRANDE", categoria: "BARQUILLOS", presentacion: "caja", compra: 15, venta: 14, stock: 120 },
-        { nombre: "CONO MARMOLEADO", categoria: "CONO MARMOLEADO", presentacion: "caja", compra: 16, venta: 18, stock: 50 },
-        { nombre: "PREMEZCLA FRESA", categoria: "PREMEZCLA FRESA", presentacion: "bolsa", compra: 20, venta: 25, stock: 80 },
-        { nombre: "PREMEZCLA CHOCOLATE", categoria: "PREMEZCLA CHOCOLATE", presentacion: "bolsa", compra: 20, venta: 25, stock: 60 },
-        { nombre: "PREMEZCLA VAINILLA", categoria: "PREMEZCLA VAINILLA", presentacion: "bolsa", compra: 20, venta: 25, stock: 70 },
-        { nombre: "PREMEZCLA MENTA", categoria: "PREMEZCLA MENTA", presentacion: "bolsa", compra: 20, venta: 25, stock: 40 },
-        { nombre: "CONOS GEMELOS", categoria: "CONOS GEMELOS", presentacion: "caja", compra: 18, venta: 20, stock: 30 }
-        // Puedes agregar más productos para probar la paginación
-    ];
-
     // Referencias
     const categorySelect = document.getElementById('productCategory');
     const addCategoryForm = document.getElementById('addCategoryForm');
@@ -41,26 +7,81 @@ document.addEventListener('DOMContentLoaded', function() {
     const productsTable = document.getElementById('productsTable');
     const pagination = document.getElementById('pagination');
     const searchInput = document.getElementById('searchInput');
+    const productForm = document.getElementById('productForm');
+    const btnSave = document.getElementById('btnSave');
+
+    let categorias = [];
+    let productos = [];
+
+    // Instancia de Choices.js (si está disponible)
+    let choicesInstance = null;
+
+    // Cargar categorías desde la API
+    function cargarCategorias() {
+        fetch('/api/categorias')
+            .then(response => response.json())
+            .then(data => {
+                categorias = data;
+                actualizarSelectCategorias();
+            })
+            .catch(err => console.error('Error al cargar categorías:', err));
+    }
+
+    // Cargar productos desde la API
+    function cargarProductos() {
+        fetch('/api/productos')
+            .then(response => response.json())
+            .then(data => {
+                productos = data;
+                mostrarProductos();
+            })
+            .catch(err => console.error('Error al cargar productos:', err));
+    }
 
     // Función para actualizar el select de categorías
     function actualizarSelectCategorias() {
-        // Elimina todas las opciones excepto la primera (placeholder)
+        // Limpiar el select
         categorySelect.innerHTML = '<option value="" selected disabled>Seleccione categoría</option>';
+
+        // Agregar categorías
         categorias.forEach(cat => {
             const opt = document.createElement('option');
             opt.value = cat.nombre;
             opt.textContent = cat.nombre;
             categorySelect.appendChild(opt);
         });
+
         // Opción para crear nueva categoría
         const optNew = document.createElement('option');
         optNew.value = "new";
         optNew.textContent = "+ Crear nueva categoría";
         categorySelect.appendChild(optNew);
+
+        // Si Choices.js está inicializado, actualizarlo
+        if (choicesInstance) {
+            choicesInstance.destroy(); // Destruir instancia anterior
+            choicesInstance = new Choices(categorySelect, {
+                shouldSort: false,
+                searchEnabled: true,
+                placeholderValue: 'Seleccione categoría',
+                itemSelectText: 'Presione Enter para seleccionar'
+            });
+        }
     }
 
-    // Inicializa el select al cargar
-    actualizarSelectCategorias();
+    // Inicializa al cargar
+    cargarCategorias();
+    cargarProductos();
+
+    // Inicializar Choices.js solo si la librería está cargada
+    if (window.Choices && !choicesInstance) {
+        choicesInstance = new Choices(categorySelect, {
+            shouldSort: false,
+            searchEnabled: true,
+            placeholderValue: 'Seleccione categoría',
+            itemSelectText: 'Presione Enter para seleccionar'
+        });
+    }
 
     // Evento para agregar nueva categoría
     addCategoryForm.addEventListener('submit', function(e) {
@@ -68,34 +89,99 @@ document.addEventListener('DOMContentLoaded', function() {
         const nombre = categoryNameInput.value.trim();
         if (!nombre) return;
 
-        // Simula inserción en la BD (agrega al array)
-        const nuevoId = categorias.length ? categorias[categorias.length - 1].categoria_id + 1 : 1;
-        categorias.push({ categoria_id: nuevoId, nombre });
-
-        // Actualiza el select
-        actualizarSelectCategorias();
-
-        // Limpia el input y muestra mensaje de éxito
-        categoryNameInput.value = '';
-        categorySuccess.style.display = 'inline-block';
-        setTimeout(() => categorySuccess.style.display = 'none', 1800);
+        // Enviar nueva categoría a la API
+        fetch('/api/categorias', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nombre })
+        })
+        .then(response => response.json())
+        .then(nuevaCategoria => {
+            // Agregar nueva categoría al array local
+            categorias.push(nuevaCategoria);
+            // Actualizar el select
+            actualizarSelectCategorias();
+            // Limpia el input y muestra mensaje de éxito
+            categoryNameInput.value = '';
+            categorySuccess.style.display = 'inline-block';
+            setTimeout(() => categorySuccess.style.display = 'none', 1800);
+        })
+        .catch(err => console.error('Error al crear categoría:', err));
     });
 
-    // Opcional: Si usas Choices.js, actualiza el select visualmente
-    if (window.Choices) {
-        const choicesInstance = new Choices(categorySelect, { shouldSort: false });
-        // Actualiza Choices cuando cambian las opciones
-        function refreshChoices() {
-            choicesInstance.setChoices(
-                categorias.map(cat => ({ value: cat.nombre, label: cat.nombre })),
-                'value', 'label', false
-            );
-            choicesInstance.setChoices([
-                { value: "new", label: "+ Crear nueva categoría" }
-            ], 'value', 'label', true);
+    // Evento para guardar nuevo producto
+    btnSave.addEventListener('click', function() {
+        const nombre = document.getElementById('productName').value.trim();
+        const categoria = document.getElementById('productCategory').value;
+        const presentacion = document.getElementById('productPresentation').value.trim();
+        const precioCompra = parseFloat(document.getElementById('productBuyPrice').value);
+        const precioVenta = parseFloat(document.getElementById('productSellPrice').value);
+        const stock = parseInt(document.getElementById('productStock').value);
+
+        if (!nombre || !categoria || !presentacion || !precioCompra || !precioVenta || !stock) {
+            alert('Por favor, complete todos los campos obligatorios');
+            return;
         }
-        addCategoryForm.addEventListener('submit', refreshChoices);
-    }
+
+        // Si seleccionó "Crear nueva categoría", no permitir crear producto
+        if (categoria === 'new') {
+            alert('Por favor, seleccione una categoría válida o cree una nueva categoría primero');
+            return;
+        }
+
+        // Enviar nuevo producto a la API
+        const categoriaSeleccionada = categorias.find(cat => cat.nombre === categoria);
+        if (!categoriaSeleccionada) {
+            alert('Categoría no encontrada');
+            return;
+        }
+
+        const nuevoProducto = {
+            nombre,
+            categoria_id: categoriaSeleccionada.categoria_id,
+            presentacion,
+            precio_compra: precioCompra,
+            precio_venta: precioVenta,
+            stock
+        };
+
+        fetch('/api/productos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(nuevoProducto)
+        })
+        .then(response => response.json())
+        .then(productoCreado => {
+            // Agregar producto al array local
+            productos.push(productoCreado);
+            // Actualizar tabla
+            mostrarProductos();
+            // Cerrar modal y limpiar formulario
+            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            modal.hide();
+            productForm.reset();
+            alert('Producto creado exitosamente');
+        })
+        .catch(err => {
+            console.error('Error al crear producto:', err);
+            alert('Error al crear producto');
+        });
+    });
+
+    // Manejar cambio en el select de categoría
+    categorySelect.addEventListener('change', function() {
+        if (this.value === 'new') {
+            // Abrir modal de nueva categoría
+            const modal = new bootstrap.Modal(document.getElementById('modalCategoria'));
+            modal.show();
+            // Limpiar selección
+            this.value = '';
+        }
+    });
 
     const productosPorPagina = 5;
     let paginaActual = 1;
@@ -120,17 +206,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const fila = document.createElement('tr');
             fila.innerHTML = `
                 <td>${prod.nombre}</td>
-                <td><span class="category-badge">${prod.categoria}</span></td>
+                <td><span class="category-badge">${prod.categoria_nombre}</span></td>
                 <td>${prod.presentacion}</td>
-                <td>${prod.compra}</td>
-                <td>${prod.venta}</td>
+                <td>S/. ${prod.precio_compra}</td>
+                <td>S/. ${prod.precio_venta}</td>
                 <td${prod.stock == 0 ? ' class="stock-warning"' : ''}>${prod.stock}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
-                        data-bs-target="#productModalModificado" data-action="edit">
+                        data-bs-target="#productModal" data-action="edit" data-id="${prod.producto_id}">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" data-action="delete">
+                    <button class="btn btn-sm btn-danger" data-action="delete" data-id="${prod.producto_id}">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -193,29 +279,9 @@ document.addEventListener('DOMContentLoaded', function() {
         pagination.appendChild(liSiguiente);
     }
 
-    // Inicializar tabla paginada
-    mostrarProductos();
-
     // Actualizar al buscar
     searchInput.addEventListener('input', function() {
         paginaActual = 1;
         mostrarProductos();
     });
-
-    // Función para agregar un nuevo producto (simulación)
-    function agregarProducto(nombre, categoria, presentacion, compra, venta, stock) {
-        const nuevoProducto = {
-            nombre,
-            categoria,
-            presentacion,
-            compra,
-            venta,
-            stock
-        };
-        productos.push(nuevoProducto);
-        mostrarProductos();
-    }
-
-    // Ejemplo de uso de la función agregarProducto
-    // agregarProducto('Nuevo Producto', 'BASES', 'caja', 25, 30, 100);
 });
