@@ -1,7 +1,5 @@
 const express = require('express');
 const clientesRoutes = require('./routes/clientes.routes');
-const productosRoutes = require('./routes/productos.routes');
-const categoriasRoutes = require('./routes/categorias.routes');
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -14,8 +12,6 @@ app.use(express.json());
 
 // Rutas de la API
 app.use('/api/clientes', clientesRoutes);
-app.use('/api/productos', productosRoutes);
-app.use('/api/categorias', categoriasRoutes);
 
 // Ruta de prueba para la base de datos (con callback)
 app.get('/test-db', (req, res) => {
