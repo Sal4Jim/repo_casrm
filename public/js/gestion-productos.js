@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const productForm = document.getElementById('productForm');
     const btnSave = document.getElementById('btnSave');
+    const btnExportarCSV = document.getElementById('btnExportarCSV');
 
     let categorias = [];
     let productos = [];
@@ -321,4 +322,48 @@ document.addEventListener('DOMContentLoaded', function() {
         paginaActual = 1;
         mostrarProductos();
     });
+
+    // === FUNCIÓN PARA EXPORTAR A CSV ===
+    function exportarProductosACSV() {
+        if (productos.length === 0) {
+            showToast('<i class="fas fa-info-circle me-2"></i> No hay productos para exportar.', 'error');
+            return;
+        }
+
+        // Encabezados del CSV
+        const headers = ['Nombre', 'Categoría', 'Presentación', 'Precio de Compra', 'Precio de Venta', 'Stock'];
+        
+        // Convertir datos de productos a filas de CSV
+        const rows = productos.map(prod => [
+            `"${prod.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
+            `"${prod.categoria_nombre}"`,
+            `"${prod.presentacion}"`,
+            prod.precio_compra,
+            prod.precio_venta,
+            prod.stock
+        ].join(','));
+
+        // Unir encabezados y filas
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        // Crear un Blob para el contenido CSV
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+        // Crear un enlace temporal para la descarga
+        const link = document.createElement('a');
+        if (link.download !== undefined) { // Feature detection
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `productos_${new Date().toISOString().slice(0,10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        showToast('<i class="fas fa-file-download me-2"></i> Exportación a CSV iniciada.', 'success');
+    }
+
+    // Evento para el botón de exportar
+    btnExportarCSV.addEventListener('click', exportarProductosACSV);
 });
