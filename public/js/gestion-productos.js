@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias
     const productModalEl = document.getElementById('productModal');
+    const productModalLabel = document.getElementById('productModalLabel');
     const categorySelect = document.getElementById('productCategory');
     const addCategoryForm = document.getElementById('addCategoryForm');
     const categoryNameInput = document.getElementById('categoryNameInput');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productForm = document.getElementById('productForm');
     const btnSave = document.getElementById('btnSave');
     const btnExportarCSV = document.getElementById('btnExportarCSV');
+    const btnNuevo = document.getElementById('btnNuevo');
 
     let categorias = [];
     let productos = [];
@@ -142,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Evento para guardar nuevo producto
     btnSave.addEventListener('click', function() {
+        const productId = document.getElementById('productId').value;
         const nombre = document.getElementById('productName').value.trim();
         const categoria = document.getElementById('productCategory').value;
         const presentacion = document.getElementById('productPresentation').value.trim();
@@ -167,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const nuevoProducto = {
+        const datosProducto = {
             nombre,
             categoria_id: categoriaSeleccionada.categoria_id,
             presentacion,
@@ -180,34 +183,97 @@ document.addEventListener('DOMContentLoaded', function() {
         btnSave.disabled = true;
         btnSave.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Guardando...';
 
-        fetch('/api/productos', {
-            method: 'POST',
+        // Determinar si es una creación (POST) o una actualización (PUT)
+        const esEdicion = !!productId;
+        const url = esEdicion ? `/api/productos/${productId}` : '/api/productos';
+        const method = esEdicion ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(nuevoProducto)
+            body: JSON.stringify(datosProducto)
         })
-        .then(response => response.json())
-        .then(productoCreado => {
-            // Agregar producto al array local
-            productos.push(productoCreado);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(esEdicion ? 'Error al actualizar' : 'Error al crear');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (esEdicion) {
+                // Actualizar producto en el array local
+                const index = productos.findIndex(p => p.producto_id == productId);
+                if (index !== -1) {
+                    // Para mantener el nombre de la categoría, lo fusionamos
+                    productos[index] = { ...productos[index], ...datosProducto, ...data };
+                }
+                showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> actualizado.`, 'success');
+            } else {
+                // Agregar nuevo producto al array local
+                const productoCreado = { ...data, categoria_nombre: categoria };
+                productos.push(productoCreado);
+                showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> creado.`, 'success');
+            }
+
             // Actualizar tabla
             mostrarProductos();
+
             // Cerrar modal y limpiar formulario
             const modal = bootstrap.Modal.getInstance(productModalEl);
             modal.hide();
-            productForm.reset();
-            showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${nuevoProducto.nombre}</strong> creado exitosamente.`, 'success');
         })
         .catch(err => {
-            console.error('Error al crear producto:', err);
-            showToast('<i class="fas fa-times-circle me-2"></i> Error al crear el producto.', 'error');
+            console.error('Error al guardar producto:', err);
+            const mensaje = esEdicion 
+                ? '<i class="fas fa-times-circle me-2"></i> Error al actualizar el producto.'
+                : '<i class="fas fa-times-circle me-2"></i> Error al crear el producto.';
+            showToast(mensaje, 'error');
         })
         .finally(() => {
             // Restaurar botón
             btnSave.disabled = false;
             btnSave.innerHTML = 'Guardar';
         });
+    });
+
+    // === LÓGICA PARA ABRIR MODAL EN MODO EDICIÓN ===
+    productsTable.addEventListener('click', function(e) {
+        const editButton = e.target.closest('button[data-action="edit"]');
+        if (editButton) {
+            const productId = editButton.dataset.id;
+            const productoAEditar = productos.find(p => p.producto_id == productId);
+
+            if (productoAEditar) {
+                // Cambiar título del modal
+                productModalLabel.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Producto';
+
+                // Llenar el formulario
+                document.getElementById('productId').value = productoAEditar.producto_id;
+                document.getElementById('productName').value = productoAEditar.nombre;
+                document.getElementById('productPresentation').value = productoAEditar.presentacion;
+                document.getElementById('productStock').value = productoAEditar.stock;
+                document.getElementById('productBuyPrice').value = productoAEditar.precio_compra;
+                document.getElementById('productSellPrice').value = productoAEditar.precio_venta;
+
+                // Seleccionar la categoría en Choices.js
+                if (choicesInstance) {
+                    choicesInstance.setChoiceByValue(productoAEditar.categoria_nombre);
+                }
+            }
+        }
+    });
+
+    // Limpiar el formulario y restaurar el título cuando se abre para un nuevo producto
+    productModalEl.addEventListener('show.bs.modal', function (event) {
+        // Solo limpiar si el modal NO fue disparado por un botón de editar
+        if (!event.relatedTarget || !event.relatedTarget.matches('button[data-action="edit"]')) {
+            productModalLabel.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Nuevo Producto';
+            productForm.reset();
+            document.getElementById('productId').value = '';
+            if (choicesInstance) choicesInstance.setChoiceByValue('');
+        }
     });
 
     // Manejar cambio en el select de categoría
@@ -221,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const productosPorPagina = 5;
+    const productosPorPagina = 8;
     let paginaActual = 1;
 
     function mostrarProductos() {
@@ -242,13 +308,22 @@ document.addEventListener('DOMContentLoaded', function() {
         productsTable.innerHTML = '';
         productosPagina.forEach(prod => {
             const fila = document.createElement('tr');
+
+            // Lógica para colorear la fila según el stock
+            if (prod.stock < 10) {
+                fila.classList.add('stock-critical'); // Rojo suave
+            } else if (prod.stock < 30) {
+                fila.classList.add('stock-low'); // Amarillo suave
+            }
+
+            // Renderizar celdas
             fila.innerHTML = `
                 <td>${prod.nombre}</td>
                 <td><span class="category-badge">${prod.categoria_nombre}</span></td>
                 <td>${prod.presentacion}</td>
                 <td>S/. ${prod.precio_compra}</td>
                 <td>S/. ${prod.precio_venta}</td>
-                <td${prod.stock == 0 ? ' class="stock-warning"' : ''}>${prod.stock}</td>
+                <td>${prod.stock}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" data-bs-toggle="modal"
                         data-bs-target="#productModal" data-action="edit" data-id="${prod.producto_id}">
