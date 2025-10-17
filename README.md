@@ -5,4 +5,4 @@
 2. `cd REPO_CASRM` 
 3. `npm install`     #
 4. Configurar MySQL
-5. `node server.js`
+5. `node server.js` ó `npm run dev`

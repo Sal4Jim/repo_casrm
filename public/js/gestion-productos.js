@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias
+    const productModalEl = document.getElementById('productModal');
     const categorySelect = document.getElementById('productCategory');
     const addCategoryForm = document.getElementById('addCategoryForm');
     const categoryNameInput = document.getElementById('categoryNameInput');
@@ -15,6 +16,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Instancia de Choices.js (si está disponible)
     let choicesInstance = null;
+
+    // === FUNCIÓN PARA MOSTRAR NOTIFICACIONES TOAST ===
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        const toastTypeClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        toast.className = `toast align-items-center text-white ${toastTypeClass} border-0 show`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
+        bsToast.show();
+    }
+
+    function createToastContainer() {
+        let container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '1090'; // Asegurar que esté sobre los modales
+        document.body.appendChild(container);
+        return container;
+    }
+
 
     // Cargar categorías desde la API
     function cargarCategorias() {
@@ -44,18 +78,12 @@ document.addEventListener('DOMContentLoaded', function() {
         categorySelect.innerHTML = '<option value="" selected disabled>Seleccione categoría</option>';
 
         // Agregar categorías
-        categorias.forEach(cat => {
+        categorias.forEach(cat => { 
             const opt = document.createElement('option');
             opt.value = cat.nombre;
             opt.textContent = cat.nombre;
             categorySelect.appendChild(opt);
         });
-
-        // Opción para crear nueva categoría
-        const optNew = document.createElement('option');
-        optNew.value = "new";
-        optNew.textContent = "+ Crear nueva categoría";
-        categorySelect.appendChild(optNew);
 
         // Si Choices.js está inicializado, actualizarlo
         if (choicesInstance) {
@@ -64,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 shouldSort: false,
                 searchEnabled: true,
                 placeholderValue: 'Seleccione categoría',
-                itemSelectText: 'Presione Enter para seleccionar'
+                itemSelectText: ''
             });
         }
     }
@@ -120,21 +148,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const precioVenta = parseFloat(document.getElementById('productSellPrice').value);
         const stock = parseInt(document.getElementById('productStock').value);
 
-        if (!nombre || !categoria || !presentacion || !precioCompra || !precioVenta || !stock) {
-            alert('Por favor, complete todos los campos obligatorios');
+        if (!nombre || !categoria || !presentacion || isNaN(precioCompra) || isNaN(precioVenta) || isNaN(stock)) {
+            showToast('<i class="fas fa-exclamation-circle me-2"></i> Por favor, complete todos los campos obligatorios.', 'error');
             return;
         }
 
         // Si seleccionó "Crear nueva categoría", no permitir crear producto
         if (categoria === 'new') {
-            alert('Por favor, seleccione una categoría válida o cree una nueva categoría primero');
+            showToast('<i class="fas fa-folder-plus me-2"></i> Seleccione una categoría válida o cree una nueva.', 'error');
             return;
         }
 
         // Enviar nuevo producto a la API
         const categoriaSeleccionada = categorias.find(cat => cat.nombre === categoria);
         if (!categoriaSeleccionada) {
-            alert('Categoría no encontrada');
+            showToast('<i class="fas fa-times-circle me-2"></i> Categoría no encontrada. Recargue la página.', 'error');
             return;
         }
 
@@ -146,6 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
             precio_venta: precioVenta,
             stock
         };
+
+        // Feedback de carga
+        btnSave.disabled = true;
+        btnSave.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Guardando...';
 
         fetch('/api/productos', {
             method: 'POST',
@@ -161,14 +193,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Actualizar tabla
             mostrarProductos();
             // Cerrar modal y limpiar formulario
-            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            const modal = bootstrap.Modal.getInstance(productModalEl);
             modal.hide();
             productForm.reset();
-            alert('Producto creado exitosamente');
+            showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${nuevoProducto.nombre}</strong> creado exitosamente.`, 'success');
         })
         .catch(err => {
             console.error('Error al crear producto:', err);
-            alert('Error al crear producto');
+            showToast('<i class="fas fa-times-circle me-2"></i> Error al crear el producto.', 'error');
+        })
+        .finally(() => {
+            // Restaurar botón
+            btnSave.disabled = false;
+            btnSave.innerHTML = 'Guardar';
         });
     });
 

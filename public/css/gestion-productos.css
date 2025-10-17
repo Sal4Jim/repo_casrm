@@ -308,7 +308,7 @@ body {
 */
 .ice-cream-icon {
     display: inline-block;
-    animation: float 3s ease-in-out infinite; /* Flotación suave del ícono */
+    animation: float 2s ease-in-out infinite; /* Flotación suave del ícono helado*/
 }
 
 @keyframes float {
@@ -341,6 +341,31 @@ body {
     color: var(--text-primary);
 }
 
+/* Estilo específico para la etiqueta de categoría en el modal */
+label[for="productCategory"] {
+    font-size: 0.9rem; 
+}
+
+/* 
+   =========================================================
+   ESTILOS PARA SOBRESCRIBIR CHOICES.JS (SELECT DE CATEGORÍA)
+   =========================================================
+*/
+.choices {
+    margin-bottom: 0; 
+}
+
+/* Estilo del campo interior para que coincida con los inputs de Bootstrap */
+.choices__inner {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    padding: 0.375rem 0.375rem;
+    font-size: 1rem;
+    height: 25px; 
+    min-width: 370px;
+}
+
 /* Contenedor para nueva categoría (oculto por defecto) */
 #newCategoryGroup {
     display: none;
@@ -352,6 +377,7 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
 
 /* 
    =========================================================
