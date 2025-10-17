@@ -231,7 +231,13 @@ const getClienteById = (req, res) => {
       return res.status(500).json({ success: false, error: "Error de conexión" });
     }
 
-    const sql = `SELECT * FROM clientes WHERE cliente_id = ?`;
+    const sql = `
+      SELECT 
+        c.*, 
+        n.descripcion AS notas 
+      FROM clientes c
+      LEFT JOIN notas n ON c.nota_id = n.nota_id
+      WHERE c.cliente_id = ?`;
     connection.execute(sql, [id], (error, results) => {
       connection.release();
       if (error) {
@@ -300,4 +306,94 @@ const deleteCliente = (req, res) => {
   });
 };
 
-module.exports = { getAllClientes, createCliente, updateCliente, getClienteById, deleteCliente };
+// ✅ FUNCIÓN: Actualizar solo las notas de un cliente (con tabla 'notas' separada)
+const updateNotasCliente = async (req, res) => {
+  const { id } = req.params;
+  const { notas } = req.body;
+  const clienteId = parseInt(id);
+
+  if (notas === undefined) {
+    return res.status(400).json({ success: false, error: "El campo 'notas' es requerido" });
+  }
+
+  let connection;
+  try {
+    connection = await pool.promise().getConnection();
+    await connection.beginTransaction();
+
+    // 1. Obtener el nota_id actual del cliente
+    const [rows] = await connection.execute('SELECT nota_id FROM clientes WHERE cliente_id = ?', [clienteId]);
+
+    if (rows.length === 0) {
+      await connection.rollback();
+      connection.release();
+      return res.status(404).json({ success: false, error: "Cliente no encontrado" });
+    }
+
+    const notaIdActual = rows[0].nota_id;
+
+    if (notaIdActual) {
+      // 2a. Si ya existe una nota, la actualizamos
+      if (notas.trim() === '') {
+        // Si el texto de la nota está vacío, desvinculamos y eliminamos la nota
+        await connection.execute('UPDATE clientes SET nota_id = NULL WHERE cliente_id = ?', [clienteId]);
+        await connection.execute('DELETE FROM notas WHERE nota_id = ?', [notaIdActual]);
+      } else {
+        // Si hay texto, actualizamos la descripción
+        await connection.execute('UPDATE notas SET descripcion = ? WHERE nota_id = ?', [notas, notaIdActual]);
+      }
+    } else if (notas.trim() !== '') {
+      // 2b. Si no existe una nota y el texto no está vacío, creamos una nueva
+      const [insertResult] = await connection.execute('INSERT INTO notas (descripcion) VALUES (?)', [notas]);
+      const nuevaNotaId = insertResult.insertId;
+
+      // 3. Vinculamos la nueva nota al cliente
+      await connection.execute('UPDATE clientes SET nota_id = ? WHERE cliente_id = ?', [nuevaNotaId, clienteId]);
+    }
+    // Si no hay notaId y el texto está vacío, no hacemos nada.
+
+    await connection.commit();
+    res.json({ success: true, message: "Notas actualizadas exitosamente" });
+
+  } catch (error) {
+    if (connection) await connection.rollback();
+    console.error("❌ Error al actualizar notas:", error.message);
+    res.status(500).json({ success: false, error: "Error interno del servidor al actualizar notas" });
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+module.exports = { getAllClientes, createCliente, updateCliente, getClienteById, deleteCliente, updateNotasCliente };
+
+/*
+// Versión anterior de updateNotasCliente (para referencia)
+const updateNotasCliente_old = (req, res) => {
+  const { id } = req.params;
+  const { notas } = req.body;
+
+  if (notas === undefined) {
+    return res.status(400).json({
+      success: false,
+      error: "El campo 'notas' es requerido"
+    });
+  }
+
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return res.status(500).json({ success: false, error: "Error de conexión" });
+    }
+
+    const sql = `UPDATE clientes SET notas = ? WHERE cliente_id = ?`;
+    connection.execute(sql, [notas, id], (error, results) => {
+      connection.release();
+      if (error) {
+        return res.status(500).json({ success: false, error: "Error al actualizar notas" });
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ success: false, error: "Cliente no encontrado" });
+      }
+      res.json({ success: true, message: "Notas actualizadas exitosamente" });
+    });
+  });
+};*/
