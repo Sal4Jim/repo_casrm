@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function () {
                <button class="btn btn-sm btn-danger me-1 delete-btn" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-trash"></i>
                </button>
-               <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+               <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-info-circle"></i>
                </button>
                <button class="btn btn-sm btn-warning">
@@ -312,43 +312,148 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }
     });
- // === MANEJAR ELIMINACIÓN DE CLIENTE ===
-document.addEventListener('click', function (e) {
-    if (e.target.closest('.delete-btn')) {
-        const button = e.target.closest('.delete-btn');
-        const clienteId = button.getAttribute('data-cliente-id');
-        const clienteNombre = button.closest('tr').querySelector('td:first-child').textContent.trim();
+    // === MANEJAR ELIMINACIÓN DE CLIENTE ===
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.delete-btn')) {
+            const button = e.target.closest('.delete-btn');
+            const clienteId = button.getAttribute('data-cliente-id');
+            const clienteNombre = button.closest('tr').querySelector('td:first-child').textContent.trim();
 
-        // Confirmación con SweetAlert2
-        Swal.fire({
-            title: '¿Estás seguro?',
-            html: `Vas a eliminar al cliente <strong>${clienteNombre}</strong>.<br>Esta acción no se puede deshacer.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // ✅ Solo eliminar si el usuario confirma
-                axios.delete(`/api/clientes/${clienteId}`)
-                    .then(response => {
-                        if (response.data.success) {
-                            showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> eliminado exitosamente`, 'success');
-                            cargarClientes(currentPage); // Recargar la tabla
-                        }
-                    })
-                    .catch(error => {
-                        let mensaje = "Error al eliminar el cliente";
-                        if (error.response?.data?.error) {
-                            mensaje = error.response.data.error;
-                        } else if (error.response?.status === 404) {
-                            mensaje = "Cliente no encontrado";
-                        }
-                        showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
-                    });
-            }
-        });
+            // Confirmación con SweetAlert2
+            Swal.fire({
+                title: '¿Estás seguro?',
+                html: `Vas a eliminar al cliente <strong>${clienteNombre}</strong>.<br>Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ✅ Solo eliminar si el usuario confirma
+                    axios.delete(`/api/clientes/${clienteId}`)
+                        .then(response => {
+                            if (response.data.success) {
+                                showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> eliminado exitosamente`, 'success');
+                                cargarClientes(currentPage); // Recargar la tabla
+                            }
+                        })
+                        .catch(error => {
+                            let mensaje = "Error al eliminar el cliente";
+                            if (error.response?.data?.error) {
+                                mensaje = error.response.data.error;
+                            } else if (error.response?.status === 404) {
+                                mensaje = "Cliente no encontrado";
+                            }
+                            showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+                        });
+                }
+            });
+
+
+        }
+    })
+    // === MANEJAR DETALLE DE CLIENTE ===
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-bs-target="#customerDetailModal"]')) {
+            const button = e.target.closest('[data-bs-target="#customerDetailModal"]');
+            const clienteId = button.getAttribute('data-cliente-id');
+            if (!clienteId) return;
+
+            axios.get(`/api/clientes/${clienteId}`)
+                .then(response => {
+                    if (response.data.success) {
+                        const cliente = response.data.cliente || {};
+
+                        const setField = (id, value) => {
+                            const el = document.getElementById(id);
+                            if (el) el[el.tagName === 'TEXTAREA' ? 'value' : 'textContent'] = (value !== undefined && value !== null && String(value).trim() !== '') ? value : (el.tagName === 'TEXTAREA' ? '' : '-');
+                        };
+
+                        setField('detail-nombre', cliente.nombre);
+                        setField('detail-ciudad', cliente.ciudad);
+                        setField('detail-ruc', cliente.ruc);
+                        setField('detail-telefono', cliente.telefono);
+                        setField('detail-email', cliente.email);
+                        setField('detail-agencia', cliente.agencia);
+                        setField('detail-notas', cliente.notas); 
+                    } else {
+                        showToast('<i class="fas fa-exclamation-triangle me-2"></i> No se encontraron datos del cliente', 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar datos del cliente', 'error');
+                });
+        }
+    });
+    // === MANEJAR EDICIÓN DE NOTAS EN LÍNEA ===
+    let clienteIdParaNotas = null; // Para recordar qué cliente se está editando
+    let notasOriginales = ''; // Para poder cancelar
+
+    // Cuando se abre el modal de detalle, guarda el ID
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-bs-target="#customerDetailModal"]')) {
+            const button = e.target.closest('[data-bs-target="#customerDetailModal"]');
+            clienteIdParaNotas = button.getAttribute('data-cliente-id');
+            // Al abrir, nos aseguramos de que esté en modo lectura
+            setNotasEditMode(false);
+        }
+    });
+
+    // Botón "Editar"
+    document.getElementById('btnEditarNota')?.addEventListener('click', function () {
+        const notasTextarea = document.getElementById('detail-notas');
+        notasOriginales = notasTextarea.value; // Guardar estado original
+        setNotasEditMode(true);
+    });
+
+    // Botón "Cancelar"
+    document.getElementById('btnCancelarNota')?.addEventListener('click', function () {
+        const notasTextarea = document.getElementById('detail-notas');
+        notasTextarea.value = notasOriginales; // Restaurar
+        setNotasEditMode(false);
+    });
+
+    // Botón "Guardar"
+    document.getElementById('btnGuardarNota')?.addEventListener('click', function () {
+        if (!clienteIdParaNotas) {
+            showToast('<i class="fas fa-exclamation-triangle me-2"></i> No se pudo identificar al cliente', 'error');
+            return;
+        }
+
+        const nuevasNotas = document.getElementById('detail-notas').value.trim();
+
+        axios.put(`/api/clientes/${clienteIdParaNotas}/notas`, { notas: nuevasNotas })
+            .then(response => {
+                if (response.data.success) {
+                    showToast('<i class="fas fa-check-circle me-2"></i> Nota guardadas exitosamente', 'success');
+                    setNotasEditMode(false); // Volver a modo lectura
+                }
+            })
+            .catch(error => {
+                const mensaje = error.response?.data?.error || "Error al guardar las notas";
+                showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+            });
+    });
+
+    // Función auxiliar para cambiar entre modo edición y lectura
+    function setNotasEditMode(isEditing) {
+        const notasTextarea = document.getElementById('detail-notas');
+        const btnEditar = document.getElementById('btnEditarNota');
+        const btnGuardar = document.getElementById('btnGuardarNota');
+        const btnCancelar = document.getElementById('btnCancelarNota');
+
+        if (isEditing) {
+            notasTextarea.readOnly = false;
+            notasTextarea.focus();
+            btnEditar.classList.add('d-none');
+            btnGuardar.classList.remove('d-none');
+            btnCancelar.classList.remove('d-none');
+        } else {
+            notasTextarea.readOnly = true;
+            btnEditar.classList.remove('d-none');
+            btnGuardar.classList.add('d-none');
+            btnCancelar.classList.add('d-none');
+        }
     }
-   }) 
 });
