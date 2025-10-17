@@ -36,7 +36,6 @@
             </button>
             <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
                     <li class="nav-item"><a class="nav-link active" href="gestion-clientes.html">Gestionar Clientes</a>
                     </li>
@@ -166,22 +165,29 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center mb-4 mb-md-0">
+                    <div class="row g-4">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="text-center">
                             <div
                                 class="customer-avatar rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3">
                                 <i class="fas fa-user fa-3x text-secondary"></i>
                             </div>
-                            <h5 class="mb-2">Nombre del Cliente</h5>
-                            <p class="text-muted mb-3">Ciudad</p>
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-warning btn-sm w-100">
-                                    <i class="fas fa-shopping-cart me-1"></i> Nueva Venta
-                                </button>
-                                <button class="btn btn-sm btn-primary me-1 edit-btn" data-bs-toggle="modal"
-                                    data-bs-target="#clientModal" data-cliente-id="${cliente.cliente_id}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                            <h5 class="mb-2" id="detail-nombre">-</h5>
+                            <p class="text-muted mb-3" id="detail-ciudad">-</p>
+                            </div>
+                            <!-- Sección de Notas (movida aquí) -->
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="fw-bold mb-0">Notas</h6>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-primary" id="btnEditarNota"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-success d-none" id="btnGuardarNota"><i class="fas fa-save"></i></button>
+                                            <button class="btn btn-sm btn-secondary d-none" id="btnCancelarNota"><i class="fas fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <textarea id="detail-notas" class="form-control" rows="5" placeholder="Sin notas registradas." readonly></textarea>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -190,20 +196,20 @@
                                     <h6 class="fw-bold mb-3">Información General</h6>
                                     <div class="row">
                                         <div class="col-sm-6 mb-2">
-                                            <small class="text-muted">RUC</small>
-                                            <p class="mb-0 fw-medium">-</p>
+                                            <small class="text-muted">RUC/DNI</small>
+                                            <p class="mb-0 fw-medium" id="detail-ruc">-</p>
                                         </div>
                                         <div class="col-sm-6 mb-2">
                                             <small class="text-muted">Teléfono</small>
-                                            <p class="mb-0 fw-medium">-</p>
+                                            <p class="mb-0 fw-medium" id="detail-telefono">-</p>
                                         </div>
                                         <div class="col-sm-6 mb-2">
                                             <small class="text-muted">Email</small>
-                                            <p class="mb-0 fw-medium">-</p>
+                                            <p class="mb-0 fw-medium" id="detail-email">-</p>
                                         </div>
                                         <div class="col-sm-6 mb-2">
                                             <small class="text-muted">Agencia</small>
-                                            <p class="mb-0 fw-medium">-</p>
+                                            <p class="mb-0 fw-medium" id="detail-agencia">-</p>
                                         </div>
                                     </div>
                                 </div>
@@ -232,18 +238,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="fw-bold mb-0">Notas</h6>
-                                        <button class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-plus me-1"></i> Agregar
-                                        </button>
-                                    </div>
-                                    <p class="mb-0 text-muted fst-italic">Sin notas registradas.</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -262,7 +256,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="js/gestion-clientes.js"></script>
