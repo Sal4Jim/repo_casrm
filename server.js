@@ -2,7 +2,8 @@ const express = require('express');
 const clientesRoutes = require('./routes/clientes.routes');
 const productosRoutes = require('./routes/productos.routes');
 const categoriasRoutes = require('./routes/categorias.routes');
-const bonificacionesRoutes = require('./routes/bonificacion.routes'); // <-- AÑADIDO
+const bonificacionesRoutes = require('./routes/bonificacion.routes');
+const cotizacionesRoutes = require('./routes/cotizacion.routes'); // <-- AÑADIDO
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -17,7 +18,8 @@ app.use(express.json());
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/productos', productosRoutes);
 app.use('/api/categorias', categoriasRoutes);
-app.use('/api/bonificaciones', bonificacionesRoutes); // <-- AÑADIDO
+app.use('/api/bonificaciones', bonificacionesRoutes);
+app.use('/api/cotizaciones', cotizacionesRoutes); // <-- AÑADIDO
 
 // Ruta de prueba para la base de datos (con callback)
 app.get('/test-db', (req, res) => {
