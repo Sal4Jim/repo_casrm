@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let clientesChoices;
     let productosChoices;
     let productosEnCotizacion = []; // Almacena los productos añadidos a la cotización
+    let productosDisponibles = []; // Almacena los productos cargados en el buscador
 
     // --- Funciones de Utilidad ---
 
@@ -140,12 +141,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         try {
             const response = await axios.get(`/api/productos?search=${searchTerm}&limit=10`);
-            const productos = response.data.map(p => ({
+            productosDisponibles = response.data; // Guardar los productos completos
+            const choicesData = productosDisponibles.map(p => ({
                 value: p.producto_id, // Asegúrate de que producto_id sea el valor correcto para Choices.js
                 label: `${p.nombre} (${p.presentacion}) - S/. ${parseFloat(p.precio_venta).toFixed(2)}`,
                 data: p // Guardar el objeto completo del producto
             }));
-            productosChoices.setChoices(productos, 'value', 'label', true);
+            productosChoices.setChoices(choicesData, 'value', 'label', true);
         } catch (error) {
             console.error('Error al buscar productos:', error);
             showToast('Error al buscar productos.', 'error');
@@ -154,15 +156,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Añadir producto a la cotización al seleccionarlo
     productoSearchEl.addEventListener('change', function (event) {
-        const selectedOption = event.detail.choice;
-        if (selectedOption && selectedOption.data) {
-            const producto = selectedOption.data;
+        console.log('Evento change de productoSearchEl disparado.');
+        const selectedValue = event.detail.value;
+        console.log('Valor seleccionado:', selectedValue);
+
+        if (selectedValue) {
+            // Buscar el producto completo en nuestro array de productos disponibles
+            const producto = productosDisponibles.find(p => p.producto_id == selectedValue);
+            if (!producto) {
+                console.error('Producto no encontrado en la lista de disponibles. ID:', selectedValue);
+                return;
+            }
+
+            console.log('Producto seleccionado (selectedOption.data):', producto);
+
             // Verificar si el producto ya está en la lista
-            const existingProduct = productosEnCotizacion.find(p => Number(p.producto_id) === Number(producto.producto_id));
+            const existingProduct = productosEnCotizacion.find(p => p.producto_id == producto.producto_id);
+
             if (existingProduct) {
+                console.log('Producto existente encontrado:', existingProduct);
                 existingProduct.cantidad++; // Incrementar cantidad si ya existe
                 showToast(`Cantidad de "${producto.nombre}" incrementada.`, 'info');
             } else {
+                console.log('Producto NO existente, añadiendo nuevo.');
                 productosEnCotizacion.push({
                     idUnico: Date.now() + Math.random(), // ID único para la fila en el frontend
                     producto_id: producto.producto_id,
@@ -177,12 +193,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             renderProductosCotizacion();
             productosChoices.setChoiceByValue(''); // Limpiar el select después de añadir
+        } else {
+            console.log('No se seleccionó ningún valor válido.');
         }
     });
 
     // --- Renderizado y Lógica de la Tabla de Productos ---
     function renderProductosCotizacion() {
         productosCotizacionTable.innerHTML = '';
+        console.log('Renderizando productos de cotización. productosEnCotizacion:', productosEnCotizacion);
         if (productosEnCotizacion.length === 0) {
             productosCotizacionTable.innerHTML = `
                 <tr>

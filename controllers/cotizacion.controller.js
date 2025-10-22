@@ -4,9 +4,9 @@ const PDFDocument = require('pdfkit');
 // --- Configuración de la Empresa para el PDF ---
 const COMPANY_INFO = {
     name: 'CASRM',
-    address: 'Av. Principal 123, Ciudad, País',
-    phone: '+51 987 654 321',
-    ruc: '12345678901'
+    address: 'CAL.LLOQUE YUPANQUI NRO. 302 URB. CHICAGO, Trujillo, Perú',
+    phone: '+51 932 142 279',
+    ruc: '20609736811'
 };
 
 // POST /api/cotizaciones - Crear una nueva cotización
@@ -110,8 +110,6 @@ exports.generatePdfCotizacion = async (req, res) => {
         );
         cotizacion.productos = detalleRows;
 
-        connection.release();
-
         // --- Generar PDF ---
         const doc = new PDFDocument({ margin: 50 });
         const filename = `cotizacion_${cotizacion_id}.pdf`;
@@ -173,10 +171,10 @@ exports.generatePdfCotizacion = async (req, res) => {
         for (const prod of cotizacion.productos) {
             doc.text(prod.nombre_producto, itemX, y);
             doc.text(prod.presentacion, presentacionX, y);
-            doc.text(`S/. ${prod.precio_unitario.toFixed(2)}`, precioX, y, { width: 60, align: 'right' });
+            doc.text(`S/. ${Number(prod.precio_unitario).toFixed(2)}`, precioX, y, { width: 60, align: 'right' });
             doc.text(prod.cantidad.toString(), cantidadX, y, { width: 50, align: 'right' });
-            doc.text(`S/. ${prod.descuento_item.toFixed(2)}`, descuentoX, y, { width: 60, align: 'right' });
-            doc.text(`S/. ${prod.subtotal.toFixed(2)}`, subtotalX, y, { width: 60, align: 'right' });
+            doc.text(`S/. ${Number(prod.descuento_item).toFixed(2)}`, descuentoX, y, { width: 60, align: 'right' });
+            doc.text(`S/. ${Number(prod.subtotal).toFixed(2)}`, subtotalX, y, { width: 60, align: 'right' });
             y += 20;
             if (y > doc.page.height - 150) { // Añadir nueva página si se acerca al final
                 doc.addPage();
@@ -191,12 +189,12 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         // Resumen de Totales
         doc.fontSize(10).font('Helvetica-Bold');
-        doc.text(`Subtotal:`, 400, y + 20, { width: 100, align: 'right' });
-        doc.text(`S/. ${cotizacion.subtotal.toFixed(2)}`, 500, y + 20, { width: 60, align: 'right' });
-        doc.text(`Descuento Total:`, 400, y + 35, { width: 100, align: 'right' });
-        doc.text(`S/. ${cotizacion.descuento_total.toFixed(2)}`, 500, y + 35, { width: 60, align: 'right' });
+        doc.text(`Subtotal:`, 400, y + 20, { align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, 500, y + 20, { width: 60, align: 'right' });
+        doc.text(`Descuento Total:`, 400, y + 35, { align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.descuento_total).toFixed(2)}`, 500, y + 35, { width: 60, align: 'right' });
         doc.fontSize(12).text(`TOTAL:`, 400, y + 50, { width: 100, align: 'right' });
-        doc.text(`S/. ${cotizacion.total.toFixed(2)}`, 500, y + 50, { width: 60, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.total).toFixed(2)}`, 500, y + 50, { width: 60, align: 'right' });
         doc.font('Helvetica');
         doc.moveDown(2);
 
@@ -205,6 +203,11 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.text('Precios sujetos a cambio.', 50, doc.page.height - 55);
 
         doc.end();
+
+        // Liberar la conexión solo después de que el stream del PDF haya finalizado
+        doc.on('finish', () => {
+            if (connection) connection.release();
+        });
 
     } catch (error) {
         if (connection) connection.release();
