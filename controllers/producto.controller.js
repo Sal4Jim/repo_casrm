@@ -7,7 +7,8 @@ exports.getProducts = (req, res) => {
   const query = `
     SELECT p.*, c.nombre AS categoria_nombre
     FROM productos p
-    JOIN categorias c ON p.categoria_id = c.categoria_id
+    LEFT JOIN categorias c ON p.categoria_id = c.categoria_id
+    WHERE p.activo = 1
     ORDER BY p.producto_id;
   `;
   pool.execute(query, (err, results) => {
@@ -24,10 +25,10 @@ exports.createProduct = (req, res) => {
   const { nombre, precio_compra, precio_venta, stock, categoria_id, presentacion } = req.body;
 
   const query = `
-    INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion)
-    VALUES (?, ?, ?, ?, ?, ?);
+    INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion, activo)
+    VALUES (?, ?, ?, ?, ?, ?, 1);
   `;
-  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion];
+  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion]; // El '1' para activo ya está en la query
 
   pool.execute(query, values, (err, result) => {
     if (err) {
@@ -41,7 +42,8 @@ exports.createProduct = (req, res) => {
       precio_venta,
       stock,
       categoria_id,
-      presentacion
+      presentacion,
+      activo: 1
     };
     res.status(201).json(nuevoProducto);
   });
@@ -74,10 +76,11 @@ exports.updateProduct = (req, res) => {
 // Eliminar producto
 exports.deleteProduct = (req, res) => {
   const { id } = req.params;
-
-  const query = 'DELETE FROM productos WHERE producto_id = ?';
-
-  pool.execute(query, [id], (err, result) => {
+  
+  // En lugar de DELETE, hacemos un UPDATE para marcarlo como inactivo (soft delete)
+  const query = 'UPDATE productos SET activo = 0 WHERE producto_id = ?';
+  
+  pool.execute(query, [id], (err, result) => { 
     if (err) {
       console.error('Error al eliminar producto:', err);
       return res.status(500).json({ error: 'Error al eliminar producto' });
@@ -85,6 +88,7 @@ exports.deleteProduct = (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
-    res.json({ message: 'Producto eliminado correctamente' });
+    // Cambiamos el mensaje para reflejar la acción real
+    res.json({ message: 'Producto desactivado correctamente' });
   });
 };

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASRM - Cotizar Venta</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome (íconos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fuente Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Choices.js (para selects mejorados) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/cotizar-venta.css">
+</head>
+<body>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-ice-cream ice-cream-icon"></i> CASRM
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between align-items-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="gestion-productos.html">Gestionar Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-clientes.html">Gestionar Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="gestion-gastos.html">Gestionar Gastos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="cotizar-venta.html">Cotizar Venta</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container mb-5">
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> Generar Cotización</h4>
+            </div>
+
+            <div class="card-body">
+                <!-- Sección: Datos del Cliente -->
+                <h5 class="mb-3"><i class="fas fa-user me-2"></i> Datos del Cliente</h5>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteSearch" class="form-label">Buscar Cliente Existente:</label>
+                        <select id="clienteSearch" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteNombre" class="form-label">Nombre/Razón Social*</label>
+                        <input type="text" class="form-control" id="clienteNombre" placeholder="Nombre completo o razón social">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteRuc" class="form-label">RUC*</label>
+                        <input type="text" class="form-control" id="clienteRuc" placeholder="Número de RUC">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteDireccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="clienteDireccion" placeholder="Dirección del cliente">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteTelefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="clienteTelefono" placeholder="Número de teléfono">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="clienteEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="clienteEmail" placeholder="Correo electrónico">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Sección: Búsqueda y Detalle de Productos -->
+                <h5 class="mb-3"><i class="fas fa-boxes me-2"></i> Productos de la Cotización</h5>
+                <div class="row mb-4">
+                    <div class="col-md-8 mb-3">
+                        <label for="productoSearch" class="form-label">Buscar y Añadir Producto:</label>
+                        <select id="productoSearch" class="form-select"></select>
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Presentación</th>
+                                <th>Precio Unitario</th>
+                                <th>Cantidad</th>
+                                <th>Descuento (Item)</th>
+                                <th>Subtotal</th>
+                                <th class="actions-column">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productosCotizacionTable">
+                            <!-- Filas de productos se añadirán aquí dinámicamente -->
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+                                    No hay productos en la cotización
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Sección: Observaciones -->
+                <div class="mb-4">
+                    <label for="observaciones" class="form-label fw-bold"><i class="fas fa-sticky-note me-2"></i>Observaciones Adicionales</label>
+                    <textarea class="form-control" id="observaciones" rows="3" placeholder="Añadir notas o condiciones especiales para esta cotización..."></textarea>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Sección: Resumen y Totales -->
+                <h5 class="mb-3"><i class="fas fa-calculator me-2"></i> Resumen de la Cotización</h5>
+                <div class="row justify-content-end">
+                    <div class="col-md-5">
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="text-end fw-bold">Subtotal:</td>
+                                    <td class="text-end">S/. <span id="resumenSubtotal">0.00</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-end fw-bold">Descuento Total:</td>
+                                    <td class="text-end">S/. <span id="resumenDescuentoTotal">0.00</span></td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td class="text-end fw-bold">TOTAL:</td>
+                                    <td class="text-end">S/. <span id="resumenTotal">0.00</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button id="btnGuardarDescargarPdf" class="btn btn-success btn-lg" disabled>
+                        <i class="fas fa-save me-2"></i> Guardar y Descargar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Toasts -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>
+
+    <!-- =============== SECCIÓN: PIE DE PÁGINA =============== -->
+    <footer class="text-center p-3 mt-5">
+        <div class="container">
+            <p class="mb-0">© 2025 CASRM - Sistema de Gestión para Productos de Heladería</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- Bootstrap JS (obligatorio) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SweetAlert2 (para confirmaciones) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Choices.js (para selects mejorados) -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Axios (para peticiones HTTP) -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Tu script personalizado -->
+    <script src="js/cotizar-venta.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+/*
+   =========================================================
+   VARIABLES DE COLOR - SUAVES Y PROFESIONALES
+   =========================================================
+*/
+:root {
+    /* Fondo general del cuerpo de la página */
+    --bg-body: #f8f9fa;
+
+    /* Fondo de las tarjetas (cards) */
+    --bg-card: #ffffff;
+
+    /* Degradado para la barra de navegación (navbar) */
+    --bg-navbar: linear-gradient(135deg, #4a6fa5, #3a5a80);
+
+    /* Color principal del texto */
+    --text-primary: #2d3748;
+
+    /* Color secundario del texto (menos énfasis) */
+    --text-secondary: #718096;
+
+    /* Texto dentro de la barra de navegación (siempre blanco) */
+    --text-navbar: #ffffff;
+
+    /* Color de bordes suaves */
+    --border-color: #e2e8f0;
+    --border-color-dark: #cbd5e0; /* Bordes ligeramente más oscuros */
+
+    /* Colores para botones primarios */
+    --btn-primary-bg: #4a6fa5;
+    --btn-primary-bg-hover: #3a5a80;
+
+    /* Colores para botones secundarios */
+    --btn-secondary-bg: #a0aec0;
+    --btn-secondary-bg-hover: #718096;
+
+    /* Fondos para badges (etiquetas) */
+    --badge-primary-bg: #4a6fa5;
+    --badge-dark-bg: #4a5568;
+
+    /* Fondo de encabezados de tabla */
+    --table-header-bg: #f1f5f9;
+
+    /* Colores de advertencia */
+    --stock-warning: #e53e3e; /* Rojo para stock agotado */
+    --price-warning-bg: rgba(234, 179, 8, 0.15); /* Fondo amarillento para precios sospechosos */
+    --stock-row-bg: rgba(229, 62, 62, 0.08); /* Fondo rojizo muy suave para filas sin stock */
+
+    /* Estilos del pie de página */
+    --footer-bg: #2d3748;
+    --footer-text: #e2e8f0;
+
+    /* Estilos para campos de entrada (inputs) */
+    --input-bg: #ffffff;
+    --input-border: #e2e8f0;
+    --input-text: #2d3748;
+    --input-placeholder: #a0aec0;
+}
+
+/*
+   =========================================================
+   ESTILOS GENERALES DEL CUERPO DE LA PÁGINA
+   =========================================================
+*/
+body {
+    font-family: 'Poppins', sans-serif; /* Fuente moderna y legible */
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    padding-top: 80px; /* Espacio para navbar fija */
+    margin: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/*
+   =========================================================
+   ESTILOS DE LA BARRA DE NAVEGACIÓN (NAVBAR)
+   =========================================================
+*/
+.navbar {
+    background: var(--bg-navbar);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Sombra sutil */
+    transition: background 0.3s ease;
+}
+
+/* Texto del logo y enlaces de navegación */
+.navbar-brand,
+.navbar .nav-link {
+    color: var(--text-navbar) !important;
+    font-weight: 500;
+}
+
+/* Ícono del logo (helado) */
+.navbar-brand i {
+    color: #f6e05e; /* Amarillo suave */
+    margin-right: 0.5rem;
+}
+
+/* Enlace activo en el menú */
+.navbar .nav-link.active {
+    font-weight: 600;
+    color: #f6e05e !important;
+    background-color: rgba(255, 255, 255, 0.1); /* Fondo semitransparente */
+    border-radius: 5px;
+}
+
+/* Efecto hover en enlaces */
+.navbar .nav-link:hover {
+    color: #f6e05e !important;
+}
+
+/*
+   =========================================================
+   ESTILOS DE LAS TARJETAS (CARDS)
+   =========================================================
+*/
+.card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); /* Sombra suave */
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.2rem 1rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/*
+   =========================================================
+   ESTILOS DE BOTONES
+   =========================================================
+*/
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-bg-hover);
+    border-color: var(--btn-primary-bg-hover);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/*
+   =========================================================
+   ESTILOS DE LA TABLA DE PRODUCTOS
+   =========================================================
+*/
+.table {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-collapse: collapse;
+}
+
+.table th {
+    background-color: var(--table-header-bg);
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color-dark);
+    padding: 12px 10px;
+}
+
+.table td {
+    border-color: var(--border-color);
+    vertical-align: middle;
+    padding: 12px 10px;
+}
+
+/* Efecto hover en filas de la tabla */
+.table-hover tbody tr:hover {
+    background-color: rgba(74, 111, 165, 0.08); /* Azul muy suave */
+}
+
+/* Columna de acciones para botones */
+.actions-column {
+    width: 100px; /* Ancho fijo para alineación */
+    text-align: center;
+}
+
+/*
+   =========================================================
+   ESTILOS PARA SOBRESCRIBIR CHOICES.JS (SELECTS DE BÚSQUEDA)
+   =========================================================
+*/
+.choices {
+    margin-bottom: 0;
+}
+
+.choices__inner {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    padding: 0.375rem 0.375rem;
+    font-size: 1rem;
+    min-height: 38px; /* Ajustar para Bootstrap form-control */
+}
+
+.choices__input {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
+
+/*
+   =========================================================
+   ESTILOS DEL PIE DE PÁGINA (FOOTER)
+   =========================================================
+*/
+footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
