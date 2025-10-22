@@ -16,11 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let categorias = [];
     let productos = [];
-
-    // Instancia de Choices.js (si está disponible)
     let choicesInstance = null;
 
-    // === FUNCIÓN PARA MOSTRAR NOTIFICACIONES TOAST ===
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer') || createToastContainer();
 
@@ -47,13 +44,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let container = document.createElement('div');
         container.id = 'toastContainer';
         container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '1090'; // Asegurar que esté sobre los modales
+        container.style.zIndex = '1090'; 
         document.body.appendChild(container);
         return container;
     }
 
 
-    // Cargar categorías desde la API
     function cargarCategorias() {
         fetch('/api/categorias')
             .then(response => response.json())

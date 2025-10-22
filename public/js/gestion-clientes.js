@@ -1,25 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Variables globales para paginación
     let currentPage = 1;
     const itemsPerPage = 5;
 
-    // === CARGAR CLIENTES AL INICIAR (solo una vez con notificación) ===
+ 
     cargarClientes(1, true);
 
-    // === BOTÓN: Guardar cliente ===
     const btnGuardar = document.getElementById('btnGuardar');
     if (btnGuardar) {
         btnGuardar.addEventListener('click', guardarCliente);
     }
 
-    // === BOTÓN: Nuevo cliente (limpiar formulario y resetear botón) ===
+
     const nuevoClienteBtn = document.querySelector('[data-bs-target="#clientModal"]');
     if (nuevoClienteBtn) {
         nuevoClienteBtn.addEventListener('click', function () {
             document.getElementById('clienteForm')?.reset();
             document.getElementById('clienteId').value = '';
 
-            // ✅ Restaurar TÍTULO y BOTÓN a "Nuevo"
             const modalTitle = document.getElementById('modalTitle');
             if (modalTitle) {
                 modalTitle.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Nuevo Cliente';
@@ -30,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // === FUNCIÓN PARA GUARDAR CLIENTE ===
     function guardarCliente() {
         const clienteId = document.getElementById('clienteId')?.value;
         const cliente = {
@@ -51,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function () {
         setButtonLoading(btnGuardar, true);
 
         if (clienteId) {
-            // ✏️ Modo EDICIÓN
             axios.put(`/api/clientes/${clienteId}`, cliente)
                 .then(response => {
                     if (response.data.success) {
@@ -60,8 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
                             if (modal) modal.hide();
                             document.getElementById('clienteForm')?.reset();
-                            document.getElementById('clienteId').value = ''; // Limpiar ID
-                            cargarClientes(currentPage); // Recargar página actual
+                            document.getElementById('clienteId').value = ''; 
+                            cargarClientes(currentPage); 
                         }, 1500);
                     }
                 })
@@ -74,13 +69,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .finally(() => {
                     setButtonLoading(btnGuardar, false);
-                    // Restaurar texto del botón
                     if (btnGuardar) {
                         btnGuardar.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
                     }
                 });
         } else {
-            // ➕ Modo CREACIÓN
             axios.post('/api/clientes', cliente)
                 .then(response => {
                     if (response.data.success) {
@@ -108,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // === ACTUALIZAR TABLA ===
     function actualizarTablaClientes(clientes) {
         const tbody = document.querySelector('#clientsTable tbody');
         if (!tbody) return;
@@ -144,16 +136,14 @@ document.addEventListener('DOMContentLoaded', function () {
                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-info-circle"></i>
                </button>
-               <button class="btn btn-sm btn-warning">
+               <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#addSaleModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-shopping-cart"></i>
                </button>
-            </td>`
-                ;
+            </td>`;
             tbody.appendChild(row);
         });
     }
 
-    // === RENDERIZAR PAGINACIÓN ===
     function renderPagination(totalPages, currentPage) {
         const pagination = document.getElementById('pagination');
         if (!pagination) return;
@@ -162,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (totalPages <= 1) return;
 
-        // Botón "Anterior"
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
         prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Anterior">&laquo;</a>`;
@@ -174,7 +163,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         pagination.appendChild(prevLi);
 
-        // Números de página
         for (let i = 1; i <= totalPages; i++) {
             const li = document.createElement('li');
             li.className = `page-item ${i === currentPage ? 'active' : ''}`;
@@ -186,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function () {
             pagination.appendChild(li);
         }
 
-        // Botón "Siguiente"
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente">&raquo;</a>`;
@@ -199,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function () {
         pagination.appendChild(nextLi);
     }
 
-    // === TOAST ===
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer');
         if (!toastContainer) return;
@@ -227,7 +213,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 4000);
     }
 
-    // === BOTÓN LOADING ===
     function setButtonLoading(button, isLoading) {
         if (!button) return;
         button.innerHTML = isLoading
@@ -236,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function () {
         button.disabled = isLoading;
     }
 
-    // === FUNCIÓN PARA CARGAR CLIENTES CON PAGINACIÓN Y BÚSQUEDA ===
     function cargarClientes(page = 1, showNotification = false, searchTerm = '') {
         currentPage = page;
         console.log(`🔄 Cargando clientes - Página ${page} ${searchTerm ? `(Búsqueda: "${searchTerm}")` : ''}`);
@@ -263,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // === BÚSQUEDA (sin botón "×") ===
     const searchInput = document.querySelector('.search-box input');
     if (searchInput) {
         let searchTimeout;
@@ -277,13 +260,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // === MANEJAR EDICIÓN DE CLIENTE === (¡AHORA DENTRO DEL DOMContentLoaded!)
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.edit-btn')) {
-            const button = e.target.closest('.edit-btn');
-            const clienteId = button.getAttribute('data-cliente-id');
+    let clienteIdParaNotas = null;
+    let notasOriginales = '';
 
-            // Cargar datos del cliente
+    document.addEventListener('click', function (e) {
+        const editBtn = e.target.closest('.edit-btn');
+        const deleteBtn = e.target.closest('.delete-btn');
+        const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
+        const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
+
+        if (editBtn) {
+            const clienteId = editBtn.getAttribute('data-cliente-id');
             axios.get(`/api/clientes/${clienteId}`)
                 .then(response => {
                     if (response.data.success) {
@@ -297,7 +284,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.getElementById('email').value = cliente.email || '';
                         document.getElementById('agencia').value = cliente.agencia || '';
 
-                        // ✅ Cambiar TÍTULO y BOTÓN a "Editar"
                         const modalTitle = document.getElementById('modalTitle');
                         if (modalTitle) {
                             modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Cliente';
@@ -310,16 +296,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => {
                     showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar cliente', 'error');
                 });
+            return;
         }
-    });
-    // === MANEJAR ELIMINACIÓN DE CLIENTE ===
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.delete-btn')) {
-            const button = e.target.closest('.delete-btn');
-            const clienteId = button.getAttribute('data-cliente-id');
-            const clienteNombre = button.closest('tr').querySelector('td:first-child').textContent.trim();
 
-            // Confirmación con SweetAlert2
+        if (deleteBtn) {
+            const clienteId = deleteBtn.getAttribute('data-cliente-id');
+            const clienteNombre = deleteBtn.closest('tr').querySelector('td:first-child').textContent.trim();
+
             Swal.fire({
                 title: '¿Estás seguro?',
                 html: `Vas a eliminar al cliente <strong>${clienteNombre}</strong>.<br>Esta acción no se puede deshacer.`,
@@ -330,12 +313,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ✅ Solo eliminar si el usuario confirma
                     axios.delete(`/api/clientes/${clienteId}`)
                         .then(response => {
                             if (response.data.success) {
                                 showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> eliminado exitosamente`, 'success');
-                                cargarClientes(currentPage); // Recargar la tabla
+                                cargarClientes(currentPage);
                             }
                         })
                         .catch(error => {
@@ -349,22 +331,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
                 }
             });
-
-
+            return;
         }
-    })
-    // === MANEJAR DETALLE DE CLIENTE ===
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('[data-bs-target="#customerDetailModal"]')) {
-            const button = e.target.closest('[data-bs-target="#customerDetailModal"]');
-            const clienteId = button.getAttribute('data-cliente-id');
+
+        if (detailModalBtn) {
+            const clienteId = detailModalBtn.getAttribute('data-cliente-id');
             if (!clienteId) return;
+
+            clienteIdParaNotas = clienteId;
+            setNotasEditMode(false);
 
             axios.get(`/api/clientes/${clienteId}`)
                 .then(response => {
                     if (response.data.success) {
                         const cliente = response.data.cliente || {};
-
                         const setField = (id, value) => {
                             const el = document.getElementById(id);
                             if (el) el[el.tagName === 'TEXTAREA' ? 'value' : 'textContent'] = (value !== undefined && value !== null && String(value).trim() !== '') ? value : (el.tagName === 'TEXTAREA' ? '' : '-');
@@ -376,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         setField('detail-telefono', cliente.telefono);
                         setField('detail-email', cliente.email);
                         setField('detail-agencia', cliente.agencia);
-                        setField('detail-notas', cliente.notas); 
+                        setField('detail-notas', cliente.notas);
                     } else {
                         showToast('<i class="fas fa-exclamation-triangle me-2"></i> No se encontraron datos del cliente', 'error');
                     }
@@ -384,19 +364,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => {
                     showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar datos del cliente', 'error');
                 });
+            return;
         }
-    });
-    // === MANEJAR EDICIÓN DE NOTAS EN LÍNEA ===
-    let clienteIdParaNotas = null; // Para recordar qué cliente se está editando
-    let notasOriginales = ''; // Para poder cancelar
 
-    // Cuando se abre el modal de detalle, guarda el ID
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('[data-bs-target="#customerDetailModal"]')) {
-            const button = e.target.closest('[data-bs-target="#customerDetailModal"]');
-            clienteIdParaNotas = button.getAttribute('data-cliente-id');
-            // Al abrir, nos aseguramos de que esté en modo lectura
-            setNotasEditMode(false);
+        if (addSaleModalBtn) {
+            e.preventDefault();
+            const clienteId = addSaleModalBtn.getAttribute('data-cliente-id');
+            const saleClientIdInput = document.getElementById('saleClientId');
+            if (saleClientIdInput && clienteId) {
+                saleClientIdInput.value = clienteId;
+            }
+            
+            const addSaleModalEl = document.getElementById('addSaleModal');
+            if (addSaleModalEl) {
+                const modal = bootstrap.Modal.getOrCreateInstance(addSaleModalEl);
+                modal.show();
+            }
         }
     });
 
@@ -426,8 +409,8 @@ document.addEventListener('DOMContentLoaded', function () {
         axios.put(`/api/clientes/${clienteIdParaNotas}/notas`, { notas: nuevasNotas })
             .then(response => {
                 if (response.data.success) {
-                    showToast('<i class="fas fa-check-circle me-2"></i> Nota guardadas exitosamente', 'success');
-                    setNotasEditMode(false); // Volver a modo lectura
+                    showToast('<i class="fas fa-check-circle me-2"></i> Notas guardadas exitosamente', 'success');
+                    setNotasEditMode(false); 
                 }
             })
             .catch(error => {
@@ -435,8 +418,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
             });
     });
-
-    // Función auxiliar para cambiar entre modo edición y lectura
     function setNotasEditMode(isEditing) {
         const notasTextarea = document.getElementById('detail-notas');
         const btnEditar = document.getElementById('btnEditarNota');
