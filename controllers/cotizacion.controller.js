@@ -4,9 +4,10 @@ const PDFDocument = require('pdfkit');
 // --- Configuración de la Empresa para el PDF ---
 const COMPANY_INFO = {
     name: 'CASRM',
-    address: 'CAL.LLOQUE YUPANQUI NRO. 302 URB. CHICAGO, Trujillo, Perú',
-    phone: '+51 932 142 279',
-    ruc: '20609736811'
+    address: 'Cal. Lloque Yupanqui Nro. 302 Urb. Chicago, Trujillo, Perú',
+    phone: '+51 940 230 855',
+    ruc: '20609736811',
+    email: 'ventas@casrm.com' // Añadido para más detalle
 };
 
 // POST /api/cotizaciones - Crear una nueva cotización
@@ -21,6 +22,7 @@ exports.createCotizacion = async (req, res) => {
         descuento_total,
         total,
         validez_dias,
+        observaciones, // <-- AÑADIDO
         productos
     } = req.body;
 
@@ -35,8 +37,8 @@ exports.createCotizacion = async (req, res) => {
 
         // 1. Insertar en la tabla `cotizaciones`
         const [cotizacionResult] = await connection.execute(
-            `INSERT INTO cotizaciones (cliente_nombre, cliente_ruc, cliente_direccion, cliente_telefono, cliente_email, subtotal, descuento_total, total, validez_dias)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO cotizaciones (cliente_nombre, cliente_ruc, cliente_direccion, cliente_telefono, cliente_email, subtotal, descuento_total, total, validez_dias, observaciones)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 cliente_nombre,
                 cliente_ruc,
@@ -46,7 +48,8 @@ exports.createCotizacion = async (req, res) => {
                 subtotal,
                 descuento_total,
                 total,
-                validez_dias
+                validez_dias,
+                observaciones || null // <-- AÑADIDO
             ]
         );
 
@@ -119,35 +122,41 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         doc.pipe(res);
 
-        // Encabezado de la empresa
-        doc.fontSize(20).text(COMPANY_INFO.name, { align: 'center' });
-        doc.fontSize(10).text(COMPANY_INFO.address, { align: 'center' });
-        doc.text(`Teléfono: ${COMPANY_INFO.phone} | RUC: ${COMPANY_INFO.ruc}`, { align: 'center' });
-        doc.moveDown();
+        // --- ENCABEZADO  ---
+        // Caja de informacion de la cotizacion de la izquierda
+        const headerY = doc.y;
+        doc.fontSize(22).font('Helvetica-Bold').text(COMPANY_INFO.name, 50, headerY, { align: 'left' });
+        doc.fontSize(10).font('Helvetica').text(COMPANY_INFO.address, { align: 'left' });
+        doc.text(`Email: ${COMPANY_INFO.email}`, { align: 'left' });
+        doc.text(`Tel: ${COMPANY_INFO.phone} | RUC: ${COMPANY_INFO.ruc}`, { align: 'left' });
 
-        // Título de la cotización
-        doc.fontSize(16).text('COTIZACIÓN', { align: 'center' });
-        doc.moveDown();
+        // Caja de información de la cotización a la derecha
+        const boxWidth = 200;
+        const boxX = doc.page.width - boxWidth - 50;
+        doc.rect(boxX, headerY - 10, boxWidth, 80).stroke();
+        doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, headerY, { width: boxWidth, align: 'center' });
+        doc.fontSize(10).font('Helvetica').text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, headerY + 25); // Usar .padStart para formatear el ID
+        doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 40);
+        doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 55);
 
-        // Información de la cotización
-        doc.fontSize(10);
-        doc.text(`Nro. Cotización: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, { align: 'right' });
-        doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, { align: 'right' });
-        doc.moveDown();
+        doc.moveDown(3); // Espacio después del encabezado
 
         // Datos del Cliente
-        doc.fontSize(12).text('Datos del Cliente:', { underline: true });
+        const clientY = doc.y;
+        doc.fillColor('#444').fontSize(11).font('Helvetica-Bold').text('Cotizado a:', 50, clientY); 
+        doc.moveDown(0.5);
         doc.fontSize(10);
-        doc.text(`Nombre/Razón Social: ${cotizacion.cliente_nombre}`);
+        doc.font('Helvetica').fillColor('black');
+        doc.text(`Nombre / Razón Social: ${cotizacion.cliente_nombre}`);
         doc.text(`RUC: ${cotizacion.cliente_ruc}`);
         if (cotizacion.cliente_direccion) doc.text(`Dirección: ${cotizacion.cliente_direccion}`);
-        if (cotizacion.cliente_telefono) doc.text(`Teléfono: ${cotizacion.cliente_telefono}`);
+        if (cotizacion.cliente_telefono) doc.text(`Telefono: ${cotizacion.cliente_telefono}`);
         if (cotizacion.cliente_email) doc.text(`Email: ${cotizacion.cliente_email}`);
-        doc.moveDown();
+        doc.moveDown(3);
 
         // Tabla de Productos
         const tableTop = doc.y;
-        const itemX = 50;
+        const itemX = 55;
         const presentacionX = 150;
         const precioX = 280;
         const cantidadX = 350;
@@ -155,7 +164,7 @@ exports.generatePdfCotizacion = async (req, res) => {
         const subtotalX = 500;
 
         doc.fontSize(10).font('Helvetica-Bold');
-        doc.text('Producto', itemX, tableTop);
+        doc.text('Producto', itemX - 5, tableTop);
         doc.text('Presentación', presentacionX, tableTop);
         doc.text('P. Unit.', precioX, tableTop, { width: 60, align: 'right' });
         doc.text('Cant.', cantidadX, tableTop, { width: 50, align: 'right' });
@@ -163,7 +172,7 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.text('Subtotal', subtotalX, tableTop, { width: 60, align: 'right' });
         doc.font('Helvetica');
 
-        doc.moveTo(itemX, tableTop + 15)
+        doc.moveTo(50, tableTop + 15)
            .lineTo(doc.page.width - 50, tableTop + 15)
            .stroke();
 
@@ -176,7 +185,7 @@ exports.generatePdfCotizacion = async (req, res) => {
             doc.text(`S/. ${Number(prod.descuento_item).toFixed(2)}`, descuentoX, y, { width: 60, align: 'right' });
             doc.text(`S/. ${Number(prod.subtotal).toFixed(2)}`, subtotalX, y, { width: 60, align: 'right' });
             y += 20;
-            if (y > doc.page.height - 150) { // Añadir nueva página si se acerca al final
+            if (y > doc.page.height - 180) { // Añadir nueva página si se acerca al final (dejando espacio para footer)
                 doc.addPage();
                 y = 70; // Reiniciar Y para la nueva página
             }
@@ -184,27 +193,44 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         doc.moveTo(itemX, y + 5)
            .lineTo(doc.page.width - 50, y + 5)
-           .stroke();
-        doc.moveDown();
+           .stroke();        
+        y += 15;
+
+        // Mostrar observaciones si existen
+        if (cotizacion.observaciones) {
+            doc.font('Helvetica-Bold').fontSize(10).text('Observaciones:', 50, y); // Título para las observaciones
+            doc.font('Helvetica').fontSize(9).text(cotizacion.observaciones, { width: doc.page.width - 100 });
+            y = doc.y + 15;
+        }
 
         // Resumen de Totales
-        doc.fontSize(10).font('Helvetica-Bold');
-        doc.text(`Subtotal:`, 400, y + 20, { align: 'right' });
-        doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, 500, y + 20, { width: 60, align: 'right' });
-        doc.text(`Descuento Total:`, 400, y + 35, { align: 'right' });
-        doc.text(`S/. ${Number(cotizacion.descuento_total).toFixed(2)}`, 500, y + 35, { width: 60, align: 'right' });
-        doc.fontSize(12).text(`TOTAL:`, 400, y + 50, { width: 100, align: 'right' });
-        doc.text(`S/. ${Number(cotizacion.total).toFixed(2)}`, 500, y + 50, { width: 60, align: 'right' });
+        const totalsLabelX = 350;
+        const totalsValueX = 450;
+        const totalsWidth = 100;
+
+        doc.font('Helvetica').fontSize(10).text('Subtotal:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
+        y += 15;
+        doc.text('Descuento Total:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.descuento_total).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
+        y += 20;
+        doc.font('Helvetica-Bold').fontSize(12).text('TOTAL:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.total).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
         doc.font('Helvetica');
-        doc.moveDown(2);
 
-        // Pie de Página (Leyendas)
-        doc.fontSize(9).text('Cotización válida por 15 días.', 50, doc.page.height - 70);
-        doc.text('Precios sujetos a cambio.', 50, doc.page.height - 55);
+        // --- PIE DE PÁGINA (Ahora se posiciona dinámicamente) ---
+        // Si el contenido de los totales deja menos de 100px de espacio al final, se añade una nueva página.
+        if (doc.y > doc.page.height - 100) {
+            doc.addPage();
+            y = doc.y; 
+        }
 
+        const finalY = doc.page.height - 80;
+        doc.moveTo(50, finalY).lineTo(doc.page.width - 50, finalY).stroke(); // Línea horizontal
+        doc.fontSize(6).font('Helvetica')
+           .text('Precios sujetos a cambio sin previo aviso después de la fecha de vencimiento.', 50, finalY + 10);
         doc.end();
 
-        // Liberar la conexión solo después de que el stream del PDF haya finalizado
         doc.on('finish', () => {
             if (connection) connection.release();
         });

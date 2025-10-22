@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const resumenTotalEl = document.getElementById('resumenTotal');
 
     const btnGuardarDescargarPdf = document.getElementById('btnGuardarDescargarPdf');
+    const observacionesEl = document.getElementById('observaciones');
 
     // --- Variables de estado ---
     let clientesChoices;
@@ -135,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cargar productos para el autocompletado
     productoSearchEl.addEventListener('search', async function (event) {
         const searchTerm = event.detail.value;
-        if (searchTerm.length < 1) {
+        if (searchTerm.length < 1 && productosDisponibles.length > 0) { // No buscar si está vacío, a menos que sea la primera vez
             productosChoices.clearChoices();
             return;
         }
@@ -311,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
             descuento_total: parseFloat(resumenDescuentoTotalEl.textContent),
             total: parseFloat(resumenTotalEl.textContent),
             validez_dias: 15, // Valor por defecto
+            observaciones: observacionesEl.value.trim(), // <-- AÑADIDO
             productos: productosEnCotizacion.map(p => ({
                 producto_id: p.producto_id,
                 nombre_producto: p.nombre_producto,
@@ -373,6 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clienteDireccionEl.value = '';
         clienteTelefonoEl.value = '';
         clienteEmailEl.value = '';
+        observacionesEl.value = ''; // <-- AÑADIDO
 
         productoSearchEl.value = '';
         productosChoices.setChoiceByValue(''); // Limpiar selección de Choices.js
