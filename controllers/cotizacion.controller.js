@@ -158,198 +158,163 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         doc.pipe(res);
 
-        // --- Definición de Constantes de Layout ---
-        const MARGEN_IZQUIERDO = 60;
-        const MARGEN_SUPERIOR = 50;
+        // --- 1. ENCABEZADO (LOGO Y CAJA DE COTIZACIÓN) ---
+        const headerY = doc.y;
+        const rightColX = doc.page.width / 2 + 50;
 
-
-        /**
-         * Dibuja el logo y la caja de "COTIZACIÓN".
-         * @returns {number} - La posición Y inicial para la siguiente sección.
-         */
-        const generarEncabezado = () => {
-            let currentLeftY = MARGEN_SUPERIOR;
-            const logoX = 30;
-            const logoWidth = 180; 
-            const logoHeight = 90; 
-            
-            try {
-                if (fs.existsSync(COMPANY_INFO.logoPath)) {
-                    doc.image(COMPANY_INFO.logoPath, logoX, currentLeftY, { 
-                        fit: [logoWidth, logoHeight], 
-                        align: 'center', 
-                        valign: 'center' 
-                    });
-                    currentLeftY += logoHeight + 40;
-                } else {
-                    console.warn(`Logo image not found at path: ${COMPANY_INFO.logoPath}. Skipping logo.`);
-                    doc.fontSize(22).font('Helvetica-Bold').text(COMPANY_INFO.name, MARGEN_IZQUIERDO, currentLeftY);
-                    currentLeftY += 25; 
-                }
-            } catch (e) {
-                console.error('Error loading logo image:', e);
-                doc.fontSize(22).font('Helvetica-Bold').text(COMPANY_INFO.name, MARGEN_IZQUIERDO, currentLeftY);
-                currentLeftY += 25; 
+        // Logo (Izquierda)
+        try {
+            if (fs.existsSync(COMPANY_INFO.logoPath)) {
+                doc.image(COMPANY_INFO.logoPath, 30, headerY, { fit: [180, 90], align: 'center', valign: 'center' });
+            } else {
+                console.warn(`Logo no encontrado en: ${COMPANY_INFO.logoPath}`);
+                doc.fontSize(22).font('Helvetica-Bold').text(COMPANY_INFO.name, 50, headerY);
             }
+        } catch (e) {
+            console.error('Error al cargar el logo:', e);
+            doc.fontSize(22).font('Helvetica-Bold').text(COMPANY_INFO.name, 50, headerY);
+        }
 
-            // --- Encabezado: Caja de Cotización (Arriba Derecha) ---
-            const boxWidth = 200;
-            const boxX = doc.page.width - boxWidth - MARGEN_IZQUIERDO;
-            const boxY = MARGEN_SUPERIOR;
+        // Caja de Cotización (Derecha)
+        const boxWidth = 200;
+        const boxX = doc.page.width - boxWidth - 50;
+        doc.rect(boxX, headerY, boxWidth, 80).stroke();
+        doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, headerY + 5, { width: boxWidth, align: 'center' });
+        doc.fontSize(10).font('Helvetica');
+        doc.text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, headerY + 30);
+        doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
+        doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 60);
 
-            doc.rect(boxX, boxY, boxWidth, 80).stroke();
-            doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, boxY + 5, { width: boxWidth, align: 'center' });
-            doc.fontSize(10).font('Helvetica');
-            doc.text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, boxY + 30);
-            doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, boxX + 10, boxY + 45);
-            doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, boxY + 60);
-            return currentLeftY; 
+        // --- 2. INFORMACIÓN DE EMPRESA Y CLIENTE ---
+        const infoStartY = headerY + 100; // Espacio después del logo/caja
+        let leftY = infoStartY;
+        let rightY = infoStartY;
+
+        // Información de la Empresa (Izquierda)
+        doc.fontSize(10).font('Helvetica-Bold').text(COMPANY_INFO.name, 50, leftY);
+        leftY += 12;
+        doc.font('Helvetica').text(COMPANY_INFO.address, 50, leftY);
+        leftY += 12;
+        doc.text(`Email: ${COMPANY_INFO.email}`, 50, leftY);
+        leftY += 12;
+        doc.text(`Tel: ${COMPANY_INFO.phone} | RUC: ${COMPANY_INFO.ruc}`, 50, leftY);
+
+        // Información del Cliente (Derecha)
+        doc.fillColor('#444').fontSize(11).font('Helvetica-Bold').text('Cotizado a:', rightColX, rightY);
+        rightY += 15;
+        doc.fontSize(10).font('Helvetica').fillColor('black');
+        doc.text(`Nombre / Razón Social: ${cotizacion.cliente_nombre}`, rightColX, rightY, { width: 220 });
+        rightY = doc.y + 2; // Ajustar Y después del texto
+        doc.text(`RUC: ${cotizacion.cliente_ruc}`, rightColX, rightY, { width: 220 });
+        rightY = doc.y + 2;
+        if (cotizacion.cliente_direccion) doc.text(`Dirección: ${cotizacion.cliente_direccion}`, rightColX, rightY, { width: 220 });
+        rightY = doc.y + 2;
+        if (cotizacion.cliente_telefono) doc.text(`Telefono: ${cotizacion.cliente_telefono}`, rightColX, rightY, { width: 220 });
+        rightY = doc.y + 2;
+        if (cotizacion.cliente_email) doc.text(`Email: ${cotizacion.cliente_email}`, rightColX, rightY, { width: 220 });
+
+        // --- 3. TABLA DE PRODUCTOS ---
+        doc.y = Math.max(leftY, rightY) + 30; // Posicionar cursor debajo de la columna más larga
+        const tableTop = doc.y;
+
+        // Definir columnas de la tabla
+        const tableColumns = {
+            producto: { x: 50, width: 140, label: 'Producto' },
+            presentacion: { x: 190, width: 120, label: 'Presentación' },
+            precio: { x: 310, width: 60, align: 'right', label: 'P. Unit.' },
+            cantidad: { x: 370, width: 50, align: 'right', label: 'Cant.' },
+            descuento: { x: 420, width: 60, align: 'right', label: 'Desc.' },
+            subtotal: { x: 480, width: 70, align: 'right', label: 'Subtotal' }
         };
 
-        /**
-         * Dibuja la información de la empresa y del cliente, alineadas.
-         * @param {number} startLeftY - La posición Y donde comienza la info de la empresa.
-         * @returns {number} - La posición Y final después de dibujar ambas columnas.
-         */
-        
-        const generarInformacion = (startLeftY) => {
-            const rightColX = doc.page.width / 2 + 50;
-            const rightColWidth = doc.page.width / 2 - MARGEN_IZQUIERDO - 20;
-
-            let currentRightY = MARGEN_SUPERIOR + 120;
-            
-            // --- Información de la Empresa (Izquierda) ---
-            let companyInfoY = startLeftY - 60;
-            doc.fontSize(10).font('Helvetica-Bold').text(COMPANY_INFO.name, MARGEN_IZQUIERDO, companyInfoY);
-            companyInfoY += 12;
-            doc.font('Helvetica').text(COMPANY_INFO.address, MARGEN_IZQUIERDO, companyInfoY);
-            companyInfoY += 12;
-            doc.text(`Email: ${COMPANY_INFO.email}`, MARGEN_IZQUIERDO, companyInfoY);
-            companyInfoY += 12;
-            doc.text(`Tel: ${COMPANY_INFO.phone} | RUC: ${COMPANY_INFO.ruc}`, MARGEN_IZQUIERDO, companyInfoY);
-
-            // --- Información del Cliente (Derecha) ---
-            doc.fillColor('#444').fontSize(11).font('Helvetica-Bold').text('Cotizado a:', rightColX, currentRightY);
-            currentRightY += 15; 
-            doc.fontSize(10).font('Helvetica').fillColor('black');
-            doc.text(`Nombre / Razón Social: ${cotizacion.cliente_nombre}`, rightColX, currentRightY, { width: rightColWidth });
-            currentRightY += 12;
-            doc.text(`RUC: ${cotizacion.cliente_ruc}`, rightColX, currentRightY, { width: rightColWidth });
-            currentRightY += 12;
-            
-            if (cotizacion.cliente_direccion) {
-                doc.text(`Dirección: ${cotizacion.cliente_direccion}`, rightColX, currentRightY, { width: rightColWidth });
-                currentRightY += 12;
-            }
-            if (cotizacion.cliente_telefono) {
-                doc.text(`Telefono: ${cotizacion.cliente_telefono}`, rightColX, currentRightY, { width: rightColWidth });
-                currentRightY += 12;
-            }
-            if (cotizacion.cliente_email) {
-                doc.text(`Email: ${cotizacion.cliente_email}`, rightColX, currentRightY, { width: rightColWidth });
-                currentRightY += 12;
-            }
-            
-            return Math.max(companyInfoY, currentRightY) + 20; // Retorna la Y más baja de ambas columnas + un espacio
-        };
-
-        /**
-         * Dibuja la tabla de productos (cabecera, filas y líneas).
-         * Maneja los saltos de página.
-         * @param {number} startY - La posición Y donde comienza la tabla.
-         * @returns {number} - La posición Y final después de dibujar la tabla.
-         */
-        const generarTablaItems = (startY) => {
-            const tableTop = startY;
-            const itemX = 55;
-            const presentacionX = 150;
-            const precioX = 280;
-            const cantidadX = 350; 
-            const descuentoX = 420; 
-            const subtotalX = 500; 
-
+        // Función para dibujar la cabecera de la tabla
+        const drawTableHeader = (y) => {
             doc.fontSize(10).font('Helvetica-Bold');
-            doc.text('Producto', itemX - 5, tableTop);
-            doc.text('Presentación', presentacionX, tableTop);
-            doc.text('P. Unit.', precioX, tableTop, { width: 60, align: 'right' });
-            doc.text('Cant.', cantidadX, tableTop, { width: 50, align: 'right' });
-            doc.text('Desc.', descuentoX, tableTop, { width: 60, align: 'right' }); 
-            doc.text('Subtotal', subtotalX, tableTop, { width: 60, align: 'right' }); 
-            doc.font('Helvetica');
-
-            doc.moveTo(50, tableTop + 15).lineTo(doc.page.width - 50, tableTop + 15).stroke();
-
-            let y = tableTop + 30;
-            
-            for (const prod of cotizacion.productos) {
-                doc.text(prod.nombre_producto, itemX, y);
-                doc.text(prod.presentacion, presentacionX, y);
-                doc.text(`S/. ${Number(prod.precio_unitario).toFixed(2)}`, precioX, y, { width: 60, align: 'right' });
-                doc.text(prod.cantidad.toString(), cantidadX, y, { width: 50, align: 'right' });
-                doc.text(`S/. ${Number(prod.descuento_item).toFixed(2)}`, descuentoX, y, { width: 60, align: 'right' });
-                doc.text(`S/. ${Number(prod.subtotal).toFixed(2)}`, subtotalX, y, { width: 60, align: 'right' });
-                y += 20;
-
-                // Control de salto de página
-                if (y > doc.page.height - 180) {
-                    doc.addPage();
-                    y = 70;
-                }
+            for (const colKey in tableColumns) {
+                const col = tableColumns[colKey];
+                doc.text(col.label, col.x, y, { width: col.width, align: col.align || 'left' });
             }
-
-            doc.moveTo(itemX, y + 5).lineTo(doc.page.width - 50, y + 5).stroke();
-            return y + 15;
+            doc.moveTo(50, y + 15).lineTo(doc.page.width - 50, y + 15).stroke();
         };
 
-        /**
-         * Dibuja las observaciones y el resumen de totales.
-         * @param {number} startY - La posición Y donde comienza esta sección.
-         */
-        const generarResumen = (startY) => {
-            let y = startY;
+        // Función para calcular la altura de una fila
+        const calculateRowHeight = (prod) => {
+            // Usar el tamaño de fuente actual para el cálculo
+            doc.fontSize(10).font('Helvetica');
+            const productNameHeight = doc.heightOfString(prod.nombre_producto, { width: tableColumns.producto.width });
+            const presentationHeight = doc.heightOfString(prod.presentacion, { width: tableColumns.presentacion.width });
+            const actualRowContentHeight = Math.max(productNameHeight, presentationHeight);
+            const rowPadding = 10; // Padding vertical para la fila
+            return actualRowContentHeight + rowPadding;
+        };
 
-            if (cotizacion.observaciones) {
-                doc.font('Helvetica-Bold').fontSize(10).text('Observaciones:', 50, y);
-                doc.font('Helvetica').fontSize(9).text(cotizacion.observaciones, { width: doc.page.width - 100 });
-                y = doc.y + 15;
+        // Función para dibujar una fila de la tabla (con cálculo de altura)
+        const drawTableRow = (prod, y, isEven, rowHeight) => {
+            // Dibujar fondo para filas impares (index % 2 !== 0)
+            if (isEven) {
+                doc.fillColor('#f3f4f6') // Color gris claro
+                   .rect(50, y, doc.page.width - 100, rowHeight) // Dibujar rectángulo
+                   .fill(); // Rellenar, sin borde
+                doc.fillColor('black'); // Restablecer color de relleno para el texto
             }
 
-            // Resumen de Totales
-            const totalsLabelX = 350; 
-            const totalsValueX = 450;
-            const totalsWidth = 100;
+            doc.fontSize(10).font('Helvetica');
+            const textY = y + 5; // Pequeño padding superior para el texto
 
-            doc.font('Helvetica').fontSize(10).text('Subtotal:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
-            doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
-            y += 15;
-            doc.text('Descuento Total:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
-            doc.text(`S/. ${Number(cotizacion.descuento_total).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
-            y += 20;
-            doc.font('Helvetica-Bold').fontSize(12).text('TOTAL:', totalsLabelX, y, { width: totalsWidth, align: 'right' });
-            doc.text(`S/. ${Number(cotizacion.total).toFixed(2)}`, totalsValueX, y, { width: totalsWidth, align: 'right' });
-            doc.font('Helvetica');
+            doc.text(prod.nombre_producto, tableColumns.producto.x, textY, { width: tableColumns.producto.width, align: 'left' });
+            doc.text(prod.presentacion, tableColumns.presentacion.x, textY, { width: tableColumns.presentacion.width, align: 'left' });
+            doc.text(`S/. ${Number(prod.precio_unitario).toFixed(2)}`, tableColumns.precio.x, textY, { width: tableColumns.precio.width, align: 'right' });
+            doc.text(prod.cantidad.toString(), tableColumns.cantidad.x, textY, { width: tableColumns.cantidad.width, align: 'right' });
+            doc.text(`S/. ${Number(prod.descuento_item).toFixed(2)}`, tableColumns.descuento.x, textY, { width: tableColumns.descuento.width, align: 'right' });
+            doc.text(`S/. ${Number(prod.subtotal).toFixed(2)}`, tableColumns.subtotal.x, textY, { width: tableColumns.subtotal.width, align: 'right' });
+        };
 
-            if (doc.y > doc.page.height - 100) {
+        drawTableHeader(tableTop);
+        doc.y = tableTop + 25;
+
+        cotizacion.productos.forEach((prod, index) => {
+            const rowHeight = calculateRowHeight(prod);
+
+            // Salto de página si no hay suficiente espacio para la fila actual
+            if (doc.y + rowHeight > doc.page.height - 100) { // -100 para dejar espacio para el pie de página y totales
                 doc.addPage();
+                drawTableHeader(50); // Redibujar cabecera en la nueva página
+                doc.y = 75; // Posicionar cursor debajo de la nueva cabecera
             }
-        };
+            drawTableRow(prod, doc.y, index % 2 !== 0, rowHeight);
+            doc.y += rowHeight; // Avanzar doc.y por la altura real de la fila
+        });
 
-        /**
-         * Dibuja el pie de página fijo en la parte inferior.
-         */
-        const generarPieDePagina = () => {
-            const finalY = doc.page.height - 80;
-            doc.moveTo(50, finalY).lineTo(doc.page.width - 50, finalY).stroke();
-            doc.fontSize(6).font('Helvetica')
-               .text('Precios sujetos a cambio sin previo aviso después de la fecha de vencimiento.', 50, finalY + 10);
-        };
+        doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+        doc.moveDown(2);
 
-        const infoStartY = generarEncabezado();
-        const tableStartY = generarInformacion(infoStartY);
-        const summaryStartY = generarTablaItems(tableStartY);
-        generarResumen(summaryStartY);
-        generarPieDePagina();
-        
+        // --- 4. OBSERVACIONES Y TOTALES ---
+        if (cotizacion.observaciones) {
+            doc.font('Helvetica-Bold').text('Observaciones:', 50, doc.y);
+            doc.font('Helvetica').fontSize(9).text(cotizacion.observaciones, { width: doc.page.width - 100 });
+            doc.moveDown();
+        }
+
+        // Totales (a la derecha)
+        const totalsLabelX = 350;
+        const totalsValueX = 450;
+        const totalsWidth = 100;
+        let totalsY = doc.y < tableTop + 60 ? tableTop + 60 : doc.y; // Asegurar que los totales no se superpongan si la tabla es muy corta
+
+        doc.font('Helvetica').fontSize(10).text('Subtotal:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
+        totalsY += 15;
+        doc.text('Descuento Total:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.descuento_total).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
+        totalsY += 20;
+        doc.font('Helvetica-Bold').fontSize(12).text('TOTAL:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
+        doc.text(`S/. ${Number(cotizacion.total).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
+
+        // --- 5. PIE DE PÁGINA ---
+        const finalY = doc.page.height - 80;
+        doc.moveTo(50, finalY).lineTo(doc.page.width - 50, finalY).stroke();
+        doc.fontSize(6).font('Helvetica').text('Precios sujetos a cambio sin previo aviso después de la fecha de vencimiento.', 50, finalY + 10);
+
         doc.end();
 
         doc.on('finish', () => {
