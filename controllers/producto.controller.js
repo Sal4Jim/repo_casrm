@@ -4,14 +4,24 @@ const { pool } = require('../config/database');
 
 // Obtener todos los productos con nombre de categoría
 exports.getProducts = (req, res) => {
-  const query = `
+  const { search } = req.query;
+  let query = `
     SELECT p.*, c.nombre AS categoria_nombre
     FROM productos p
     LEFT JOIN categorias c ON p.categoria_id = c.categoria_id
-    WHERE p.activo = 1
-    ORDER BY p.producto_id;
   `;
-  pool.execute(query, (err, results) => {
+  const params = [];
+
+  let whereClauses = ['p.activo = 1'];
+  if (search) {
+    whereClauses.push('p.nombre LIKE ?');
+    params.push(`%${search}%`);
+  }
+
+  query += ` WHERE ${whereClauses.join(' AND ')}`;
+  query += ' ORDER BY p.nombre;';
+
+  pool.execute(query, params, (err, results) => {
     if (err) {
       console.error('Error al obtener productos:', err);
       return res.status(500).json({ error: 'Error al obtener productos' });
