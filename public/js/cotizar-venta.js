@@ -98,15 +98,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Rellenar campos del cliente al seleccionar uno
-    clienteSearchEl.addEventListener('change', function (event) {
-        const selectedOption = event.detail.choice;
-        if (selectedOption && selectedOption.data) {
-            const cliente = selectedOption.data;
-            clienteNombreEl.value = cliente.nombre || '';
-            clienteRucEl.value = cliente.ruc || '';
-            clienteDireccionEl.value = cliente.direccion || '';
-            clienteTelefonoEl.value = cliente.telefono || '';
-            clienteEmailEl.value = cliente.email || '';
+        clienteSearchEl.addEventListener('change', async function (event) {
+        const clienteId = event.detail.value;
+
+        if (clienteId) {
+            try {
+                // Hacemos una petición para obtener todos los datos del cliente seleccionado
+                const response = await axios.get(`/api/clientes/${clienteId}`);
+                if (response.data.success) {
+                    const cliente = response.data.cliente;
+                    clienteNombreEl.value = cliente.nombre || '';
+                    clienteRucEl.value = cliente.ruc || '';
+                    clienteDireccionEl.value = cliente.direccion || '';
+                    clienteTelefonoEl.value = cliente.telefono || '';
+                    clienteEmailEl.value = cliente.email || '';
+                }
+            } catch (error) {
+                showToast('Error al cargar los datos completos del cliente.', 'error');
+            }
         } else {
             // Si se deselecciona o se borra, limpiar campos
             clienteNombreEl.value = '';

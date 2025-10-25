@@ -99,7 +99,7 @@ const getAllClientes = (req, res) => {
 
       
       const sql = `
-        SELECT cliente_id, nombre, ruc, ciudad, telefono 
+        SELECT cliente_id, nombre, ruc, ciudad, telefono, direccion, email
         FROM clientes 
         WHERE ? = ''
            OR nombre LIKE ? 
