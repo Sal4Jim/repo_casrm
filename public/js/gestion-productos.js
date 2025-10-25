@@ -16,11 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let categorias = [];
     let productos = [];
-
-    // Instancia de Choices.js (si está disponible)
     let choicesInstance = null;
 
-    // === FUNCIÓN PARA MOSTRAR NOTIFICACIONES TOAST ===
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer') || createToastContainer();
 
@@ -47,13 +44,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let container = document.createElement('div');
         container.id = 'toastContainer';
         container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '1090'; // Asegurar que esté sobre los modales
+        container.style.zIndex = '1090'; 
         document.body.appendChild(container);
         return container;
     }
 
 
-    // Cargar categorías desde la API
     function cargarCategorias() {
         fetch('/api/categorias')
             .then(response => response.json())
@@ -68,8 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function cargarProductos() {
         fetch('/api/productos')
             .then(response => response.json())
-            .then(data => {
-                productos = data;
+            .then(data => { 
+                if (data && data.success && Array.isArray(data.productos)) {
+                    productos = data.productos;
+                }
                 mostrarProductos();
             })
             .catch(err => console.error('Error al cargar productos:', err));
@@ -241,8 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // === LÓGICA PARA ABRIR MODAL EN MODO EDICIÓN ===
     productsTable.addEventListener('click', function(e) {
         const editButton = e.target.closest('button[data-action="edit"]');
-        const deleteButton = e.target.closest('button[data-action="delete"]');
-
         if (editButton) {
             const productId = editButton.dataset.id;
             const productoAEditar = productos.find(p => p.producto_id == productId);
@@ -264,38 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     choicesInstance.setChoiceByValue(productoAEditar.categoria_nombre);
                 }
             }
-        } else if (deleteButton) {
-            const productId = deleteButton.dataset.id;
-            const productName = deleteButton.closest('tr').querySelector('td:first-child').textContent.trim();
-
-            // Confirmación con SweetAlert2
-            Swal.fire({
-                title: '¿Estás seguro?',
-                html: `El producto <strong>${productName}</strong> se desactivará y no aparecerá en la lista.<br>Esta acción se puede revertir desde la base de datos.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, desactivar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/api/productos/${productId}`, {
-                        method: 'DELETE'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Eliminar el producto del array local para que desaparezca de la tabla
-                        productos = productos.filter(p => p.producto_id != productId);
-                        mostrarProductos();
-                        showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${productName}</strong> desactivado.`, 'success');
-                    })
-                    .catch(err => {
-                        console.error('Error al desactivar producto:', err);
-                        showToast('<i class="fas fa-times-circle me-2"></i> Error al desactivar el producto.', 'error');
-                    });
-                }
-            });
         }
     });
 

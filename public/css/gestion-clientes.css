@@ -342,3 +342,20 @@ textarea[readonly] {
   font-family: inherit;
   color: inherit;
 }
+
+/* Estilos para la sección de bonificación */
+.bonificacion-section {
+    background-color: #d4edda; /* Fondo verde claro */
+    border-left: 4px solid #28a745; /* Borde izquierdo verde */
+    transition: all 0.3s ease;
+}
+
+.bonificacion-section h5 {
+    color: #155724; /* Texto verde oscuro */
+}
+
+.bonificacion-activa {
+    border: 2px solid #28a745; /* Borde más pronunciado cuando está activa */
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.3); /* Sombra suave */
+    background-color: #e6ffe6; /* Fondo aún más claro cuando está activa */
+}

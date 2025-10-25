@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Simulación de gastos como si vinieran de la base de datos
     let gastos = [
         { descripcion: "Compra de azúcar y leche", monto: 450.00, fecha: "24/05/2025", persona: "María Gonzales" },
         { descripcion: "Reparación congelador", monto: 850.00, fecha: "22/05/2025", persona: "Roberto Méndez" },
@@ -25,12 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const mostrarInfo = document.querySelector('.text-sm.text-gray-700');
 
     function mostrarGastos() {
-        // Calcular índices
         const inicio = (paginaActual - 1) * gastosPorPagina;
         const fin = inicio + gastosPorPagina;
         const gastosPagina = gastos.slice(inicio, fin);
 
-        // Renderizar filas
+
         tablaBody.innerHTML = '';
         gastosPagina.forEach(gasto => {
             const fila = document.createElement('tr');
@@ -52,17 +50,15 @@ document.addEventListener('DOMContentLoaded', function() {
             tablaBody.appendChild(fila);
         });
 
-        // Actualizar info de paginación
         const total = gastos.length;
         const desde = total === 0 ? 0 : inicio + 1;
         const hasta = Math.min(fin, total);
         mostrarInfo.innerHTML = `Mostrando <span class="font-medium">${desde}</span> a <span class="font-medium">${hasta}</span> de <span class="font-medium">${total}</span> gastos`;
 
-        // Renderizar controles de paginación
+
         const totalPaginas = Math.ceil(total / gastosPorPagina);
         paginacionDiv.innerHTML = '';
 
-        // Botón anterior
         const btnAnterior = document.createElement('a');
         btnAnterior.href = "javascript:void(0)";
         btnAnterior.className = "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50";
@@ -75,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         paginacionDiv.appendChild(btnAnterior);
 
-        // Números de página
         for (let i = 1; i <= totalPaginas; i++) {
             const btnPagina = document.createElement('a');
             btnPagina.href = "javascript:void(0)";
