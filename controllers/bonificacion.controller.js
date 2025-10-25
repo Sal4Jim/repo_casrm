@@ -38,10 +38,10 @@ exports.getBonificacionesActivas = (req, res) => {
 
 // POST /api/bonificaciones - Crear una nueva bonificación desde un producto
 exports.createBonificacion = async (req, res) => {
-    const { producto_id, stock, presentacion } = req.body;
+    const { producto_id, stock } = req.body;
 
-    if (!producto_id || stock === undefined || !presentacion) {
-        return res.status(400).json({ error: 'Faltan campos requeridos: producto_id, stock y presentacion.' });
+    if (!producto_id || stock === undefined) {
+        return res.status(400).json({ error: 'Faltan campos requeridos: producto_id y stock.' });
     }
 
     try {
@@ -56,7 +56,7 @@ exports.createBonificacion = async (req, res) => {
         // 2. Crear la nueva bonificación
         const insertQuery = `
             INSERT INTO bonificaciones (producto_id, nombre, categoria_id, valor_bonif, stock, presentacion, activo)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
         `;
         const values = [
             producto_id,
@@ -64,8 +64,7 @@ exports.createBonificacion = async (req, res) => {
             productoOriginal.categoria_id,
             productoOriginal.precio_venta, // Copia el precio de venta como valor
             stock,
-            presentacion,
-            1 // Activo por defecto
+            productoOriginal.presentacion, // Copia la presentación del producto
         ];
 
         const [result] = await pool.promise().execute(insertQuery, values);
@@ -82,7 +81,7 @@ exports.createBonificacion = async (req, res) => {
             categoria_nombre: categoria_nombre,
             valor_bonif: productoOriginal.precio_venta,
             stock,
-            presentacion,
+            presentacion: productoOriginal.presentacion,
             activo: 1,
         };
 
@@ -97,12 +96,13 @@ exports.createBonificacion = async (req, res) => {
 // PUT /api/bonificaciones/:id - Actualizar una bonificación
 exports.updateBonificacion = (req, res) => {
     const { id } = req.params;
-    const { stock, presentacion, activo } = req.body;
+    const { stock, presentacion, activo, valor_bonif } = req.body;
 
     // Construir la consulta dinámicamente
     let fields = [];
     let values = [];
     if (stock !== undefined) { fields.push('stock = ?'); values.push(stock); }
+    if (valor_bonif !== undefined) { fields.push('valor_bonif = ?'); values.push(valor_bonif); }
     if (presentacion !== undefined) { fields.push('presentacion = ?'); values.push(presentacion); }
     if (activo !== undefined) { fields.push('activo = ?'); values.push(activo); }
 

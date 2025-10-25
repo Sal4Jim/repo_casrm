@@ -3,12 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const bonificacionesTable = document.getElementById('bonificacionesTable');
     const pagination = document.getElementById('pagination');
     const btnSaveBonificacion = document.getElementById('btnSaveBonificacion');
-    const btnUpdateStock = document.getElementById('btnUpdateStock');
+    const btnUpdateBonificacion = document.getElementById('btnUpdateBonificacion');
+    const btnExportarBonificacionesCSV = document.getElementById('btnExportarBonificacionesCSV');
+    const totalBonificacionesValorEl = document.getElementById('totalBonificacionesValor');
     const productoBaseSelect = document.getElementById('productoBase');
 
     // Modales de Bootstrap
     const bonificacionModal = new bootstrap.Modal(document.getElementById('bonificacionModal'));
-    const stockModal = new bootstrap.Modal(document.getElementById('stockModal'));
+    const editBonificacionModal = new bootstrap.Modal(document.getElementById('editBonificacionModal'));
+
 
     let bonificaciones = [];
     let productos = [];
@@ -37,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             productos = productosData;
             
             renderizarBonificaciones();
+            calcularYMostrarValorTotal();
             inicializarSelectProductos();
         } catch (error) {
             console.error("Error al cargar datos iniciales:", error);
@@ -83,8 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <td>${estado}</td>
                 <td>
-                    <button class="btn btn-sm btn-info me-1" data-action="stock" data-id="${b.bonificacion_id}" title="Ajustar Stock">
-                        <i class="fas fa-cubes"></i>
+                    <button class="btn btn-sm btn-primary me-1" data-action="edit" data-id="${b.bonificacion_id}" title="Editar Bonificación">
+                        <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-danger" data-action="delete" data-id="${b.bonificacion_id}" title="Eliminar">
                         <i class="fas fa-trash"></i>
@@ -100,10 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Crear nueva bonificación
     btnSaveBonificacion.addEventListener('click', async () => {
         const producto_id = productoChoices.getValue(true);
-        const presentacion = document.getElementById('bonificacionPresentacion').value.trim();
         const stock = document.getElementById('bonificacionStock').value;
 
-        if (!producto_id || !presentacion || stock === '') {
+        if (!producto_id || stock === '') {
             showToast('Por favor, complete todos los campos.', 'error');
             return;
         }
@@ -112,13 +115,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('/api/bonificaciones', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ producto_id, presentacion, stock: Number(stock) })
+                body: JSON.stringify({ producto_id, stock: Number(stock) })
             });
 
             if (!response.ok) throw new Error('Error al crear la bonificación.');
 
             const nuevaBonificacion = await response.json();
             bonificaciones.unshift(nuevaBonificacion); // Añadir al inicio
+            
             renderizarBonificaciones();
             bonificacionModal.hide();
             // Limpiamos el formulario y el selector de Choices.js sin reinicializarlo
@@ -126,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
             productoChoices.clearInput();
             productoChoices.setChoiceByValue(''); // Resetea la selección visual
             showToast('Bonificación creada exitosamente.', 'success');
+            calcularYMostrarValorTotal();
         } catch (error) {
             console.error(error);
             showToast(error.message, 'error');
@@ -140,13 +145,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const action = target.dataset.action;
         const id = target.dataset.id;
 
-        if (action === 'stock') {
+        if (action === 'edit') {
             const bonificacion = bonificaciones.find(b => b.bonificacion_id == id);
             if (bonificacion) {
-                document.getElementById('stockBonificacionId').value = id;
-                document.getElementById('stockProductName').textContent = bonificacion.nombre;
-                document.getElementById('nuevoStock').value = bonificacion.stock;
-                stockModal.show();
+                document.getElementById('editBonificacionId').value = id;
+                document.getElementById('editBonificacionName').textContent = bonificacion.nombre;
+                document.getElementById('editBonificacionPresentacion').value = bonificacion.presentacion;
+                document.getElementById('editBonificacionStock').value = bonificacion.stock;
+                document.getElementById('editBonificacionValor').value = Number(bonificacion.valor_bonif).toFixed(2);
+                editBonificacionModal.show();
             }
         }
 
@@ -155,13 +162,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Actualizar stock
-    btnUpdateStock.addEventListener('click', async () => {
-        const id = document.getElementById('stockBonificacionId').value;
-        const stock = document.getElementById('nuevoStock').value;
+    // Actualizar bonificación (presentación y valor)
+    btnUpdateBonificacion.addEventListener('click', async () => {
+        const id = document.getElementById('editBonificacionId').value;
+        const presentacion = document.getElementById('editBonificacionPresentacion').value.trim();
+        const stock = document.getElementById('editBonificacionStock').value;
+        const valor_bonif = document.getElementById('editBonificacionValor').value;
 
-        if (stock === '' || Number(stock) < 0) {
-            showToast('El nuevo stock no puede estar vacío o ser negativo.', 'error');
+        if (!presentacion || valor_bonif === '' || Number(valor_bonif) < 0 || stock === '' || Number(stock) < 0) {
+            showToast('Todos los campos son requeridos y los valores numéricos no pueden ser negativos.', 'error');
             return;
         }
 
@@ -169,18 +178,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`/api/bonificaciones/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ stock: Number(stock) })
+                body: JSON.stringify({ presentacion, stock: Number(stock), valor_bonif: Number(valor_bonif) })
             });
 
-            if (!response.ok) throw new Error('Error al actualizar el stock.');
+            if (!response.ok) throw new Error('Error al actualizar la bonificación.');
 
             const index = bonificaciones.findIndex(b => b.bonificacion_id == id);
             if (index !== -1) {
+                bonificaciones[index].presentacion = presentacion;
                 bonificaciones[index].stock = Number(stock);
+                bonificaciones[index].valor_bonif = Number(valor_bonif);
             }
             renderizarBonificaciones();
-            stockModal.hide();
-            showToast('Stock actualizado correctamente.', 'success');
+            editBonificacionModal.hide();
+            showToast('Bonificación actualizada correctamente.', 'success');
+            calcularYMostrarValorTotal();
         } catch (error) {
             console.error(error);
             showToast(error.message, 'error');
@@ -209,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     bonificaciones = bonificaciones.filter(b => b.bonificacion_id != id);
                     renderizarBonificaciones();
+                    calcularYMostrarValorTotal();
                     showToast('Bonificación eliminada.', 'success');
                 } catch (error) {
                     console.error(error);
@@ -218,6 +231,57 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // --- Cálculos Adicionales ---
+    function calcularYMostrarValorTotal() {
+        const valorTotalGeneral = bonificaciones.reduce((total, b) => {
+            return total + (b.stock * b.valor_bonif);
+        }, 0);
+        totalBonificacionesValorEl.textContent = `S/. ${valorTotalGeneral.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // --- Exportar a CSV ---
+    function exportarBonificacionesACSV() {
+        if (bonificaciones.length === 0) {
+            showToast('No hay bonificaciones para exportar.', 'error');
+            return;
+        }
+
+        // Encabezados del CSV
+        const headers = ['Nombre', 'Categoría', 'Presentación', 'Stock', 'Valor Unitario (S/.)', 'Valor Total (S/.)', 'Estado'];
+
+        // Convertir datos a filas de CSV
+        const rows = bonificaciones.map(b => {
+            const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
+            const estado = b.activo ? 'Activo' : 'Inactivo';
+
+            return [
+                `"${b.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
+                `"${b.categoria_nombre || 'N/A'}"`,
+                `"${b.presentacion.replace(/"/g, '""')}"`,
+                b.stock,
+                Number(b.valor_bonif).toFixed(2),
+                valorTotal,
+                estado
+            ].join(',');
+        });
+
+        // Unir encabezados y filas
+        const csvContent = [headers.join(','), ...rows].join('\n');
+
+        // Crear un Blob y enlace de descarga
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `bonificaciones_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     // Iniciar la carga de datos
     cargarDatosIniciales();
+
+    // Evento para el botón de exportar
+    btnExportarBonificacionesCSV.addEventListener('click', exportarBonificacionesACSV);
 });
