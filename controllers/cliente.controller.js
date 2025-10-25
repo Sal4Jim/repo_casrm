@@ -223,7 +223,7 @@ const getClienteById = (req, res) => {
 
     const sql = `
       SELECT 
-        c.*, 
+        c.cliente_id, c.nombre, c.ruc, c.ciudad, c.telefono, c.direccion, c.email, c.agencia,
         n.descripcion AS notas 
       FROM clientes c
       LEFT JOIN notas n ON c.nota_id = n.nota_id

@@ -357,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         setField('detail-telefono', cliente.telefono);
                         setField('detail-email', cliente.email);
                         setField('detail-agencia', cliente.agencia);
+                        setField('detail-direccion', cliente.direccion);
                         setField('detail-notas', cliente.notas);
 
                         cargarHistorialCompras(clienteId);
