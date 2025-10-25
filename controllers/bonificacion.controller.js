@@ -1,18 +1,18 @@
-// controllers/bonificacion.controller.js
 const { pool } = require('../config/database');
 
-// GET /api/bonificaciones - Obtener todas las bonificaciones
-exports.getBonificaciones = (req, res) => {
+// Obtener todas las bonificaciones activas y con stock
+exports.getActiveBonificaciones = (req, res) => {
+    // Se buscan bonificaciones activas y con stock mayor a 0
     const query = `
-        SELECT b.*, c.nombre as categoria_nombre
-        FROM bonificaciones b
-        LEFT JOIN categorias c ON b.categoria_id = c.categoria_id
-        ORDER BY b.bonificacion_id DESC;
+        SELECT * 
+        FROM bonificaciones 
+        WHERE activo = 1 AND stock > 0 
+        ORDER BY nombre ASC
     `;
     pool.execute(query, (err, results) => {
         if (err) {
             console.error('Error al obtener bonificaciones:', err);
-            return res.status(500).json({ error: 'Error interno del servidor' });
+            return res.status(500).json({ error: 'Error al obtener bonificaciones' });
         }
         res.json(results);
     });
