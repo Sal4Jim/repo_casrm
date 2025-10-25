@@ -245,6 +245,46 @@
         </div>
     </div>
 
+    <!-- Modal: Detalle de Venta -->
+    <div class="modal fade" id="saleDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="saleDetailModalTitle">
+                        <i class="fas fa-receipt me-2"></i> Detalle de Venta
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6"><small class="text-muted">Cliente:</small><p id="saleDetailClient" class="fw-bold">-</p></div>
+                        <div class="col-md-6"><small class="text-muted">Fecha:</small><p id="saleDetailDate" class="fw-bold">-</p></div>
+                    </div>
+                    <h6>Productos y Bonificaciones</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Ítem</th>
+                                    <th class="text-end">P. Unit.</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saleDetailTableBody">
+                                <!-- Los detalles se insertarán aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="saleDetailSummary" class="text-end mt-3">
+                        <!-- El resumen de totales se insertará aquí -->
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: Añadir Venta -->
     <div class="modal fade" id="addSaleModal" tabindex="-1" aria-labelledby="modalRegistroVentaLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">

@@ -262,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let clienteIdParaNotas = null;
     let notasOriginales = '';
+    const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
 
     document.addEventListener('click', function (e) {
         const editBtn = e.target.closest('.edit-btn');
@@ -357,6 +358,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         setField('detail-email', cliente.email);
                         setField('detail-agencia', cliente.agencia);
                         setField('detail-notas', cliente.notas);
+
+                        cargarHistorialCompras(clienteId);
                     } else {
                         showToast('<i class="fas fa-exclamation-triangle me-2"></i> No se encontraron datos del cliente', 'error');
                     }
@@ -364,6 +367,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => {
                     showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar datos del cliente', 'error');
                 });
+            return;
+        }
+
+        const saleDetailBtn = e.target.closest('.sale-detail-btn');
+        if (saleDetailBtn) {
+            const ventaId = saleDetailBtn.dataset.ventaId;
+            const clienteNombre = document.getElementById('detail-nombre').textContent;
+            if (ventaId) {
+                cargarDetalleVenta(ventaId, clienteNombre);
+            }
             return;
         }
 
@@ -755,5 +768,94 @@ document.addEventListener('DOMContentLoaded', function () {
             btnGuardar.classList.add('d-none');
             btnCancelar.classList.add('d-none');
         }
+    }
+
+    function cargarHistorialCompras(clienteId) {
+        const historialContainer = document.querySelector('#customerDetailModal .list-group');
+        const badgeContainer = document.querySelector('#customerDetailModal .card-header .badge');
+        
+        historialContainer.innerHTML = '<div class="list-group-item text-center"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</div>';
+        badgeContainer.textContent = '...';
+
+        axios.get(`/api/ventas/cliente/${clienteId}`)
+            .then(response => {
+                if (response.data.success) {
+                    const ventas = response.data.ventas;
+                    badgeContainer.textContent = `${ventas.length} compras`;
+                    if (ventas.length === 0) {
+                        historialContainer.innerHTML = '<div class="list-group-item text-center text-muted">No hay compras registradas.</div>';
+                        return;
+                    }
+
+                    historialContainer.innerHTML = '';
+                    ventas.forEach(venta => {
+                        const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        const item = document.createElement('div');
+                        item.className = 'list-group-item';
+                        item.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Compra #${venta.compra_id}</h6>
+                                    <p class="text-muted mb-0"><small>${fecha}</small></p>
+                                </div>
+                                <div class="text-end">
+                                    <h6 class="text-success mb-1">S/. ${Number(venta.total).toFixed(2)}</h6>
+                                    <button class="btn btn-sm btn-outline-secondary sale-detail-btn" data-venta-id="${venta.compra_id}">
+                                        Ver detalles
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        historialContainer.appendChild(item);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar historial de compras:', error);
+                historialContainer.innerHTML = '<div class="list-group-item text-center text-danger">Error al cargar historial.</div>';
+                badgeContainer.textContent = 'Error';
+            });
+    }
+
+    function cargarDetalleVenta(ventaId, clienteNombre) {
+        document.getElementById('saleDetailModalTitle').innerHTML = `<i class="fas fa-receipt me-2"></i> Detalle de Venta #${ventaId}`;
+        document.getElementById('saleDetailClient').textContent = clienteNombre;
+        const tableBody = document.getElementById('saleDetailTableBody');
+        const summaryDiv = document.getElementById('saleDetailSummary');
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+        
+        saleDetailModal.show();
+
+        axios.get(`/api/ventas/${ventaId}`)
+            .then(response => {
+                if (response.data.success) {
+                    const venta = response.data.venta;
+                    document.getElementById('saleDetailDate').textContent = new Date(venta.fecha).toLocaleDateString('es-ES');
+                    tableBody.innerHTML = '';
+
+                    venta.detalles.forEach(item => {
+                        const row = document.createElement('tr');
+                        const nombreItem = item.es_bonificacion ? `${item.nombre_bonificacion} <span class="badge bg-success">Bonificación</span>` : item.nombre_producto;
+                        row.innerHTML = `
+                            <td>${nombreItem}</td>
+                            <td class="text-end">S/. ${Number(item.precio_unitario).toFixed(2)}</td>
+                            <td class="text-center">${item.cantidad}</td>
+                            <td class="text-end">S/. ${Number(item.subtotal).toFixed(2)}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    summaryDiv.innerHTML = `
+                        <p class="mb-1">Subtotal: <span class="fw-bold">S/. ${Number(venta.subtotal).toFixed(2)}</span></p>
+                        <p class="mb-1 text-danger">Descuento: <span class="fw-bold">-S/. ${Number(venta.descuento_venta).toFixed(2)}</span></p>
+                        <hr class="my-1">
+                        <h5 class="mb-0">Total: <span class="fw-bold text-success">S/. ${Number(venta.total).toFixed(2)}</span></h5>
+                    `;
+                }
+            })
+            .catch(error => {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar los detalles.</td></tr>';
+                console.error('Error al cargar detalle de venta:', error);
+            });
     }
 });

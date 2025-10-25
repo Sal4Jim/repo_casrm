@@ -93,3 +93,56 @@ exports.createVenta = async (req, res) => {
         if (connection) connection.release();
     }
 };
+
+// Obtener todas las ventas de un cliente específico
+exports.getVentasByCliente = async (req, res) => {
+    const { cliente_id } = req.params;
+
+    try {
+        const query = `
+            SELECT compra_id, fecha, total 
+            FROM venta 
+            WHERE cliente_id = ? 
+            ORDER BY fecha DESC
+        `;
+        const [ventas] = await pool.promise().query(query, [cliente_id]);
+        res.json({ success: true, ventas });
+    } catch (error) {
+        console.error('❌ Error al obtener ventas del cliente:', error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+};
+
+// Obtener los detalles de una venta específica
+exports.getVentaById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Obtener datos principales de la venta
+        const [ventaRows] = await pool.promise().query('SELECT * FROM venta WHERE compra_id = ?', [id]);
+        if (ventaRows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Venta no encontrada.' });
+        }
+        const venta = ventaRows[0];
+
+        // Obtener detalles (productos y bonificaciones)
+        const detalleQuery = `
+            SELECT 
+                dv.*,
+                p.nombre AS nombre_producto,
+                b.nombre AS nombre_bonificacion
+            FROM detalle_venta dv
+            LEFT JOIN productos p ON dv.producto_id = p.producto_id
+            LEFT JOIN bonificaciones b ON dv.bonificacion_id = b.bonificacion_id
+            WHERE dv.compra_id = ?
+        `;
+        const [detalles] = await pool.promise().query(detalleQuery, [id]);
+
+        venta.detalles = detalles;
+
+        res.json({ success: true, venta });
+    } catch (error) {
+        console.error(`❌ Error al obtener detalle de la venta ${id}:`, error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+};
