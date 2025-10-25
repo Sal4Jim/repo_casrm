@@ -6,3 +6,4 @@
 3. `npm install`     #
 4. Configurar MySQL
 5. `node server.js` ó `npm run dev`
+

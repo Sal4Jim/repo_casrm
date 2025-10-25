@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         try {
             const response = await axios.get(`/api/productos?search=${searchTerm}&limit=10`);
-            productosDisponibles = response.data; // Guardar los productos completos
-            const choicesData = productosDisponibles.map(p => ({
+            productosDisponibles = response.data.productos; // Guardar los productos completos
+            const choicesData = productosDisponibles.map(p => ({ // Asegúrate de que producto_id sea el valor correcto para Choices.js
                 value: p.producto_id, // Asegúrate de que producto_id sea el valor correcto para Choices.js
                 label: `${p.nombre} (${p.presentacion}) - S/. ${parseFloat(p.precio_venta).toFixed(2)}`,
                 data: p // Guardar el objeto completo del producto

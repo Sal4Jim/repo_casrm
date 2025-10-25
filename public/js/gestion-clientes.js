@@ -370,17 +370,336 @@ document.addEventListener('DOMContentLoaded', function () {
         if (addSaleModalBtn) {
             e.preventDefault();
             const clienteId = addSaleModalBtn.getAttribute('data-cliente-id');
+            const clienteNombre = addSaleModalBtn.closest('tr').querySelector('td:first-child').textContent.trim();
+
+            // Guardar el ID del cliente en un input oculto o un atributo de datos
             const saleClientIdInput = document.getElementById('saleClientId');
             if (saleClientIdInput && clienteId) {
                 saleClientIdInput.value = clienteId;
+            }
+
+            const saleClientNameInput = document.getElementById('saleClientName');
+            if (saleClientNameInput) {
+                saleClientNameInput.value = clienteNombre;
             }
             
             const addSaleModalEl = document.getElementById('addSaleModal');
             if (addSaleModalEl) {
                 const modal = bootstrap.Modal.getOrCreateInstance(addSaleModalEl);
                 modal.show();
+                // Cargar productos y bonificaciones para los selectores
+                cargarProductosVenta();
+                cargarBonificacionesVenta();
             }
         }
+    });
+
+    // --- LÓGICA PARA EL NUEVO MODAL DE VENTA ---
+    let productosVenta = [];
+    let bonificacionesDisponibles = [];
+    let productosSeleccionadosVenta = [];
+    let productoSearchChoices = null;
+    let bonificacionSearchChoices = null;
+
+    function cargarProductosVenta() {
+        axios.get('/api/productos?limit=1000') // Obtener todos los productos
+            .then(response => {
+                if (response.data && Array.isArray(response.data.productos)) {
+                    productosVenta = response.data.productos;
+                    const selectEl = document.getElementById('productoSearch');
+                    
+                    if (!productoSearchChoices) {
+                        productoSearchChoices = new Choices(selectEl, {
+                            searchEnabled: true,
+                            itemSelectText: 'Seleccionar',
+                            placeholder: true,
+                            placeholderValue: 'Buscar producto...',
+                            allowHTML: false,
+                        });
+                    }
+                    const choicesData = productosVenta.map(p => ({ value: p.producto_id, label: `${p.nombre} (S/. ${p.precio_venta})` }));
+                    productoSearchChoices.clearStore();
+                    productoSearchChoices.setChoices(choicesData, 'value', 'label', true);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar productos para la venta:', error);
+                showToast('Error al cargar productos', 'error');
+            });
+    }
+
+    function cargarBonificacionesVenta() {
+        axios.get('/api/bonificaciones/activas')
+            .then(response => {
+                if (response.data && Array.isArray(response.data)) {
+                    bonificacionesDisponibles = response.data;
+                    const selectEl = document.getElementById('bonificacionSearch');
+                    if (!bonificacionSearchChoices) {
+                        bonificacionSearchChoices = new Choices(selectEl, {
+                            searchEnabled: true,
+                            itemSelectText: 'Seleccionar',
+                            placeholder: true,
+                            placeholderValue: 'Buscar bonificación...',
+                            allowHTML: false,
+                        });
+                    }
+
+                    const choicesData = bonificacionesDisponibles.map(b => ({
+                        value: b.bonificacion_id,
+                        label: `${b.nombre} (${b.presentacion})`,
+                        data: b
+                    }));
+                    bonificacionSearchChoices.setChoices(choicesData, 'value', 'label', true);
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar bonificaciones para la venta:', error);
+                // No mostramos toast aquí para no ser intrusivos si solo falla esto
+            });
+    }
+
+
+    document.getElementById('btnAnadirProducto')?.addEventListener('click', () => {
+        const selectEl = document.getElementById('productoSearch');
+        const productoId = selectEl.value;
+        if (!productoId) {
+            showToast('Debe seleccionar un producto', 'error');
+            return;
+        }
+
+        const producto = productosVenta.find(p => p.producto_id == productoId); // Aquí el error era que se buscaba en el array equivocado
+        const cantidad = parseInt(document.getElementById('cantidadProducto').value) || 1;
+
+        if (productosSeleccionadosVenta.find(p => p.id == producto.producto_id)) {
+            showToast('Este producto ya ha sido agregado', 'error');
+            return;
+        }
+
+        if (cantidad > producto.stock) {
+            showToast(`Stock insuficiente. Disponible: ${producto.stock}`, 'error');
+            return;
+        }
+
+        productosSeleccionadosVenta.push({
+            id: producto.producto_id,
+            nombre: producto.nombre,
+            precio: parseFloat(producto.precio_venta),
+            cantidad: cantidad,
+            stock: producto.stock,
+            subtotal: parseFloat(producto.precio_venta) * cantidad,
+            isBonificacion: false // Marcar como producto regular
+        });
+
+        renderizarProductosVenta();
+        calcularTotalesVenta();
+        productoSearchChoices.setChoiceByValue(''); // Limpiar select
+        document.getElementById('cantidadProducto').value = 1;
+    });
+
+    document.getElementById('btnAnadirBonificacion')?.addEventListener('click', () => {
+        const selectEl = document.getElementById('bonificacionSearch');
+        const bonificacionId = selectEl.value;
+        if (!bonificacionId) {
+            showToast('Debe seleccionar una bonificación', 'error');
+            return;
+        }
+
+        const bonificacion = bonificacionesDisponibles.find(b => b.bonificacion_id == bonificacionId);
+        const cantidad = parseInt(document.getElementById('cantidadBonificacion').value) || 1;
+
+        if (productosSeleccionadosVenta.find(p => p.id == bonificacion.bonificacion_id && p.isBonificacion)) {
+            showToast('Esta bonificación ya ha sido agregada', 'error');
+            return;
+        }
+
+        if (cantidad > bonificacion.stock) {
+            showToast(`Stock de bonificación insuficiente. Disponible: ${bonificacion.stock}`, 'error');
+            return;
+        }
+
+        productosSeleccionadosVenta.push({
+            id: bonificacion.bonificacion_id,
+            nombre: bonificacion.nombre,
+            precio: 0, // Las bonificaciones no tienen costo
+            cantidad: cantidad,
+            stock: bonificacion.stock,
+            subtotal: 0,
+            isBonificacion: true // Marcar como bonificación
+        });
+
+        renderizarProductosVenta();
+        calcularTotalesVenta();
+        if (bonificacionSearchChoices) bonificacionSearchChoices.setChoiceByValue('');
+        document.getElementById('cantidadBonificacion').value = 1;
+    });
+
+    function renderizarProductosVenta() {
+        const tbody = document.getElementById('tablaProductos');
+        if (!tbody) return;
+
+        if (productosSeleccionadosVenta.length === 0) {
+            tbody.innerHTML = '<tr id="filaVacia"><td colspan="5" class="text-center text-muted"><i class="fas fa-cart-x"></i> No hay productos seleccionados</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        productosSeleccionadosVenta.forEach(producto => {
+            const row = document.createElement('tr');
+            row.dataset.id = producto.id;
+            row.dataset.stock = producto.stock;
+            const badge = producto.isBonificacion ? '<span class="badge bg-success ms-2">Bonificación</span>' : '';
+
+            row.innerHTML = `
+                <td>
+                    <div class="fw-bold">${producto.nombre}${badge}</div>
+                    <small class="text-muted">Stock disponible: ${producto.stock}</small>
+                </td>
+                <td>S/. ${producto.precio.toFixed(2)}</td>
+                <td>
+                    <input type="number" class="form-control form-control-sm cantidad-input-venta" 
+                           value="${producto.cantidad}" min="1" max="${producto.stock}" ${producto.isBonificacion ? '' : ''}>
+                </td>
+                <td class="fw-bold">S/. ${producto.subtotal.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm eliminar-producto-venta">
+                        <i class="fas fa-trash" style="pointer-events: none;"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    document.getElementById('tablaProductos')?.addEventListener('input', function(e) {
+        if (e.target.classList.contains('cantidad-input-venta')) {
+            const row = e.target.closest('tr');
+            const id = row.dataset.id;
+            const cantidad = parseInt(e.target.value) || 0;
+            const stock = parseInt(row.dataset.stock);
+
+            if (cantidad > stock) {
+                showToast(`Stock insuficiente. Disponible: ${stock}`, 'error');
+                e.target.value = stock;
+                return;
+            }
+
+            const producto = productosSeleccionadosVenta.find(p => p.id == id);
+            // Prevenir cambiar cantidad de bonificaciones si se decide en el futuro
+            if (producto && producto.isBonificacion) {
+                // Podríamos añadir lógica aquí si no queremos que se edite la cantidad de bonificaciones
+            }
+
+            if (producto) {
+                producto.cantidad = cantidad;
+                producto.subtotal = producto.precio * cantidad;
+                renderizarProductosVenta();
+                calcularTotalesVenta();
+            }
+        }
+    });
+
+    document.getElementById('tablaProductos')?.addEventListener('click', function(e) {
+        if (e.target.closest('.eliminar-producto-venta')) {
+            const id = e.target.closest('tr').dataset.id;
+            productosSeleccionadosVenta = productosSeleccionadosVenta.filter(p => p.id != id);
+            renderizarProductosVenta();
+            calcularTotalesVenta();
+        }
+    });
+
+    document.getElementById('descuentoValor')?.addEventListener('input', calcularTotalesVenta);
+    document.getElementById('descuentoTipo')?.addEventListener('change', calcularTotalesVenta);
+
+    function calcularTotalesVenta() {
+        const subtotal = productosSeleccionadosVenta.reduce((sum, p) => sum + p.subtotal, 0);
+        const descuentoValor = parseFloat(document.getElementById('descuentoValor').value) || 0;
+        const descuentoTipo = document.getElementById('descuentoTipo').value;
+
+        let descuento = 0;
+        if (descuentoTipo === 'porcentaje') {
+            descuento = subtotal * (descuentoValor / 100);
+        } else {
+            descuento = descuentoValor;
+        }
+
+        if (descuento > subtotal) descuento = subtotal;
+
+        const total = subtotal - descuento;
+
+        document.getElementById('subtotalVenta').textContent = `S/. ${subtotal.toFixed(2)}`;
+        document.getElementById('descuentoVenta').textContent = `-S/. ${descuento.toFixed(2)}`;
+        document.getElementById('totalVenta').textContent = `S/. ${total.toFixed(2)}`;
+    }
+
+    // Guardar la venta
+    document.getElementById('guardarVenta')?.addEventListener('click', async function() {
+        const btn = this;
+        const clienteId = document.getElementById('saleClientId').value;
+
+        // Validaciones
+        if (!clienteId) {
+            showToast('No se ha especificado un cliente.', 'error');
+            return;
+        }
+        if (productosSeleccionadosVenta.filter(p => !p.isBonificacion).length === 0) {
+            showToast('Debe agregar al menos un producto a la venta.', 'error');
+            return;
+        }
+
+        // Recopilar datos de la venta
+        const subtotal = productosSeleccionadosVenta.reduce((sum, p) => sum + p.subtotal, 0);
+        const descuentoValor = parseFloat(document.getElementById('descuentoValor').value) || 0;
+        const descuentoTipo = document.getElementById('descuentoTipo').value;
+        let descuentoMonto = descuentoTipo === 'porcentaje' ? subtotal * (descuentoValor / 100) : descuentoValor;
+        if (descuentoMonto > subtotal) descuentoMonto = subtotal;
+        const total = subtotal - descuentoMonto;
+
+        const productosParaGuardar = productosSeleccionadosVenta.filter(p => !p.isBonificacion);
+        const bonificacionesParaGuardar = productosSeleccionadosVenta.filter(p => p.isBonificacion);
+
+        const ventaData = {
+            cliente_id: clienteId,
+            fecha: document.getElementById('fechaVenta').value,
+            productos: productosParaGuardar,
+            subtotal: subtotal,
+            descuento: {
+                valor: descuentoValor,
+                tipo: descuentoTipo,
+                monto: descuentoMonto
+            },
+            total: total,
+            bonificaciones: bonificacionesParaGuardar
+        };
+
+        // Enviar al backend
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Guardando...';
+        try {
+            const response = await axios.post('/api/ventas', ventaData);
+            showToast(response.data.message, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('addSaleModal')).hide();
+        } catch (error) {
+            const mensaje = error.response?.data?.error || 'Error al guardar la venta.';
+            showToast(mensaje, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Venta';
+        }
+    });
+
+    // Limpiar modal de venta al cerrar
+    const addSaleModalEl = document.getElementById('addSaleModal');
+    addSaleModalEl?.addEventListener('hidden.bs.modal', function () {
+        productosSeleccionadosVenta = [];
+        renderizarProductosVenta();
+        document.getElementById('descuentoValor').value = '';
+        document.getElementById('descuentoTipo').value = 'monto';
+        calcularTotalesVenta();
+        document.getElementById('fechaVenta').valueAsDate = new Date();
+    });
+
+    addSaleModalEl?.addEventListener('shown.bs.modal', function () {
+        document.getElementById('fechaVenta').valueAsDate = new Date();
     });
 
     // Botón "Editar"

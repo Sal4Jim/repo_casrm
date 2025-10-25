@@ -4,19 +4,53 @@ const { pool } = require('../config/database');
 
 // Obtener todos los productos con nombre de categoría
 exports.getProducts = (req, res) => {
-  const query = `
-    SELECT p.*, c.nombre AS categoria_nombre
-    FROM productos p
-    LEFT JOIN categorias c ON p.categoria_id = c.categoria_id
-    WHERE p.activo = 1
-    ORDER BY p.producto_id;
-  `;
-  pool.execute(query, (err, results) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 0; // Si el límite es 0, se devuelven todos
+  const search = req.query.search || '';
+  const offset = (page - 1) * limit;
+
+  pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error al obtener productos:', err);
-      return res.status(500).json({ error: 'Error al obtener productos' });
+      console.error("❌ Error obteniendo conexión:", err.message);
+      return res.status(500).json({ success: false, error: "Error de conexión a la base de datos" });
     }
-    res.json(results);
+
+    const searchTerm = `%${search.trim()}%`;
+    let sql;
+    let params;
+
+    // Construcción de la consulta SQL
+    const baseQuery = `
+      SELECT p.*, c.nombre AS categoria_nombre
+      FROM productos p
+      JOIN categorias c ON p.categoria_id = c.categoria_id
+    `;
+    const whereClause = `WHERE ? = '' OR p.nombre LIKE ?`;
+    const orderClause = `ORDER BY p.nombre ASC`;
+    const limitClause = limit > 0 ? `LIMIT ? OFFSET ?` : '';
+
+    sql = `${baseQuery} ${whereClause} ${orderClause} ${limitClause}`;
+
+    // Parámetros para la consulta
+    params = [search, searchTerm];
+    if (limit > 0) {
+      params.push(limit, offset);
+    }
+
+    connection.execute(sql, params, (error, results) => {
+      connection.release();
+
+      if (error) {
+        console.error("❌ Error en consulta SQL de productos:", error.message);
+        return res.status(500).json({ success: false, error: "Error al obtener productos" });
+      }
+
+      // Devolver siempre el mismo formato de objeto para consistencia
+      res.json({
+        success: true,
+        productos: results,
+      });
+    });
   });
 };
 
@@ -25,10 +59,10 @@ exports.createProduct = (req, res) => {
   const { nombre, precio_compra, precio_venta, stock, categoria_id, presentacion } = req.body;
 
   const query = `
-    INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion, activo)
-    VALUES (?, ?, ?, ?, ?, ?, 1);
+    INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion)
+    VALUES (?, ?, ?, ?, ?, ?);
   `;
-  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion]; // El '1' para activo ya está en la query
+  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion];
 
   pool.execute(query, values, (err, result) => {
     if (err) {
@@ -42,8 +76,7 @@ exports.createProduct = (req, res) => {
       precio_venta,
       stock,
       categoria_id,
-      presentacion,
-      activo: 1
+      presentacion
     };
     res.status(201).json(nuevoProducto);
   });
@@ -76,11 +109,10 @@ exports.updateProduct = (req, res) => {
 // Eliminar producto
 exports.deleteProduct = (req, res) => {
   const { id } = req.params;
-  
-  // En lugar de DELETE, hacemos un UPDATE para marcarlo como inactivo (soft delete)
-  const query = 'UPDATE productos SET activo = 0 WHERE producto_id = ?';
-  
-  pool.execute(query, [id], (err, result) => { 
+
+  const query = 'DELETE FROM productos WHERE producto_id = ?';
+
+  pool.execute(query, [id], (err, result) => {
     if (err) {
       console.error('Error al eliminar producto:', err);
       return res.status(500).json({ error: 'Error al eliminar producto' });
@@ -88,7 +120,6 @@ exports.deleteProduct = (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
-    // Cambiamos el mensaje para reflejar la acción real
-    res.json({ message: 'Producto desactivado correctamente' });
+    res.json({ message: 'Producto eliminado correctamente' });
   });
 };
