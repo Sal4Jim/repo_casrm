@@ -207,35 +207,44 @@ exports.generatePdfVenta = async (req, res) => {
         const tableTop = doc.y;
 
         const drawTableHeader = (y) => {
-            doc.fontSize(10).font('Helvetica-Bold');
-            doc.text('Ítem', 50, y);
-            doc.text('P. Unit.', 300, y, { width: 70, align: 'right' });
-            doc.text('Cant.', 380, y, { width: 50, align: 'center' });
-            doc.text('Subtotal', 440, y, { width: 100, align: 'right' });
-            doc.moveTo(50, y + 15).lineTo(doc.page.width - 50, y + 15).stroke();
+            doc.fontSize(10).font('Helvetica-Bold')
+               .text('Ítem', 50, y)
+               .text('P. Unit.', 300, y, { width: 70, align: 'right' })
+               .text('Cant.', 380, y, { width: 50, align: 'center' })
+               .text('Subtotal', 440, y, { width: 100, align: 'right' });
+            doc.moveTo(50, y + 20).lineTo(doc.page.width - 50, y + 20).stroke();
         };
 
         drawTableHeader(tableTop);
-        doc.y = tableTop + 25;
-        doc.fontSize(10).font('Helvetica');
+        doc.y = tableTop + 25; // Move cursor down
 
         venta.detalles.forEach((item, index) => {
-            const y = doc.y;
-            const rowHeight = 30;
+            const nombreItem = item.es_bonificacion ? `${item.nombre_bonificacion} (Bonificación)` : item.nombre_producto;
+            
+            // Calcular altura de la fila dinámicamente
+            const rowHeight = Math.max(
+                doc.heightOfString(nombreItem, { width: 240 }),
+                20 // Altura mínima de fila
+            ) + 10; // Padding
 
-            if (y + rowHeight > doc.page.height - 150) {
+            // Verificar si la fila cabe en la página actual
+            if (doc.y + rowHeight > doc.page.height - 150) { // Margen inferior para totales
                 doc.addPage();
                 drawTableHeader(50);
                 doc.y = 75;
             }
 
+            const y = doc.y;
+
+            // Fondo para filas impares
             if (index % 2 !== 0) {
-                doc.fillColor('#f3f4f6').rect(50, y, doc.page.width - 100, rowHeight).fill();
-                doc.fillColor('black');
+                doc.fillColor('#f3f4f6').rect(50, y, doc.page.width - 100, rowHeight).fill().fillColor('black');
             }
 
-            const textY = y + (rowHeight - 10) / 2;
-            const nombreItem = item.es_bonificacion ? `${item.nombre_bonificacion} (Bonificación)` : item.nombre_producto;
+            const textY = y + 5; // Padding superior para el texto
+
+            // Dibujar el contenido de la fila
+            doc.font('Helvetica').fontSize(10);
             doc.text(nombreItem, 55, textY, { width: 240 });
             doc.text(`S/. ${Number(item.precio_unitario).toFixed(2)}`, 300, textY, { width: 70, align: 'right' });
             doc.text(item.cantidad.toString(), 380, textY, { width: 50, align: 'center' });
@@ -269,11 +278,15 @@ exports.generatePdfVenta = async (req, res) => {
         doc.text('TOTAL:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' }).fillColor('#28a745'); // Color verde para el total
         doc.text(`S/. ${Number(venta.total).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' }).fillColor('black');
 
-        // --- PIE DE PÁGINA ---
-        const finalY = doc.page.height - 50;
-        doc.fontSize(8).font('Helvetica-Oblique').text('Gracias por su compra.', 50, finalY, {
+        // --- PIE DE PÁGINA (POSICIÓN RELATIVA) ---
+        // Mover el cursor hacia abajo después de los totales
+        doc.moveDown(4);
+
+        // Si el cursor está muy cerca del final, añadir una nueva página para el agradecimiento
+        if (doc.y > doc.page.height - 50) doc.addPage();
+
+        doc.fontSize(9).font('Helvetica-Oblique').text('¡Gracias por su compra!', {
             align: 'center',
-            width: doc.page.width - 100
         });
 
         doc.end();

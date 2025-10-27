@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const deleteBtn = e.target.closest('.delete-btn');
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
         const printSaleBtn = e.target.closest('.print-sale-btn');
+        const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
         const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
 
         if (editBtn) {
@@ -390,6 +391,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const numeroCompra = printSaleBtn.dataset.numeroCompra;
             if (ventaId) {
                 descargarPdfVenta(ventaId, numeroCompra);
+            }
+            return;
+        }
+
+        if (exportCsvBtn) {
+            if (clienteIdParaNotas) {
+                exportarHistorialCSV(clienteIdParaNotas);
             }
             return;
         }
@@ -950,6 +958,53 @@ document.addEventListener('DOMContentLoaded', function () {
         } finally {
             originalButton.disabled = false;
             originalButton.innerHTML = originalContent;
+        }
+    }
+
+    async function exportarHistorialCSV(clienteId) {
+        const btn = document.getElementById('btnExportarHistorialCSV');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+
+        try {
+            const response = await axios.get(`/api/ventas/cliente/${clienteId}`);
+            if (!response.data.success || response.data.ventas.length === 0) {
+                showToast('No hay compras para exportar.', 'error');
+                return;
+            }
+
+            const ventas = response.data.ventas;
+            const totalVentas = ventas.length;
+            const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
+
+            // Encabezados del CSV
+            let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
+
+            // Filas del CSV
+            ventas.forEach((venta, index) => {
+                const numeroCompra = totalVentas - index;
+                const fecha = new Date(venta.fecha).toLocaleDateString('es-ES');
+                const total = Number(venta.total).toFixed(2);
+                csvContent += `${numeroCompra},${fecha},${total}\n`;
+            });
+
+            // Crear y descargar el archivo
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `historial_compras_${clienteNombre}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error('Error al exportar historial a CSV:', error);
+            showToast('Error al generar el archivo CSV.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
         }
     }
 
