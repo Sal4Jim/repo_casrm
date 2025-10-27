@@ -171,23 +171,25 @@
                             <p class="text-muted mb-3" id="detail-ciudad">-</p>
                             </div>
                             <div class="card mt-4">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="fw-bold mb-0">Notas</h6>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-primary" id="btnEditarNota"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-success d-none" id="btnGuardarNota"><i class="fas fa-save"></i></button>
-                                            <button class="btn btn-sm btn-secondary d-none" id="btnCancelarNota"><i class="fas fa-times"></i></button>
-                                        </div>
+                                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #e9ecef;">
+                                    <h6 class="fw-bold mb-0">Notas</h6>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary" id="btnEditarNota"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-success d-none" id="btnGuardarNota"><i class="fas fa-save"></i></button>
+                                        <button class="btn btn-sm btn-secondary d-none" id="btnCancelarNota"><i class="fas fa-times"></i></button>
                                     </div>
+                                </div>
+                                <div class="card-body" style="background-color: #f8f9fa;">
                                     <textarea id="detail-notas" class="form-control" rows="5" placeholder="Sin notas registradas." readonly></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-8">
                             <div class="card mb-3">
-                                <div class="card-body">
-                                    <h6 class="fw-bold mb-3">Información General</h6>
+                                <div class="card-header" style="background-color: #e9ecef;">
+                                    <h6 class="fw-bold mb-0">Información General</h6>
+                                </div>
+                                <div class="card-body" style="background-color: #f8f9fa;">
                                     <div class="row">
                                         <div class="col-sm-6 mb-2">
                                             <small class="text-muted">RUC/DNI</small>
@@ -214,15 +216,15 @@
                             </div>
 
                             <div class="card mb-3">
-                                <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #e9ecef;">
                                     <h6 class="mb-0">Historial de Compras</h6>
                                     <div>
 
                                         <span class="badge bg-primary">0 compras</span>
                                     </div>
                                 </div>
-                                <div class="card-body p-0">
-                                    <div class="list-group list-group-flush">
+                                <div class="card-body p-0" style="background-color: #f8f9fa;">
+                                    <div class="list-group list-group-flush" style="max-height: 280px; overflow-y: auto;">
                                         <div class="list-group-item">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>

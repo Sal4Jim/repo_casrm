@@ -262,12 +262,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let clienteIdParaNotas = null;
     let notasOriginales = '';
+    const customerDetailModal = new bootstrap.Modal(document.getElementById('customerDetailModal'));
     const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
 
     document.addEventListener('click', function (e) {
         const editBtn = e.target.closest('.edit-btn');
         const deleteBtn = e.target.closest('.delete-btn');
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
+        const printSaleBtn = e.target.closest('.print-sale-btn');
         const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
 
         if (editBtn) {
@@ -374,9 +376,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const saleDetailBtn = e.target.closest('.sale-detail-btn');
         if (saleDetailBtn) {
             const ventaId = saleDetailBtn.dataset.ventaId;
+            const numeroCompra = saleDetailBtn.dataset.numeroCompra;
             const clienteNombre = document.getElementById('detail-nombre').textContent;
             if (ventaId) {
-                cargarDetalleVenta(ventaId, clienteNombre);
+                customerDetailModal.hide(); // Ocultar el modal de cliente antes de mostrar el de venta
+                cargarDetalleVenta(ventaId, clienteNombre, numeroCompra);
+            }
+            return;
+        }
+
+        if (printSaleBtn) {
+            const ventaId = printSaleBtn.dataset.ventaId;
+            const numeroCompra = printSaleBtn.dataset.numeroCompra;
+            if (ventaId) {
+                descargarPdfVenta(ventaId, numeroCompra);
             }
             return;
         }
@@ -789,21 +802,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     historialContainer.innerHTML = '';
-                    ventas.forEach(venta => {
+                    const totalVentas = ventas.length;
+                    ventas.forEach((venta, index) => {
                         const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        const numeroCompra = totalVentas - index; // Calcula el número secuencial de la compra
                         const item = document.createElement('div');
                         item.className = 'list-group-item';
                         item.innerHTML = `
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Compra #${venta.compra_id}</h6>
+                                    <h6 class="mb-1">Compra #${numeroCompra}</h6>
                                     <p class="text-muted mb-0"><small>${fecha}</small></p>
                                 </div>
                                 <div class="text-end">
                                     <h6 class="text-success mb-1">S/. ${Number(venta.total).toFixed(2)}</h6>
-                                    <button class="btn btn-sm btn-outline-secondary sale-detail-btn" data-venta-id="${venta.compra_id}">
-                                        Ver detalles
-                                    </button>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-secondary sale-detail-btn" data-venta-id="${venta.compra_id}" data-numero-compra="${numeroCompra}" title="Ver detalles">
+                                            <i class="fas fa-eye"></i> Ver
+                                        </button>
+                                        <button class="btn btn-outline-danger print-sale-btn" data-venta-id="${venta.compra_id}" data-numero-compra="${numeroCompra}" title="Imprimir PDF">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -818,8 +838,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    function cargarDetalleVenta(ventaId, clienteNombre) {
-        document.getElementById('saleDetailModalTitle').innerHTML = `<i class="fas fa-receipt me-2"></i> Detalle de Venta #${ventaId}`;
+    function cargarDetalleVenta(ventaId, clienteNombre, numeroCompra) {
+        const titulo = numeroCompra ? `Detalle de Venta #${numeroCompra}` : `Detalle de Venta`;
+        document.getElementById('saleDetailModalTitle').innerHTML = `<i class="fas fa-receipt me-2"></i> ${titulo}`;
         document.getElementById('saleDetailClient').textContent = clienteNombre;
         const tableBody = document.getElementById('saleDetailTableBody');
         const summaryDiv = document.getElementById('saleDetailSummary');
@@ -858,5 +879,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error al cargar los detalles.</td></tr>';
                 console.error('Error al cargar detalle de venta:', error);
             });
+    }
+
+    async function descargarPdfVenta(ventaId, numeroCompra) {
+        const originalButton = document.querySelector(`.print-sale-btn[data-venta-id="${ventaId}"]`);
+        const originalContent = originalButton.innerHTML;
+        originalButton.disabled = true;
+        originalButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+
+        try {
+            const response = await axios.get(`/api/ventas/${ventaId}/pdf`, {
+                responseType: 'blob' // Importante para manejar archivos
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            const fileName = `recibo_venta_${numeroCompra}.pdf`;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+
+            showToast(`Recibo #${numeroCompra} descargado.`, 'success');
+
+        } catch (error) {
+            console.error('Error al descargar el PDF de la venta:', error);
+            showToast('Error al generar el recibo PDF.', 'error');
+        } finally {
+            originalButton.disabled = false;
+            originalButton.innerHTML = originalContent;
+        }
+    }
+
+    // Volver a mostrar el modal de detalle de cliente cuando se cierre el de detalle de venta
+    const saleDetailModalEl = document.getElementById('saleDetailModal');
+    if (saleDetailModalEl) {
+        saleDetailModalEl.addEventListener('hidden.bs.modal', function () {
+            customerDetailModal.show();
+        });
     }
 });
