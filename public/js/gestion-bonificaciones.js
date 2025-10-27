@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos del DOM
     const bonificacionesTable = document.getElementById('bonificacionesTable');
     const pagination = document.getElementById('pagination');
     const btnSaveBonificacion = document.getElementById('btnSaveBonificacion');
@@ -8,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalBonificacionesValorEl = document.getElementById('totalBonificacionesValor');
     const productoBaseSelect = document.getElementById('productoBase');
 
-    // Modales de Bootstrap
     const bonificacionModal = new bootstrap.Modal(document.getElementById('bonificacionModal'));
     const editBonificacionModal = new bootstrap.Modal(document.getElementById('editBonificacionModal'));
 
@@ -29,15 +27,14 @@ document.addEventListener('DOMContentLoaded', function() {
         new bootstrap.Toast(toast, { delay: 4000 }).show();
     }
 
-    // --- Carga de datos inicial ---
     async function cargarDatosIniciales() {
         try {
             const [bonificacionesData, productosData] = await Promise.all([
-                fetch('/api/bonificaciones').then(res => res.json()),
+                fetch('/api/bonificaciones/activas').then(res => res.json()),
                 fetch('/api/productos').then(res => res.json())
             ]);
             bonificaciones = bonificacionesData;
-            productos = productosData;
+            productos = productosData.productos;
             
             renderizarBonificaciones();
             calcularYMostrarValorTotal();
@@ -125,10 +122,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             renderizarBonificaciones();
             bonificacionModal.hide();
-            // Limpiamos el formulario y el selector de Choices.js sin reinicializarlo
+
             document.getElementById('bonificacionForm').reset();
             productoChoices.clearInput();
-            productoChoices.setChoiceByValue(''); // Resetea la selección visual
+            productoChoices.setChoiceByValue(''); 
             showToast('Bonificación creada exitosamente.', 'success');
             calcularYMostrarValorTotal();
         } catch (error) {

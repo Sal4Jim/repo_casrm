@@ -4,6 +4,7 @@ const productosRoutes = require('./routes/productos.routes');
 const categoriasRoutes = require('./routes/categorias.routes');
 const ventaRoutes = require('./routes/venta.routes');
 const bonificacionesRoutes = require('./routes/bonificaciones.routes');
+const gastoRoutes = require('./routes/gasto.routes.js'); // Importar rutas de gastos
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/productos', productosRoutes);
 app.use('/api/categorias', categoriasRoutes);
 app.use('/api/ventas', ventaRoutes);
 app.use('/api/bonificaciones', bonificacionesRoutes);
+app.use('/api/gastos', gastoRoutes); // Usar rutas de gastos
 
 // Ruta de prueba para la base de datos (con callback)
 app.get('/test-db', (req, res) => {
