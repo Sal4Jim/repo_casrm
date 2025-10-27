@@ -784,28 +784,40 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function cargarHistorialCompras(clienteId) {
-        const historialContainer = document.querySelector('#customerDetailModal .list-group');
+    function cargarHistorialCompras(clienteId, page = 1) {
+        const historialContainer = document.getElementById('historialComprasContainer');
         const badgeContainer = document.querySelector('#customerDetailModal .card-header .badge');
+        const paginacionContainer = document.getElementById('historialComprasPaginacionContainer');
         
         historialContainer.innerHTML = '<div class="list-group-item text-center"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</div>';
         badgeContainer.textContent = '...';
+        paginacionContainer.innerHTML = '';
 
         axios.get(`/api/ventas/cliente/${clienteId}`)
             .then(response => {
                 if (response.data.success) {
                     const ventas = response.data.ventas;
+                    const totalVentas = ventas.length;
+                    const itemsPerPage = 4;
+                    const totalPages = Math.ceil(totalVentas / itemsPerPage);
+
                     badgeContainer.textContent = `${ventas.length} compras`;
+
                     if (ventas.length === 0) {
                         historialContainer.innerHTML = '<div class="list-group-item text-center text-muted">No hay compras registradas.</div>';
                         return;
                     }
 
+                    // Paginación
+                    const startIndex = (page - 1) * itemsPerPage;
+                    const endIndex = startIndex + itemsPerPage;
+                    const ventasPaginadas = ventas.slice(startIndex, endIndex);
+
                     historialContainer.innerHTML = '';
-                    const totalVentas = ventas.length;
-                    ventas.forEach((venta, index) => {
+                    ventasPaginadas.forEach((venta, index) => {
                         const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                        const numeroCompra = totalVentas - index; // Calcula el número secuencial de la compra
+                        // El número de compra se calcula desde el total, no desde el índice de la página
+                        const numeroCompra = totalVentas - (startIndex + index);
                         const item = document.createElement('div');
                         item.className = 'list-group-item';
                         item.innerHTML = `
@@ -829,6 +841,34 @@ document.addEventListener('DOMContentLoaded', function () {
                         `;
                         historialContainer.appendChild(item);
                     });
+
+                    // Renderizar controles de paginación si hay más de una página
+                    if (totalPages > 1) {
+                        const ul = document.createElement('ul');
+                        ul.className = 'pagination pagination-sm mb-0';
+
+                        // Botón Anterior
+                        const prevLi = document.createElement('li');
+                        prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
+                        prevLi.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
+                        prevLi.addEventListener('click', (e) => { e.preventDefault(); if(page > 1) cargarHistorialCompras(clienteId, page - 1); });
+                        ul.appendChild(prevLi);
+
+                        // Indicador de página
+                        const pageInfoLi = document.createElement('li');
+                        pageInfoLi.className = 'page-item disabled';
+                        pageInfoLi.innerHTML = `<span class="page-link">Pág ${page} de ${totalPages}</span>`;
+                        ul.appendChild(pageInfoLi);
+
+                        // Botón Siguiente
+                        const nextLi = document.createElement('li');
+                        nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
+                        nextLi.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
+                        nextLi.addEventListener('click', (e) => { e.preventDefault(); if(page < totalPages) cargarHistorialCompras(clienteId, page + 1); });
+                        ul.appendChild(nextLi);
+
+                        paginacionContainer.appendChild(ul);
+                    }
                 }
             })
             .catch(error => {
