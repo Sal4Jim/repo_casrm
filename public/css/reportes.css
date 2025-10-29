@@ -1,10 +1,72 @@
+/* 
+   =========================================================
+   VARIABLES DE COLOR - PALETA UNIFICADA
+   =========================================================
+*/
+:root {
+    --text-primary: #2d3748;
+    --text-secondary: #718096;
+    --border-color: #e2e8f0;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f8f9fa;
+    padding-top: 80px; /* Espacio para la navbar fija */
+    color: var(--text-primary); /* Color de texto principal para toda la página */
 }
 
 .navbar {
     box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    background: linear-gradient(135deg, #4a6fa5, #3a5a80);
 }
 
-/* Puedes añadir más estilos aquí a medida que la página crezca */
+.navbar-brand i {
+    color: #f6e05e;
+    margin-right: 0.5rem;
+}
+
+.navbar .nav-link.active {
+    font-weight: 600;
+    color: #f6e05e !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.navbar .nav-link:hover {
+    color: #f6e05e !important;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.text-muted {
+    color: var(--text-secondary) !important; /* Asegurar que el texto secundario use el color correcto */
+}
+
+/* 
+   =========================================================
+   ANIMACIONES
+   =========================================================
+*/
+.ice-cream-icon {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
