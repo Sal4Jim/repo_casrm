@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = searchInput.value.toLowerCase();
         const gastosFiltrados = gastos.filter(g => 
             (g.descripcion && g.descripcion.toLowerCase().includes(searchTerm)) ||
-            (g.persona_responsable && g.persona_responsable.toLowerCase().includes(searchTerm))
+            (g.persona && String(g.persona).toLowerCase().includes(searchTerm))
         );
 
         const inicio = (paginaActual - 1) * gastosPorPagina;
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${gasto.descripcion}</td>
                     <td>S/. ${Number(gasto.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</td>
                     <td>${new Date(gasto.fecha).toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
-                    <td>${gasto.persona_responsable}</td>
+                    <td>${gasto.persona || 'N/A'}</td>
                 `;
                 tablaBody.appendChild(fila);
             });
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const gastoData = {
             descripcion: document.getElementById('descripcion').value.trim(),
             monto: document.getElementById('monto').value,
-            fecha: document.getElementById('fecha').value,
+            fecha: document.getElementById('fecha').value, // Enviamos solo la fecha, el servidor pondrá la hora.
             persona: document.getElementById('persona').value.trim()
         };
         
@@ -198,9 +198,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // const dateParts = columns[2].textContent.trim().split('/');
         // const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
         // document.getElementById('fecha').value = formattedEditDate;
-        
+
         document.getElementById('persona').value = columns[3].textContent.trim();
-        
+
         // Scroll to form
         formContainer.style.display = 'block';
         formContainer.scrollIntoView({ behavior: 'smooth' });

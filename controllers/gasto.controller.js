@@ -19,25 +19,27 @@ exports.getGastos = async (req, res) => {
  * @description Crea un nuevo gasto en la base de datos.
  */
 exports.createGasto = async (req, res) => {
-    const { descripcion, monto, fecha, persona } = req.body;
+    const { descripcion, monto, persona } = req.body; 
 
-    if (!descripcion || !monto || !fecha || !persona) {
+    if (!descripcion || !monto || !persona) {
         return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios.' });
     }
 
     try {
+        const fechaActualServidor = new Date(); 
+
         const query = `
-            INSERT INTO gastos (descripcion, monto, fecha, persona)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO gastos (descripcion, monto, fecha, persona) 
+            VALUES (?, ?, NOW(), ?)
         `;
-        const [result] = await pool.promise().execute(query, [descripcion, monto, fecha, persona]);
+        const [result] = await pool.promise().execute(query, [descripcion, monto, persona]);
 
         const nuevoGasto = {
             gasto_id: result.insertId,
             descripcion,
             monto: parseFloat(monto),
-            fecha,
-            persona: persona // Corregido para coincidir con la tabla
+            fecha: fechaActualServidor.toISOString(),
+            persona: persona
         };
 
         res.status(201).json({ success: true, message: 'Gasto registrado exitosamente.', gasto: nuevoGasto });
