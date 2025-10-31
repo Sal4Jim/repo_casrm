@@ -23,6 +23,9 @@
 
     <!-- Tu CSS personalizado -->
     <link rel="stylesheet" href="css/gestion-clientes.css">
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/logoCASRM.png" type="image/png">
 </head>
 
 <body>
@@ -59,9 +62,15 @@
 
             <div class="card-body">
                 <div class="row mb-4">
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <div class="search-box">
                             <input type="text" class="form-control" placeholder="Buscar cliente...">
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center justify-content-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchMostrarInactivos">
+                            <label class="form-check-label" for="switchMostrarInactivos">Mostrar inactivos</label>
                         </div>
                     </div>
                 </div>
@@ -256,8 +265,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="col-md-6"><small class="text-muted">Cliente:</small><p id="saleDetailClient" class="fw-bold">-</p></div>
-                        <div class="col-md-6"><small class="text-muted">Fecha:</small><p id="saleDetailDate" class="fw-bold">-</p></div>
+                        <div class="col-md-4"><small class="text-muted">ID Venta:</small><p id="saleDetailId" class="fw-bold">-</p></div>
+                        <div class="col-md-4"><small class="text-muted">Cliente:</small><p id="saleDetailClient" class="fw-bold">-</p></div>
+                        <div class="col-md-4"><small class="text-muted">Fecha:</small><p id="saleDetailDate" class="fw-bold">-</p></div>
                     </div>
                     <h6>Productos y Bonificaciones</h6>
                     <div class="table-responsive">
@@ -279,7 +289,12 @@
                         <!-- El resumen de totales se insertará aquí -->
                     </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger me-auto" id="btnAnularVenta">
+                        <i class="fas fa-ban me-2"></i> Anular Venta
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>

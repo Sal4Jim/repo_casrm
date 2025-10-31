@@ -13,4 +13,6 @@ router.get('/:id', ventaController.getVentaById);
 
 router.get('/:id/pdf', ventaController.generatePdfVenta);
 
+router.put('/:id/anular', ventaController.anularVenta);
+
 module.exports = router;

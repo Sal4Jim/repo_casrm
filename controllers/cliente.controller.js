@@ -61,6 +61,7 @@ const getAllClientes = (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const search = req.query.search || ''; 
+  const status = req.query.status || 'activo'; // 'activo', 'inactivo', o 'todos'
   const offset = (page - 1) * limit;
 
   pool.getConnection((err, connection) => {
@@ -68,11 +69,17 @@ const getAllClientes = (req, res) => {
       console.error("❌ Error obteniendo conexión:", err.message);
       return res.status(500).json({
         success: false,
-        error: "Error de conexión a la base de datos"
+        error: "Error de conexión a la base de datos",
       });
     }
 
     const searchTerm = `%${search.trim()}%`;
+    let statusCondition = 'c.activo = 1'; // Por defecto, solo activos
+    if (status === 'inactivo') {
+      statusCondition = 'c.activo = 0';
+    } else if (status === 'todos') {
+      statusCondition = '1=1'; // Siempre verdadero, para mostrar todos
+    }
 
    
     const countSql = `
@@ -82,7 +89,7 @@ const getAllClientes = (req, res) => {
          OR nombre LIKE ? 
          OR ruc LIKE ? 
          OR ciudad LIKE ? 
-         OR telefono LIKE ?
+         OR telefono LIKE ? 
     `;
 
     connection.execute(countSql, [search, searchTerm, searchTerm, searchTerm, searchTerm], (error, countResults) => {
@@ -99,20 +106,21 @@ const getAllClientes = (req, res) => {
 
       
       const sql = `
-        SELECT cliente_id, nombre, ruc, ciudad, telefono, direccion, email
-        FROM clientes 
-        WHERE ? = ''
-           OR nombre LIKE ? 
-           OR ruc LIKE ? 
-           OR ciudad LIKE ? 
-           OR telefono LIKE ?
+        SELECT cliente_id, nombre, ruc, ciudad, telefono, direccion, email, c.activo
+        FROM clientes c
+        WHERE (${statusCondition}) AND
+              (? = ''
+               OR c.nombre LIKE ? 
+               OR c.ruc LIKE ? 
+               OR c.ciudad LIKE ? 
+               OR c.telefono LIKE ?)
         ORDER BY nombre ASC 
         LIMIT ? OFFSET ?
       `;
 
       connection.execute(
         sql,
-        [search, searchTerm, searchTerm, searchTerm, searchTerm, limit, offset],
+        [search, searchTerm, searchTerm, searchTerm, searchTerm, limit, offset], // Los parámetros de statusCondition ya están en el string
         (error, results) => {
           connection.release();
 
@@ -223,7 +231,7 @@ const getClienteById = (req, res) => {
 
     const sql = `
       SELECT 
-        c.cliente_id, c.nombre, c.ruc, c.ciudad, c.telefono, c.direccion, c.email, c.agencia,
+        c.cliente_id, c.nombre, c.ruc, c.ciudad, c.telefono, c.direccion, c.email, c.agencia, c.activo,
         n.descripcion AS notas 
       FROM clientes c
       LEFT JOIN notas n ON c.nota_id = n.nota_id
@@ -241,52 +249,36 @@ const getClienteById = (req, res) => {
   });
 };
 
-const deleteCliente = (req, res) => {
+/**
+ * @function toggleClienteStatus
+ * @description Cambia el estado de un cliente entre activo (1) e inactivo (0).
+ */
+const toggleClienteStatus = async (req, res) => {
   const { id } = req.params;
+  const { activo } = req.body;
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("❌ Error obteniendo conexión:", err.message);
-      return res.status(500).json({
-        success: false,
-        error: "Error de conexión a la base de datos"
-      });
+  if (activo === undefined || typeof activo !== 'boolean') {
+    return res.status(400).json({ success: false, error: "Se requiere un estado 'activo' (true/false)." });
+  }
+
+  const nuevoEstado = activo ? 1 : 0;
+  const mensaje = activo ? 'reactivado' : 'desactivado';
+
+  try {
+    const [result] = await pool.promise().execute(
+      'UPDATE clientes SET activo = ? WHERE cliente_id = ?',
+      [nuevoEstado, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Cliente no encontrado.' });
     }
 
-    const checkSql = `SELECT cliente_id FROM clientes WHERE cliente_id = ?`;
-    connection.execute(checkSql, [id], (error, results) => {
-      if (error) {
-        connection.release();
-        return res.status(500).json({
-          success: false,
-          error: "Error al verificar cliente"
-        });
-      }
-
-      if (results.length === 0) {
-        connection.release();
-        return res.status(404).json({
-          success: false,
-          error: "Cliente no encontrado"
-        });
-      }
-
-      const deleteSql = `DELETE FROM clientes WHERE cliente_id = ?`;
-      connection.execute(deleteSql, [id], (error, results) => {
-        connection.release();
-
-        if (error) {
-          console.error("❌ Error al eliminar cliente:", error.message);
-          return res.status(500).json({
-            success: false,
-            error: "Error interno del servidor"
-          });
-        }
-
-        res.json({ success: true, message: "Cliente eliminado exitosamente", id: id });
-      });
-    });
-  });
+    res.json({ success: true, message: `Cliente ${mensaje} exitosamente.` });
+  } catch (error) {
+    console.error(`❌ Error al cambiar estado del cliente:`, error);
+    res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+  }
 };
 
 const updateNotasCliente = async (req, res) => {
@@ -342,4 +334,4 @@ const updateNotasCliente = async (req, res) => {
   }
 };
 
-module.exports = { getAllClientes, createCliente, updateCliente, getClienteById, deleteCliente, updateNotasCliente };
+module.exports = { getAllClientes, createCliente, updateCliente, getClienteById, toggleClienteStatus, updateNotasCliente };

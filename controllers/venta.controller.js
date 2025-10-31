@@ -98,13 +98,65 @@ exports.createVenta = async (req, res) => {
     }
 };
 
+/**
+ * @function anularVenta
+ * @description Anula una venta, restaurando el stock de productos y bonificaciones.
+ * La venta no se elimina, sino que se marca como inactiva.
+ */
+exports.anularVenta = async (req, res) => {
+    const { id } = req.params;
+    const ventaId = parseInt(id);
+
+    let connection;
+    try {
+        connection = await pool.promise().getConnection();
+        await connection.beginTransaction();
+
+        // 1. Verificar que la venta exista y no esté ya anulada
+        const [ventaRows] = await connection.execute('SELECT * FROM venta WHERE compra_id = ?', [ventaId]);
+        if (ventaRows.length === 0) {
+            throw new Error('Venta no encontrada.');
+        }
+        if (ventaRows[0].activa === 0) {
+            throw new Error('Esta venta ya ha sido anulada.');
+        }
+
+        // 2. Obtener todos los detalles de la venta (productos y bonificaciones)
+        const [detalles] = await connection.execute('SELECT * FROM detalle_venta WHERE compra_id = ?', [ventaId]);
+
+        // 3. Restaurar el stock para cada item
+        for (const item of detalles) {
+            if (item.producto_id) { // Es un producto regular
+                await connection.execute('UPDATE productos SET stock = stock + ? WHERE producto_id = ?', [item.cantidad, item.producto_id]);
+            } else if (item.bonificacion_id) { // Es una bonificación
+                await connection.execute('UPDATE bonificaciones SET stock = stock + ? WHERE bonificacion_id = ?', [item.cantidad, item.bonificacion_id]);
+            }
+        }
+
+        // 4. Marcar la venta como inactiva (anulada)
+        await connection.execute('UPDATE venta SET activa = 0 WHERE compra_id = ?', [ventaId]);
+
+        // 5. Confirmar la transacción
+        await connection.commit();
+
+        res.json({ success: true, message: 'Venta anulada y stock restaurado correctamente.' });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('❌ Error al anular la venta:', error);
+        res.status(500).json({ success: false, error: error.message || 'Error interno del servidor al anular la venta.' });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
 // Obtener todas las ventas de un cliente específico
 exports.getVentasByCliente = async (req, res) => {
     const { cliente_id } = req.params;
 
     try {
         const query = `
-            SELECT compra_id, fecha, total 
+            SELECT compra_id, fecha, total, activa
             FROM venta 
             WHERE cliente_id = ? 
             ORDER BY fecha DESC

@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         clientes.forEach(cliente => {
             const row = document.createElement('tr');
+            if (cliente.activo === 0) row.classList.add('table-secondary', 'text-muted');
             row.innerHTML = `
                <td>${cliente.nombre || '<span class="text-muted">No especificado</span>'}</td>
                <td>${cliente.ruc || '<span class="text-muted">-</span>'}</td>
@@ -130,9 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
                <button class="btn btn-sm btn-primary me-1 edit-btn" data-bs-toggle="modal" data-bs-target="#clientModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-edit"></i>
                </button>
-               <button class="btn btn-sm btn-danger me-1 delete-btn" data-cliente-id="${cliente.cliente_id}">
-               <i class="fas fa-trash"></i>
-               </button>
+               ${cliente.activo === 1 
+                ? `<button class="btn btn-sm btn-danger me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="0" title="Desactivar Cliente"><i class="fas fa-user-slash"></i></button>`
+                : `<button class="btn btn-sm btn-success me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="1" title="Reactivar Cliente"><i class="fas fa-user-check"></i></button>`
+               }
                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-info-circle"></i>
                </button>
@@ -221,13 +223,18 @@ document.addEventListener('DOMContentLoaded', function () {
         button.disabled = isLoading;
     }
 
-    function cargarClientes(page = 1, showNotification = false, searchTerm = '') {
+    function cargarClientes(page = 1, showNotification = false) {
         currentPage = page;
+        const searchTerm = document.querySelector('.search-box input').value.trim();
+        const mostrarInactivos = document.getElementById('switchMostrarInactivos').checked;
+        const status = mostrarInactivos ? 'todos' : 'activo';
+
         console.log(`🔄 Cargando clientes - Página ${page} ${searchTerm ? `(Búsqueda: "${searchTerm}")` : ''}`);
 
         const params = new URLSearchParams({
             page: page,
-            limit: itemsPerPage
+            limit: itemsPerPage,
+            status: status
         });
         if (searchTerm) params.append('search', searchTerm);
 
@@ -252,11 +259,18 @@ document.addEventListener('DOMContentLoaded', function () {
         let searchTimeout;
         searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
-            const searchTerm = this.value.trim();
             searchTimeout = setTimeout(() => {
                 currentPage = 1;
-                cargarClientes(1, false, searchTerm);
+                cargarClientes(1, false);
             }, 400);
+        });
+    }
+
+    const switchInactivos = document.getElementById('switchMostrarInactivos');
+    if (switchInactivos) {
+        switchInactivos.addEventListener('change', function() {
+            currentPage = 1;
+            cargarClientes(1, false);
         });
     }
 
@@ -267,10 +281,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
         const editBtn = e.target.closest('.edit-btn');
-        const deleteBtn = e.target.closest('.delete-btn');
+        const statusBtn = e.target.closest('.status-btn');
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
         const printSaleBtn = e.target.closest('.print-sale-btn');
         const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
+        const anularVentaBtn = e.target.closest('#btnAnularVenta');
         const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
 
         if (editBtn) {
@@ -303,34 +318,31 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (deleteBtn) {
-            const clienteId = deleteBtn.getAttribute('data-cliente-id');
-            const clienteNombre = deleteBtn.closest('tr').querySelector('td:first-child').textContent.trim();
+        if (statusBtn) {
+            const clienteId = statusBtn.dataset.clienteId;
+            const nuevoStatus = parseInt(statusBtn.dataset.status);
+            const accion = nuevoStatus === 1 ? 'reactivar' : 'desactivar';
+            const clienteNombre = statusBtn.closest('tr').querySelector('td:first-child').textContent.trim();
 
             Swal.fire({
                 title: '¿Estás seguro?',
-                html: `Vas a eliminar al cliente <strong>${clienteNombre}</strong>.<br>Esta acción no se puede deshacer.`,
+                html: `Vas a <strong>${accion}</strong> al cliente <strong>${clienteNombre}</strong>.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, eliminar',
+                confirmButtonText: `Sí, ${accion}`,
                 cancelButtonText: 'Cancelar',
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.delete(`/api/clientes/${clienteId}`)
+                    axios.put(`/api/clientes/${clienteId}/status`, { activo: nuevoStatus === 1 })
                         .then(response => {
                             if (response.data.success) {
-                                showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> eliminado exitosamente`, 'success');
+                                showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> ${accion}do exitosamente`, 'success');
                                 cargarClientes(currentPage);
                             }
                         })
                         .catch(error => {
-                            let mensaje = "Error al eliminar el cliente";
-                            if (error.response?.data?.error) {
-                                mensaje = error.response.data.error;
-                            } else if (error.response?.status === 404) {
-                                mensaje = "Cliente no encontrado";
-                            }
+                            const mensaje = error.response?.data?.error || `Error al ${accion} el cliente.`;
                             showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
                         });
                 }
@@ -386,20 +398,53 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (printSaleBtn) {
-            const ventaId = printSaleBtn.dataset.ventaId;
-            const numeroCompra = printSaleBtn.dataset.numeroCompra;
-            if (ventaId) {
-                descargarPdfVenta(ventaId, numeroCompra);
-            }
-            return;
-        }
+        // if (printSaleBtn) {
+        //     const ventaId = printSaleBtn.dataset.ventaId;
+        //     const numeroCompra = printSaleBtn.dataset.numeroCompra;
+        //     if (ventaId) {
+        //         descargarPdfVenta(ventaId, numeroCompra);
+        //     }
+        //     return;
+        // }
 
         if (exportCsvBtn) {
             if (clienteIdParaNotas) {
                 exportarHistorialCSV(clienteIdParaNotas);
             }
             return;
+        }
+
+        if (anularVentaBtn) {
+            const ventaId = anularVentaBtn.dataset.ventaId;
+            if (!ventaId) return;
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción anulará la venta y restaurará el stock de los productos. No se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, anular venta',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios.put(`/api/ventas/${ventaId}/anular`)
+                        .then(response => {
+                            if (response.data.success) {
+                                showToast(response.data.message, 'success');
+                                saleDetailModal.hide();
+                                // El modal de cliente se mostrará automáticamente al cerrar el de venta.
+                                // Recargamos el historial para que se vea el cambio.
+                                cargarHistorialCompras(clienteIdParaNotas);
+                            }
+                        })
+                        .catch(error => {
+                            const mensaje = error.response?.data?.error || 'Error al anular la venta.';
+                            showToast(mensaje, 'error');
+                        });
+                }
+            });
         }
 
         if (addSaleModalBtn) {
@@ -825,23 +870,30 @@ document.addEventListener('DOMContentLoaded', function () {
                     ventasPaginadas.forEach((venta, index) => {
                         const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
                         // El número de compra se calcula desde el total, no desde el índice de la página
-                        const numeroCompra = totalVentas - (startIndex + index);
+                        const numeroCompra = totalVentas - (startIndex + index); // Se mantiene para numeración
+                        const isAnulada = venta.activa === 0;
+
                         const item = document.createElement('div');
-                        item.className = 'list-group-item';
+                        item.className = `list-group-item ${isAnulada ? 'list-group-item-light text-muted' : ''}`;
                         item.innerHTML = `
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1">Compra #${numeroCompra}</h6>
+                                    <h6 class="mb-1">
+                                        Compra #${numeroCompra}
+                                        ${isAnulada ? '<span class="badge bg-danger ms-2">Anulada</span>' : ''}
+                                    </h6>
                                     <p class="text-muted mb-0"><small>${fecha}</small></p>
                                 </div>
                                 <div class="text-end">
-                                    <h6 class="text-success mb-1">S/. ${Number(venta.total).toFixed(2)}</h6>
+                                    <h6 class="${isAnulada ? 'text-decoration-line-through' : 'text-success'} mb-1">
+                                        S/. ${Number(venta.total).toFixed(2)}
+                                    </h6>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <button class="btn btn-outline-secondary sale-detail-btn" data-venta-id="${venta.compra_id}" data-numero-compra="${numeroCompra}" title="Ver detalles">
+                                        <button class="btn btn-outline-secondary sale-detail-btn" 
+                                                data-venta-id="${venta.compra_id}" 
+                                                data-numero-compra="${numeroCompra}" 
+                                                title="Ver detalles">
                                             <i class="fas fa-eye"></i> Ver
-                                        </button>
-                                        <button class="btn btn-outline-danger print-sale-btn" data-venta-id="${venta.compra_id}" data-numero-compra="${numeroCompra}" title="Imprimir PDF">
-                                            <i class="fas fa-file-pdf"></i> PDF
                                         </button>
                                     </div>
                                 </div>
@@ -893,6 +945,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tableBody = document.getElementById('saleDetailTableBody');
         const summaryDiv = document.getElementById('saleDetailSummary');
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+        document.getElementById('btnAnularVenta').dataset.ventaId = ventaId;
         
         saleDetailModal.show();
 
@@ -900,7 +953,17 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 if (response.data.success) {
                     const venta = response.data.venta;
+                    document.getElementById('saleDetailId').textContent = venta.compra_id;
                     document.getElementById('saleDetailDate').textContent = new Date(venta.fecha).toLocaleDateString('es-ES');
+                    
+                    // Ocultar o mostrar el botón de anular según el estado de la venta
+                    const btnAnular = document.getElementById('btnAnularVenta');
+                    if (venta.activa === 0) {
+                        btnAnular.style.display = 'none';
+                    } else {
+                        btnAnular.style.display = 'block';
+                    }
+
                     tableBody.innerHTML = '';
 
                     venta.detalles.forEach(item => {
@@ -929,37 +992,37 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    async function descargarPdfVenta(ventaId, numeroCompra) {
-        const originalButton = document.querySelector(`.print-sale-btn[data-venta-id="${ventaId}"]`);
-        const originalContent = originalButton.innerHTML;
-        originalButton.disabled = true;
-        originalButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+    // async function descargarPdfVenta(ventaId, numeroCompra) {
+    //     const originalButton = document.querySelector(`.print-sale-btn[data-venta-id="${ventaId}"]`);
+    //     const originalContent = originalButton.innerHTML;
+    //     originalButton.disabled = true;
+    //     originalButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
 
-        try {
-            const response = await axios.get(`/api/ventas/${ventaId}/pdf`, {
-                responseType: 'blob' // Importante para manejar archivos
-            });
+    //     try {
+    //         const response = await axios.get(`/api/ventas/${ventaId}/pdf`, {
+    //             responseType: 'blob' // Importante para manejar archivos
+    //         });
 
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            const fileName = `recibo_venta_${numeroCompra}.pdf`;
-            link.setAttribute('download', fileName);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
+    //         const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         const fileName = `recibo_venta_${numeroCompra}.pdf`;
+    //         link.setAttribute('download', fileName);
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         link.remove();
+    //         window.URL.revokeObjectURL(url);
 
-            showToast(`Recibo #${numeroCompra} descargado.`, 'success');
+    //         showToast(`Recibo #${numeroCompra} descargado.`, 'success');
 
-        } catch (error) {
-            console.error('Error al descargar el PDF de la venta:', error);
-            showToast('Error al generar el recibo PDF.', 'error');
-        } finally {
-            originalButton.disabled = false;
-            originalButton.innerHTML = originalContent;
-        }
-    }
+    //     } catch (error) {
+    //         console.error('Error al descargar el PDF de la venta:', error);
+    //         showToast('Error al generar el recibo PDF.', 'error');
+    //     } finally {
+    //         originalButton.disabled = false;
+    //         originalButton.innerHTML = originalContent;
+    //     }
+    // }
 
     async function exportarHistorialCSV(clienteId) {
         const btn = document.getElementById('btnExportarHistorialCSV');
@@ -1011,8 +1074,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Volver a mostrar el modal de detalle de cliente cuando se cierre el de detalle de venta
     const saleDetailModalEl = document.getElementById('saleDetailModal');
     if (saleDetailModalEl) {
-        saleDetailModalEl.addEventListener('hidden.bs.modal', function () {
-            customerDetailModal.show();
+        saleDetailModalEl.addEventListener('hidden.bs.modal', function (event) {
+            // Solo volver a mostrar el modal de cliente si no se está cerrando la página o cambiando de modal principal
+            if (document.body.classList.contains('modal-open')) {
+                 customerDetailModal.show();
+            }
         });
     }
 });
