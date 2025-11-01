@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Funciones principales ---
 
     // Función para cargar todos los datos necesarios
-    async function cargarDatos() {
+    async function cargarDatos(callback) {
         try {
             // Usamos Promise.all para cargar ventas y gastos en paralelo
             const [ventasRes, gastosRes] = await Promise.all([
@@ -108,8 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Todas las ventas cargadas:', allVentas);
             console.log('Todos los gastos cargados:', allGastos);
 
-            // Aplicar filtro por defecto (Este Mes) al cargar
-            applyFilter('month');
+            // Si se proporciona un callback, ejecutarlo.
+            // Esto se usará para aplicar el filtro después de cargar los datos.
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
 
         } catch (error) {
             console.error('Error al cargar los datos para los reportes:', error);
@@ -117,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Aplica el filtro de fecha a los datos y actualiza los KPIs
-    function applyFilter(period, customStart = null, customEnd = null) {
+    async function applyFilter(period, customStart = null, customEnd = null) {
         let startDate, endDate;
 
         if (period === 'custom' && customStart && customEnd) {
@@ -138,22 +141,26 @@ document.addEventListener('DOMContentLoaded', function() {
         fechaInicioEl.value = formatDate(startDate);
         fechaFinEl.value = formatDate(endDate);
 
-        // Filtrar ventas
-        filteredVentas = allVentas.filter(venta => {
-            return venta.fecha >= startDate && venta.fecha <= endDate;
+        // Volver a cargar los datos de ventas y gastos antes de filtrar
+        await cargarDatos(() => {
+            // Este código se ejecuta DESPUÉS de que los datos se hayan recargado
+            // Filtrar ventas
+            filteredVentas = allVentas.filter(venta => {
+                return venta.fecha >= startDate && venta.fecha <= endDate;
+            });
+
+            // Filtrar gastos
+            filteredGastos = allGastos.filter(gasto => {
+                return gasto.fecha >= startDate && gasto.fecha <= endDate;
+            });
+
+            console.log(`Datos filtrados para el período ${period} (${formatDate(startDate)} - ${formatDate(endDate)}):`);
+            console.log('Ventas filtradas:', filteredVentas);
+            console.log('Gastos filtrados:', filteredGastos);
+
+            updateKPIs();
+            renderCharts(startDate, endDate); // Renderizar los gráficos con los datos filtrados y las fechas
         });
-
-        // Filtrar gastos
-        filteredGastos = allGastos.filter(gasto => {
-            return gasto.fecha >= startDate && gasto.fecha <= endDate;
-        });
-
-        console.log(`Datos filtrados para el período ${period} (${formatDate(startDate)} - ${formatDate(endDate)}):`);
-        console.log('Ventas filtradas:', filteredVentas);
-        console.log('Gastos filtrados:', filteredGastos);
-
-        updateKPIs();
-        renderCharts(startDate, endDate); // Renderizar los gráficos con los datos filtrados y las fechas
     }
 
     // Calcula y actualiza los KPIs en el DOM
@@ -350,18 +357,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 'S/. '
             );
             topProductosIngresosChartInstance = window.chartInstances.topProductosIngresosChart;
+            delete window.chartInstances.topProductosIngresosChart; // Limpiar la instancia global
 
             // Renderizar gráfico por cantidad
             renderBarChart(
                 'topProductosCantidadChart',
                 topProductosCantidadChartInstance,
-                data.topPorCantidad.map(p => p.nombre_producto).reverse(),
-                data.topPorCantidad.map(p => p.total_cantidad).reverse(),
+                data.topPorCantidad.map(p => p.nombre_producto),
+                data.topPorCantidad.map(p => p.total_cantidad),
                 'Cantidad Vendida',
                 'rgba(75, 192, 192, 0.8)',
                 ''
             );
             topProductosCantidadChartInstance = window.chartInstances.topProductosCantidadChart;
+            delete window.chartInstances.topProductosCantidadChart; // Limpiar la instancia global
 
         } catch (error) {
             console.error('Error al renderizar gráficos de productos:', error);
@@ -370,13 +379,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función genérica para crear gráficos de barras horizontales
     function renderBarChart(canvasId, chartInstance, labels, data, label, color, prefix = '') {
+        // Asegurarse de que el objeto global exista para evitar errores
+        window.chartInstances = window.chartInstances || {};
+
         const ctx = document.getElementById(canvasId).getContext('2d');
         if (chartInstance) {
             chartInstance.destroy();
         }
 
-        window.chartInstances = window.chartInstances || {};
-        window.chartInstances[canvasId] = new Chart(ctx, {
+        const newChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -406,6 +417,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        // Asignar la nueva instancia al objeto global para que pueda ser recogida
+        window.chartInstances[canvasId] = newChartInstance;
     }
 
     // --- Event Listeners ---
@@ -413,10 +427,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Eventos para los botones de período predefinidos
     periodButtons.forEach(button => {
         button.addEventListener('click', function() {
+            const period = this.dataset.period;
+            // Siempre llamar a applyFilter, incluso si el botón ya está activo.
+            applyFilter(period);
+
+            // Gestionar la clase 'active' después de la llamada.
             periodButtons.forEach(btn => btn.classList.remove('active')); // Quitar 'active' de todos
             this.classList.add('active'); // Añadir 'active' al botón clickeado
-            const period = this.dataset.period;
-            applyFilter(period);
         });
     });
 
@@ -433,5 +450,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Cargar datos al iniciar la página
-    cargarDatos();
+    // Ahora, la carga inicial también aplica el filtro del mes actual como callback
+    cargarDatos(() => {
+        applyFilter('month');
+    });
 });
