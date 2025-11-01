@@ -25,7 +25,7 @@ exports.getProducts = (req, res) => {
       FROM productos p
       JOIN categorias c ON p.categoria_id = c.categoria_id
     `;
-    const whereClause = `WHERE ? = '' OR p.nombre LIKE ?`;
+    const whereClause = `WHERE p.activo = 1 AND (? = '' OR p.nombre LIKE ?)`;
     const orderClause = `ORDER BY p.nombre ASC`;
     const limitClause = limit > 0 ? `LIMIT ? OFFSET ?` : '';
 
@@ -106,20 +106,21 @@ exports.updateProduct = (req, res) => {
   });
 };
 
-// Eliminar producto
-exports.deleteProduct = (req, res) => {
+// Desactivar/Eliminar lógicamente un producto
+exports.toggleProductStatus = (req, res) => {
   const { id } = req.params;
+  // Por ahora, solo desactivamos. El body podría usarse para reactivar en el futuro.
+  const nuevoEstado = 0; // 0 para inactivo
 
-  const query = 'DELETE FROM productos WHERE producto_id = ?';
+  const query = 'UPDATE productos SET activo = ? WHERE producto_id = ?';
 
-  pool.execute(query, [id], (err, result) => {
+  pool.execute(query, [nuevoEstado, id], (err, result) => {
     if (err) {
-      console.error('Error al eliminar producto:', err);
-      return res.status(500).json({ error: 'Error al eliminar producto' });
+      console.error('Error al desactivar producto:', err);
+      return res.status(500).json({ success: false, error: 'Error al desactivar el producto' });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Producto no encontrado' });
-    }
-    res.json({ message: 'Producto eliminado correctamente' });
+    if (result.affectedRows === 0) return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+    
+    res.json({ success: true, message: 'Producto desactivado correctamente' });
   });
 };

@@ -261,6 +261,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+
+        const deleteButton = e.target.closest('button[data-action="delete"]');
+        if (deleteButton) {
+            const productId = deleteButton.dataset.id;
+            const productoAEliminar = productos.find(p => p.producto_id == productId);
+
+            if (productoAEliminar) {
+                Swal.fire({ // La alerta ahora dice "desactivará" en lugar de "eliminará"
+                    title: '¿Estás seguro?',
+                    html: `Se eliminará permanentemente el producto <strong>${productoAEliminar.nombre}</strong>.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/api/productos/${productId}/status`, { // URL y método actualizados
+                            method: 'PUT'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) throw new Error(data.error || 'Error al desactivar el producto.');
+                            showToast(`Producto <strong>${productoAEliminar.nombre}</strong> desactivado.`, 'success');
+                            cargarProductos(); // Recargar la lista desde el servidor
+                        }) 
+                        .catch(err => {
+                            showToast('No se pudo eliminar el producto.', 'error');
+                            console.error('Error al eliminar:', err);
+                        });
+                    }
+                });
+            }
+        }
     });
 
     // Limpiar el formulario y restaurar el título cuando se abre para un nuevo producto
