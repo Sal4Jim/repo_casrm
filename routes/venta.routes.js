@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const ventaController = require('../controllers/venta.controller');
 
+// GET /api/ventas - Obtener todas las ventas (para reportes)
+router.get('/', ventaController.getAllVentas);
+
 // POST /api/ventas - Crear una nueva venta
 router.post('/', ventaController.createVenta);
 

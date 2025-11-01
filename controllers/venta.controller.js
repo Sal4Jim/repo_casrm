@@ -146,3 +146,20 @@ exports.getVentaById = async (req, res) => {
         res.status(500).json({ success: false, error: 'Error interno del servidor.' });
     }
 };
+
+/**
+ * @function getAllVentas
+ * @description Obtiene todas las ventas de la base de datos para los reportes.
+ */
+exports.getAllVentas = async (req, res) => {
+    try {
+        const query = `
+            SELECT compra_id, cliente_id, fecha, total FROM venta ORDER BY fecha DESC
+        `;
+        const [ventas] = await pool.promise().query(query);
+        res.json({ success: true, ventas });
+    } catch (error) {
+        console.error('❌ Error al obtener todas las ventas:', error);
+        res.status(500).json({ success: false, error: 'Error interno del servidor.' });
+    }
+};

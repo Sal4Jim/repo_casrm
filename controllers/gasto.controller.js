@@ -36,8 +36,8 @@ exports.createGasto = async (req, res) => {
             gasto_id: result.insertId,
             descripcion,
             monto: parseFloat(monto),
-            fecha,
-            persona: persona // Corregido para coincidir con la tabla
+            fecha: fecha,
+            persona: persona
         };
 
         res.status(201).json({ success: true, message: 'Gasto registrado exitosamente.', gasto: nuevoGasto });
