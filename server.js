@@ -7,6 +7,7 @@ const bonificacionesRoutes = require('./routes/bonificaciones.routes');
 const cotizacionRoutes = require('./routes/cotizacion.routes'); // Importar rutas de cotizaciones
 const gastoRoutes = require('./routes/gasto.routes.js'); // Importar rutas de gastos
 const reportesRoutes = require('./routes/reportes.routes.js'); // Importar rutas de reportes
+const responsableRoutes = require('./routes/responsable.routes.js'); // Importar rutas de responsables
 const { testConnection } = require('./config/database');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/bonificaciones', bonificacionesRoutes);
 app.use('/api/cotizaciones', cotizacionRoutes); // Usar rutas de cotizaciones
 app.use('/api/gastos', gastoRoutes); // Usar rutas de gastos
 app.use('/api/reportes', reportesRoutes); // Usar rutas de reportes
+app.use('/api/responsables', responsableRoutes); // Usar rutas de responsables
 
 // Ruta de prueba para la base de datos (con callback)
 app.get('/test-db', (req, res) => {

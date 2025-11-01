@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let gastos = []; // El array ahora se cargará desde la API
+    let responsables = []; // Array para almacenar los responsables
     const gastosPorPagina = 6;
     let paginaActual = 1;
 
@@ -7,6 +8,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const paginationControls = document.getElementById('pagination-controls');
     const paginationInfo = document.getElementById('pagination-info');
     const searchInput = document.getElementById('searchGastos');
+    const gastoForm = document.getElementById('gasto-form');
+    const formContainer = document.getElementById('gasto-form-container');
+    const toggleFormBtn = document.getElementById('toggle-form-btn');
+    let editandoId = null; // Variable para saber si estamos editando
+    const personaSelect = document.getElementById('persona');
+
+    // --- Referencias para la gestión de responsables ---
+    const gestionResponsablesModalEl = document.getElementById('gestionResponsablesModal');
+    const responsablesTableBody = document.getElementById('responsablesTableBody');
+    const responsableModal = new bootstrap.Modal(document.getElementById('responsableModal'));
+    const responsableForm = document.getElementById('responsableForm');
+    const responsableModalLabel = document.getElementById('responsableModalLabel');
+    const btnSaveResponsable = document.getElementById('btnSaveResponsable');
 
     async function cargarGastos() {
         try {
@@ -23,6 +37,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    async function cargarResponsables() {
+        try {
+            const response = await fetch('/api/responsables');
+            if (!response.ok) throw new Error('Error al cargar responsables.');
+            const data = await response.json();
+            if (data.success) {
+                personaSelect.innerHTML = '<option value="" disabled selected>Seleccione un responsable</option>';
+                responsables = data.responsables; // Guardar la lista completa
+                data.responsables.forEach(r => {
+                    const option = document.createElement('option');
+                    option.value = r.responsable_id;
+                    option.textContent = r.nombre;
+                    personaSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(error.message, 'error');
+        }
+    }
+
+    // --- Funciones para la gestión de responsables ---
+
+    async function cargarTodosLosResponsables() {
+        try {
+            // Ahora usaremos una ruta que traiga a TODOS los responsables (activos e inactivos)
+            const response = await fetch('/api/responsables?status=todos');
+            const data = await response.json();
+
+            if (data.success) {
+                responsables = data.responsables; // Actualizamos la lista local
+                renderResponsablesTable();
+            }
+        } catch (error) {
+            showToast('Error al cargar la lista de responsables.', 'error');
+        }
+    }
+
+    function renderResponsablesTable() {
+        responsablesTableBody.innerHTML = '';
+        if (responsables.length === 0) {
+            responsablesTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay responsables registrados.</td></tr>';
+            return;
+        }
+        responsables.forEach(resp => {
+            const row = document.createElement('tr'); // La columna 'activo' debe venir del backend
+            row.innerHTML = `
+                <td>${resp.nombre}</td>
+                <td><span class="badge ${resp.activo ? 'bg-success' : 'bg-secondary'}">${resp.activo ? 'Activo' : 'Inactivo'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-primary me-1 edit-responsable-btn" data-id="${resp.responsable_id}" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm ${resp.activo ? 'btn-warning' : 'btn-success'}" data-id="${resp.responsable_id}" data-status="${resp.activo ? '0' : '1'}" title="${resp.activo ? 'Desactivar' : 'Activar'}">
+                        <i class="fas ${resp.activo ? 'fa-ban' : 'fa-check-circle'}"></i>
+                    </button>
+                </td>
+            `;
+            responsablesTableBody.appendChild(row);
+        });
+    }
+
     function mostrarGastos() {
         const searchTerm = searchInput.value.toLowerCase();
         const gastosFiltrados = gastos.filter(g => 
@@ -36,15 +110,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tablaBody.innerHTML = '';
         if (gastosPagina.length === 0) {
-            tablaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se encontraron gastos.</td></tr>';
+            tablaBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron gastos.</td></tr>';
         } else {
             gastosPagina.forEach(gasto => {
                 const fila = document.createElement('tr');
+                fila.dataset.gastoId = gasto.gasto_id;
                 fila.innerHTML = `
                     <td>${gasto.descripcion}</td>
                     <td>S/. ${Number(gasto.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</td>
                     <td>${new Date(gasto.fecha).toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
                     <td>${gasto.persona || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1 edit-btn" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
                 `;
                 tablaBody.appendChild(fila);
             });
@@ -107,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Cargar los gastos iniciales desde la base de datos
     cargarGastos();
+    cargarResponsables();
 
     // Set current date by default
     const today = new Date();
@@ -114,18 +198,25 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fecha').value = formattedDate;
     
     // Toggle form visibility
-    const toggleFormBtn = document.getElementById('toggle-form-btn');
-    const formContainer = document.getElementById('gasto-form-container');
-
-    toggleFormBtn.addEventListener('click', function() {
+    toggleFormBtn.addEventListener('click', () => {
         if (formContainer.style.display === 'none' || formContainer.style.display === '') {
             formContainer.style.display = 'block';
             toggleFormBtn.innerHTML = '<i class="fas fa-times me-2"></i> Cerrar Formulario';
         } else {
             formContainer.style.display = 'none';
             toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
+            // Si se cierra el formulario, reseteamos el modo edición
+            resetFormulario();
         }
     });
+
+    function resetFormulario() {
+        gastoForm.reset();
+        document.getElementById('fecha').value = formattedDate;
+        editandoId = null;
+        document.querySelector('#gasto-form-container .card-header h5').innerHTML = '<i class="fas fa-file-invoice-dollar me-2"></i> Registro de Gastos';
+        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-save me-2"></i> Guardar Gasto';
+    }
     
     // Form clear button
     document.getElementById('btn-limpiar').addEventListener('click', function() {
@@ -138,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Form submit handler
-    document.getElementById('gasto-form').addEventListener('submit', async function(e) {
+    gastoForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         // Form validation
@@ -146,34 +237,36 @@ document.addEventListener('DOMContentLoaded', function() {
             descripcion: document.getElementById('descripcion').value.trim(),
             monto: document.getElementById('monto').value,
             fecha: document.getElementById('fecha').value, // Enviamos solo la fecha, el servidor pondrá la hora.
-            persona: document.getElementById('persona').value.trim()
+            responsable_id: document.getElementById('persona').value
         };
         
-        if (!gastoData.descripcion || !gastoData.monto || !gastoData.fecha || !gastoData.persona) {
+        if (!gastoData.descripcion || !gastoData.monto || !gastoData.fecha || !gastoData.responsable_id) {
             showToast('Por favor complete todos los campos.', 'error');
             return;
         }
 
+        const esEdicion = !!editandoId;
+        const url = esEdicion ? `/api/gastos/${editandoId}` : '/api/gastos';
+        const method = esEdicion ? 'PUT' : 'POST';
+
         try {
-            const response = await fetch('/api/gastos', {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(gastoData)
             });
 
             const result = await response.json();
 
-            if (!response.ok) throw new Error(result.error || 'Error al guardar el gasto.');
+            if (!response.ok) throw new Error(result.error || (esEdicion ? 'Error al actualizar el gasto.' : 'Error al guardar el gasto.'));
 
             showToast(result.message, 'success');
             
-            // Añadir el nuevo gasto al inicio del array y recargar la tabla
-            gastos.unshift(result.gasto);
-            mostrarGastos();
+            // Recargar todos los gastos para reflejar el cambio
+            await cargarGastos();
 
             // Limpiar y ocultar el formulario
-            document.getElementById('gasto-form').reset();
-            document.getElementById('fecha').value = formattedDate;
+            resetFormulario();
             formContainer.style.display = 'none';
             toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
 
@@ -182,28 +275,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Funcionalidad de edición (ejemplo)
+    // Funcionalidad de edición y eliminación
     tablaBody.addEventListener('click', function(e) {
-        const editButton = e.target.closest('.edit-btn'); // Suponiendo que agregas botones de edición con esta clase
-        if (!editButton) return;
+        const editBtn = e.target.closest('.edit-btn');
+        const deleteBtn = e.target.closest('.delete-btn');
 
-        // Lógica para llenar el formulario con datos de la fila
-        const row = button.closest('tr');
-        const columns = row.querySelectorAll('td');
-        
-        document.getElementById('descripcion').value = columns[0].textContent.trim();
-        document.getElementById('monto').value = columns[1].textContent.trim().replace('S/. ', '').replace(',', '');
-        
-      // Convert date format
-        // const dateParts = columns[2].textContent.trim().split('/');
-        // const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-        // document.getElementById('fecha').value = formattedEditDate;
+        if (editBtn) {
+            const fila = editBtn.closest('tr');
+            const gastoId = fila.dataset.gastoId;
+            const gastoAEditar = gastos.find(g => g.gasto_id == gastoId);
 
-        document.getElementById('persona').value = columns[3].textContent.trim();
+            if (gastoAEditar) {
+                editandoId = gastoId;
+                document.getElementById('descripcion').value = gastoAEditar.descripcion;
+                document.getElementById('monto').value = gastoAEditar.monto;
+                // La fecha viene en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ), el input 'date' necesita 'YYYY-MM-DD'
+                document.getElementById('fecha').value = new Date(gastoAEditar.fecha).toISOString().split('T')[0];
+                // Buscamos el responsable_id correspondiente al nombre de la persona
+                const responsable = gastos.find(g => g.gasto_id == gastoId);
+                if (responsable) {
+                    // Necesitamos el ID del responsable, no el nombre. Lo buscamos en la lista de gastos.
+                    document.getElementById('persona').value = responsable.responsable_id;
+                }
 
-        // Scroll to form
-        formContainer.style.display = 'block';
-        formContainer.scrollIntoView({ behavior: 'smooth' });
+                // Cambiar UI del formulario a modo edición
+                document.querySelector('#gasto-form-container .card-header h5').innerHTML = '<i class="fas fa-edit me-2"></i> Editando Gasto';
+                document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync-alt me-2"></i> Actualizar Gasto';
+                formContainer.style.display = 'block';
+                toggleFormBtn.innerHTML = '<i class="fas fa-times me-2"></i> Cerrar Formulario';
+                formContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        if (deleteBtn) {
+            const fila = deleteBtn.closest('tr');
+            const gastoId = fila.dataset.gastoId;
+            const gastoAEliminar = gastos.find(g => g.gasto_id == gastoId);
+
+            if (gastoAEliminar) {
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    html: `Se eliminará permanentemente el gasto: <br><strong>${gastoAEliminar.descripcion}</strong>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch(`/api/gastos/${gastoId}`, { method: 'DELETE' });
+                            const data = await response.json();
+                            if (!response.ok) throw new Error(data.error || 'Error en el servidor.');
+                            
+                            showToast(data.message, 'success');
+                            await cargarGastos(); // Recargar la lista
+
+                        } catch (error) {
+                            showToast(error.message, 'error');
+                        }
+                    }
+                });
+            }
+        }
     });
 
     // Función para mostrar notificaciones Toast
@@ -223,4 +358,106 @@ document.addEventListener('DOMContentLoaded', function() {
         const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
         bsToast.show();
     }
+
+    // --- Event Listeners para la gestión de responsables ---
+
+    // Cargar la tabla de responsables cuando se abre el modal principal de gestión
+    gestionResponsablesModalEl.addEventListener('show.bs.modal', function () {
+        responsablesTableBody.innerHTML = '<tr><td colspan="3" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
+        cargarTodosLosResponsables();
+    });
+
+    // Abrir modal para nuevo responsable
+    document.getElementById('btnNuevoResponsable').addEventListener('click', () => {
+        responsableForm.reset();
+        document.getElementById('responsableId').value = '';
+        responsableModalLabel.innerHTML = '<i class="fas fa-user-plus me-2"></i> Nuevo Responsable';
+        btnSaveResponsable.innerHTML = 'Guardar';
+    });
+
+    // Guardar (crear o editar) responsable
+    btnSaveResponsable.addEventListener('click', async () => {
+        const id = document.getElementById('responsableId').value;
+        const nombre = document.getElementById('responsableName').value.trim();
+
+        if (!nombre) {
+            showToast('El nombre es obligatorio.', 'error');
+            return;
+        }
+
+        const esEdicion = !!id;
+        const url = esEdicion ? `/api/responsables/${id}` : '/api/responsables';
+        const method = esEdicion ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error);
+
+            showToast(result.message, 'success');
+            responsableModal.hide();
+            await cargarResponsables(); // Recarga tanto el select como la tabla
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+
+    // Delegación de eventos en la tabla de responsables
+    responsablesTableBody.addEventListener('click', async (e) => {
+        const editBtn = e.target.closest('.edit-responsable-btn');
+        const toggleBtn = e.target.closest('button[data-status]');
+
+        // Editar responsable
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            const responsable = responsables.find(r => r.responsable_id == id);
+            if (responsable) {
+                document.getElementById('responsableId').value = responsable.responsable_id;
+                document.getElementById('responsableName').value = responsable.nombre;
+                responsableModalLabel.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Responsable';
+                btnSaveResponsable.innerHTML = 'Actualizar';
+                responsableModal.show();
+            }
+        }
+
+        // Activar/Desactivar responsable
+        if (toggleBtn) {
+            const id = toggleBtn.dataset.id;
+            const nuevoStatus = parseInt(toggleBtn.dataset.status);
+            const responsable = responsables.find(r => r.responsable_id == id);
+            const accion = nuevoStatus === 1 ? 'reactivar' : 'desactivar';
+
+            Swal.fire({
+                title: `¿Estás seguro?`,
+                html: `Se va a ${accion} a <strong>${responsable.nombre}</strong>.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: nuevoStatus === 1 ? '#28a745' : '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: `Sí, ${accion}`,
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/api/responsables/${id}/status`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ activo: nuevoStatus })
+                        });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error);
+
+                        showToast(data.message, 'success');
+                        await cargarResponsables(); // Recargar todo
+                    } catch (error) {
+                        showToast(error.message, 'error');
+                    }
+                }
+            });
+        }
+    });
 });
