@@ -291,124 +291,123 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="saleClientId">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Cliente:</label>
-                                <input type="text" class="form-control" id="saleClientName" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Fecha:</label>
-                                <input type="date" class="form-control" id="fechaVenta">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card mb-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0"><i class="fas fa-box-seam me-2"></i> Productos</h5>
-                        </div>
-                        <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Columna Izquierda: Selección de productos y tabla -->
+                        <div class="col-lg-8">
                             <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label for="productoSearch" class="form-label">Buscar y Añadir Producto:</label>
-                                    <select id="productoSearch" class="form-select"></select>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Cliente:</label>
+                                    <input type="text" class="form-control bg-light" id="saleClientName" readonly>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Cantidad:</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="cantidadProducto" min="1" value="1">
-                                        <button class="btn btn-primary" type="button" id="btnAnadirProducto"><i class="fas fa-plus me-1"></i> Añadir</button>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Fecha:</label>
+                                    <input type="date" class="form-control" id="fechaVenta">
+                                </div>
+                            </div>
+
+                            <!-- Pestañas para Productos y Bonificaciones -->
+                            <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="productos-tab" data-bs-toggle="tab" data-bs-target="#productos-tab-pane" type="button" role="tab" aria-controls="productos-tab-pane" aria-selected="true">
+                                        <i class="fas fa-box-seam me-2"></i>Productos
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="bonificaciones-tab" data-bs-toggle="tab" data-bs-target="#bonificaciones-tab-pane" type="button" role="tab" aria-controls="bonificaciones-tab-pane" aria-selected="false">
+                                        <i class="fas fa-gift me-2"></i>Bonificaciones
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Panel de Productos -->
+                                <div class="tab-pane fade show active" id="productos-tab-pane" role="tabpanel" aria-labelledby="productos-tab" tabindex="0">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-8">
+                                            <label for="productoSearch" class="form-label">Buscar y Añadir Producto:</label>
+                                            <select id="productoSearch" class="form-select"></select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Cantidad:</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="cantidadProducto" min="1" value="1">
+                                                <button class="btn btn-primary" type="button" id="btnAnadirProducto"><i class="fas fa-plus me-1"></i> Añadir</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Panel de Bonificaciones -->
+                                <div class="tab-pane fade" id="bonificaciones-tab-pane" role="tabpanel" aria-labelledby="bonificaciones-tab" tabindex="0">
+                                    <div class="row align-items-end">
+                                        <div class="col-md-8">
+                                            <label for="bonificacionSearch" class="form-label">Buscar y Añadir Bonificación:</label>
+                                            <select id="bonificacionSearch" class="form-select"></select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Cantidad:</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="cantidadBonificacion" min="1" value="1" />
+                                                <button class="btn btn-success" type="button" id="btnAnadirBonificacion"><i class="fas fa-plus me-1"></i> Añadir</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Tabla de productos y bonificaciones -->
+                            <h5 class="mt-4">Items de la Venta</h5>
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover">
                                     <thead>
                                         <tr>
                                             <th>Producto</th>
-                                            <th width="120">Precio Unit.</th>
-                                            <th width="100">Cantidad</th>
-                                            <th width="120">Subtotal</th>
-                                            <th width="80">Acciones</th>
+                                            <th class="text-end" width="120">P. Unit.</th>
+                                            <th class="text-center" width="100">Cantidad</th>
+                                            <th class="text-end" width="120">Subtotal</th>
+                                            <th class="text-center" width="80">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tablaProductos">
                                         <tr id="filaVacia">
                                             <td colspan="5" class="text-center text-muted">
-                                                <i class="fas fa-cart-x"></i> No hay productos seleccionados
+                                                <i class="fas fa-shopping-cart"></i> No hay items en la venta
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h5 class="mb-0"><i class="fas fa-percent me-2"></i> Descuento</h5>
-                                    <p class="text-muted mb-0">Aplicar descuento a la venta</p>
+                        <!-- Columna Derecha: Resumen y Descuento -->
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="fas fa-calculator me-2"></i> Resumen de Venta</h5>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="descuentoValor" min="0" step="0.01" placeholder="0.00">
-                                        <select class="form-select" id="descuentoTipo" style="max-width: 120px;">
-                                            <option value="monto">S/. Monto</option>
-                                            <option value="porcentaje">% Porcentaje</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Nueva sección para añadir Bonificaciones -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="fas fa-gift me-2"></i> Bonificaciones</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label for="bonificacionSearch" class="form-label">Buscar y Añadir Bonificación:</label>
-                                    <select id="bonificacionSearch" class="form-select"></select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Cantidad:</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="cantidadBonificacion" min="1" value="1" />
-                                        <button class="btn btn-success" type="button" id="btnAnadirBonificacion"><i class="fas fa-plus me-1"></i> Añadir Bonificación</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-calculator fs-1 me-3 text-info" style="color: var(--btn-info-bg);"></i>
-                                        <div>
-                                            <h5 class="mb-0">Resumen de Venta</h5>
-                                            <p class="text-muted mb-0">Cálculo automático de totales</p>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Descuento:</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="descuentoValor" min="0" step="0.01" placeholder="0.00">
+                                            <select class="form-select flex-grow-0" id="descuentoTipo" style="width: auto;">
+                                                <option value="monto">S/.</option>
+                                                <option value="porcentaje">%</option>
+                                            </select>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="row text-end">
-                                        <div class="col-12">
-                                            <p class="mb-1">Subtotal: <span id="subtotalVenta" class="fw-bold">S/. 0.00</span></p>
-                                            <p class="mb-1">Descuento: <span id="descuentoVenta" class="fw-bold text-danger">-S/. 0.00</span></p>
-                                            <hr>
-                                            <h4 class="mb-0">Total: <span id="totalVenta" class="text-success fw-bold">S/. 0.00</span></h4>
-                                        </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">Subtotal:</span>
+                                        <span id="subtotalVenta" class="fw-bold fs-5">S/. 0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted">Descuento:</span>
+                                        <span id="descuentoVenta" class="fw-bold fs-5 text-danger">-S/. 0.00</span>
+                                    </div>
+                                    <hr class="my-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="mb-0">Total:</h4>
+                                        <h4 id="totalVenta" class="text-success fw-bold mb-0">S/. 0.00</h4>
                                     </div>
                                 </div>
                             </div>
