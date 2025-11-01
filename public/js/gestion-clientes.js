@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             allowHTML: false,
                         });
                     }
-                    const choicesData = productosVenta.map(p => ({ value: p.producto_id, label: `${p.nombre} (S/. ${p.precio_venta})` }));
+                    const choicesData = productosVenta.map(p => ({ value: p.producto_id, label: `${p.nombre} (Stock: ${p.stock})` }));
                     productoSearchChoices.clearStore();
                     productoSearchChoices.setChoices(choicesData, 'value', 'label', true);
                 }
@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const choicesData = bonificacionesDisponibles.map(b => ({
                         value: b.bonificacion_id,
-                        label: `${b.nombre} (${b.presentacion})`,
+                        label: `${b.nombre} (Stock: ${b.stock})`,
                         data: b
                     }));
                     bonificacionSearchChoices.setChoices(choicesData, 'value', 'label', true);
