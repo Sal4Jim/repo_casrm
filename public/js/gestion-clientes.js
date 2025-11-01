@@ -2,6 +2,28 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = 1;
     const itemsPerPage = 5;
 
+    // --- VALIDACIÓN EN TIEMPO REAL PARA EL CAMPO TELÉFONO ---
+    const telefonoInput = document.getElementById('telefono');
+    if (telefonoInput) {
+        telefonoInput.addEventListener('input', function (e) {
+            // Reemplaza cualquier caracter que NO sea un dígito por una cadena vacía
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    }
+
+    // --- VALIDACIÓN EN TIEMPO REAL PARA NOMBRE Y CIUDAD (NO NÚMEROS) ---
+    const nombreInput = document.getElementById('nombre');
+    const ciudadInput = document.getElementById('ciudad');
+
+    const filterNumbers = function(e) {
+        // Reemplaza cualquier dígito por una cadena vacía
+        e.target.value = e.target.value.replace(/\d/g, '');
+    };
+
+    if (nombreInput) nombreInput.addEventListener('input', filterNumbers);
+    if (ciudadInput) ciudadInput.addEventListener('input', filterNumbers);
+
+
  
     cargarClientes(1, true);
 
@@ -41,6 +63,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!cliente.nombre || !cliente.telefono || !cliente.ciudad) {
             showToast('<i class="fas fa-exclamation-circle me-2"></i> Los campos <strong>Nombre</strong>, <strong>Teléfono</strong> y <strong>Ciudad</strong> son obligatorios', 'error');
+            return;
+        }
+
+        // --- VALIDACIONES ADICIONALES ---
+        const contieneNumeros = (texto) => /\d/.test(texto);
+
+        if (contieneNumeros(cliente.nombre)) {
+            showToast('<i class="fas fa-exclamation-circle me-2"></i> El campo <strong>Nombre</strong> no puede contener números.', 'error');
+            return;
+        }
+
+        if (contieneNumeros(cliente.ciudad)) {
+            showToast('<i class="fas fa-exclamation-circle me-2"></i> El campo <strong>Ciudad</strong> no puede contener números.', 'error');
+            return;
+        }
+
+        const soloNumeros = /^\d+$/;
+        if (!soloNumeros.test(cliente.telefono)) {
+            showToast('<i class="fas fa-exclamation-circle me-2"></i> El campo <strong>Teléfono</strong> solo debe contener números.', 'error');
             return;
         }
 
