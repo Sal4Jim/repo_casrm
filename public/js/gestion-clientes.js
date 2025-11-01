@@ -739,7 +739,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const ventaData = {
             cliente_id: clienteId,
-            fecha: document.getElementById('fechaVenta').value,
+            // Combinar fecha y hora en un solo string ISO para el backend
+            fecha: `${document.getElementById('fechaVenta').value}T${document.getElementById('horaVenta').value}`,
             productos: productosParaGuardar,
             subtotal: subtotal,
             descuento: {
@@ -775,11 +776,25 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('descuentoValor').value = '';
         document.getElementById('descuentoTipo').value = 'monto';
         calcularTotalesVenta();
-        document.getElementById('fechaVenta').valueAsDate = new Date();
     });
 
     addSaleModalEl?.addEventListener('shown.bs.modal', function () {
-        document.getElementById('fechaVenta').valueAsDate = new Date();
+        // Establecer fecha y hora actuales por separado
+        const fechaInput = document.getElementById('fechaVenta');
+        const horaInput = document.getElementById('horaVenta');
+        const ahora = new Date();
+
+        // Formato YYYY-MM-DD para el input de fecha
+        const anio = ahora.getFullYear();
+        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dia = String(ahora.getDate()).padStart(2, '0');
+        fechaInput.value = `${anio}-${mes}-${dia}`;
+
+        // Formato HH:MM para el input de hora
+        const horas = String(ahora.getHours()).padStart(2, '0');
+        const minutos = String(ahora.getMinutes()).padStart(2, '0');
+        horaInput.value = `${horas}:${minutos}`;
+
     });
 
     // Botón "Editar"
@@ -862,15 +877,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // Paginación
+                    // 1. Ordenar todas las ventas de más nueva a más antigua
+                    const ventasOrdenadas = ventas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+                    // 2. Asignar el número de compra a cada venta
+                    ventasOrdenadas.forEach((venta, index) => {
+                        venta.numeroCompra = totalVentas - index;
+                    });
+
+                    // 3. Paginar el array ya ordenado y numerado
                     const startIndex = (page - 1) * itemsPerPage;
-                    const endIndex = startIndex + itemsPerPage;
-                    const ventasPaginadas = ventas.slice(startIndex, endIndex);
+                    const ventasPaginadas = ventasOrdenadas.slice(startIndex, startIndex + itemsPerPage);
 
                     historialContainer.innerHTML = '';
-                    ventasPaginadas.forEach((venta, index) => {
+                    ventasPaginadas.forEach(venta => {
                         const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                        // El número de compra se calcula desde el total, no desde el índice de la página
-                        const numeroCompra = totalVentas - (startIndex + index); // Se mantiene para numeración
                         const isAnulada = venta.activa === 0;
 
                         const item = document.createElement('div');
@@ -879,7 +900,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">
-                                        Compra #${numeroCompra}
+                                        Compra #${venta.numeroCompra}
                                         ${isAnulada ? '<span class="badge bg-danger ms-2">Anulada</span>' : ''}
                                     </h6>
                                     <p class="text-muted mb-0"><small>${fecha}</small></p>
@@ -891,7 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <div class="btn-group btn-group-sm" role="group">
                                         <button class="btn btn-outline-secondary sale-detail-btn" 
                                                 data-venta-id="${venta.compra_id}" 
-                                                data-numero-compra="${numeroCompra}" 
+                                                data-numero-compra="${venta.numeroCompra}" 
                                                 title="Ver detalles">
                                             <i class="fas fa-eye"></i> Ver
                                         </button>
@@ -953,8 +974,11 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 if (response.data.success) {
                     const venta = response.data.venta;
-                    document.getElementById('saleDetailId').textContent = venta.compra_id;
-                    document.getElementById('saleDetailDate').textContent = new Date(venta.fecha).toLocaleDateString('es-ES');
+                    const fechaVenta = new Date(venta.fecha);                    
+                    const fechaFormateada = fechaVenta.toLocaleDateString('es-ES');
+                    const horaFormateada = fechaVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    document.getElementById('saleDetailId').textContent = venta.compra_id;                    
+                    document.getElementById('saleDetailDate').textContent = `${fechaFormateada} - ${horaFormateada}`;
                     
                     // Ocultar o mostrar el botón de anular según el estado de la venta
                     const btnAnular = document.getElementById('btnAnularVenta');
