@@ -32,7 +32,7 @@ exports.createVenta = async (req, res) => {
         `;
         const [ventaResult] = await connection.execute(ventaQuery, [
             cliente_id,
-            fecha,
+            fecha, // Usamos la fecha y hora completas que vienen del frontend
             subtotal,
             total,
             descuento.monto

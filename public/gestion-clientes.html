@@ -249,7 +249,7 @@
                     <div class="row mb-3">
                         <div class="col-md-4"><small class="text-muted">ID Venta:</small><p id="saleDetailId" class="fw-bold">-</p></div>
                         <div class="col-md-4"><small class="text-muted">Cliente:</small><p id="saleDetailClient" class="fw-bold">-</p></div>
-                        <div class="col-md-4"><small class="text-muted">Fecha:</small><p id="saleDetailDate" class="fw-bold">-</p></div>
+                        <div class="col-md-4"><small class="text-muted">Fecha y Hora:</small><p id="saleDetailDate" class="fw-bold">-</p></div>
                     </div>
                     <h6>Productos y Bonificaciones</h6>
                     <div class="table-responsive">
@@ -300,8 +300,11 @@
                                     <input type="text" class="form-control bg-light" id="saleClientName" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">Fecha:</label>
-                                    <input type="date" class="form-control" id="fechaVenta">
+                                    <label class="form-label fw-bold">Fecha de Venta:</label>
+                                    <div class="d-flex gap-2">
+                                        <input type="date" class="form-control" id="fechaVenta" title="Fecha de la venta">
+                                        <input type="time" class="form-control" id="horaVenta" title="Hora de la venta" style="max-width: 120px;">
+                                    </div>
                                 </div>
                             </div>
 
