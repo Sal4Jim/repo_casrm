@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function guardarCliente() {
+    async function guardarCliente() {
         const clienteId = document.getElementById('clienteId')?.value;
         const cliente = {
             nombre: document.getElementById('nombre')?.value.trim(),
@@ -46,58 +46,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setButtonLoading(btnGuardar, true);
 
-        if (clienteId) {
-            axios.put(`/api/clientes/${clienteId}`, cliente)
-                .then(response => {
-                    if (response.data.success) {
-                        showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> actualizado exitosamente`, 'success');
-                        setTimeout(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
-                            if (modal) modal.hide();
-                            document.getElementById('clienteForm')?.reset();
-                            document.getElementById('clienteId').value = ''; 
-                            cargarClientes(currentPage); 
-                        }, 1500);
-                    }
-                })
-                .catch(error => {
-                    let mensaje = "Error al actualizar el cliente";
-                    if (error.response?.data?.error) {
-                        mensaje = error.response.data.error;
-                    }
-                    showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
-                })
-                .finally(() => {
-                    setButtonLoading(btnGuardar, false);
-                    if (btnGuardar) {
-                        btnGuardar.innerHTML = '<i class="fas fa-save me-2"></i> Guardar';
-                    }
-                });
-        } else {
-            axios.post('/api/clientes', cliente)
-                .then(response => {
-                    if (response.data.success) {
-                        showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> guardado exitosamente`, 'success');
-                        setTimeout(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
-                            if (modal) modal.hide();
-                            document.getElementById('clienteForm')?.reset();
-                            cargarClientes(1);
-                        }, 1500);
-                    }
-                })
-                .catch(error => {
-                    let mensaje = "Error al guardar el cliente";
-                    if (error.response?.data?.error) {
-                        mensaje = error.response.data.error;
-                    } else if (error.request) {
-                        mensaje = "No se pudo conectar con el servidor";
-                    }
-                    showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
-                })
-                .finally(() => {
-                    setButtonLoading(btnGuardar, false);
-                });
+        const url = clienteId ? `/api/clientes/${clienteId}` : '/api/clientes';
+        const method = clienteId ? 'put' : 'post';
+        const actionText = clienteId ? 'actualizado' : 'guardado';
+
+        try {
+            const response = await axios[method](url, cliente);
+            if (response.data.success) {
+                showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> ${actionText} exitosamente`, 'success');
+                
+                // Usamos un pequeño delay para que el usuario vea el toast antes de cerrar el modal
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                    if (modal) modal.hide();
+                    document.getElementById('clienteForm')?.reset();
+                    document.getElementById('clienteId').value = '';
+                    cargarClientes(clienteId ? currentPage : 1);
+                }, 1500);
+            }
+        } catch (error) {
+            let mensaje = `Error al ${actionText.slice(0, -1)}ar el cliente`;
+            if (error.response?.data?.error) {
+                mensaje = error.response.data.error;
+            } else if (error.request) {
+                mensaje = "No se pudo conectar con el servidor";
+            }
+            showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+        } finally {
+            setButtonLoading(btnGuardar, false);
+            // Restaurar el texto del botón según si era edición o creación
+            if (btnGuardar) {
+                const buttonText = clienteId ? '<i class="fas fa-sync-alt me-2"></i> Actualizar' : '<i class="fas fa-save me-2"></i> Guardar';
+                btnGuardar.innerHTML = buttonText;
+            }
         }
     }
 
@@ -223,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
         button.disabled = isLoading;
     }
 
-    function cargarClientes(page = 1, showNotification = false) {
+    async function cargarClientes(page = 1, showNotification = false) {
         currentPage = page;
         const searchTerm = document.querySelector('.search-box input').value.trim();
         const mostrarInactivos = document.getElementById('switchMostrarInactivos').checked;
@@ -238,20 +219,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         if (searchTerm) params.append('search', searchTerm);
 
-        axios.get(`/api/clientes?${params.toString()}`)
-            .then(function (response) {
-                if (response.data.success) {
-                    actualizarTablaClientes(response.data.clientes);
-                    renderPagination(response.data.totalPages, page);
-                    if (showNotification && !searchTerm) {
-                        showToast(`<i class="fas fa-users me-2"></i> ${response.data.total} clientes cargados`, 'success');
-                    }
+        try {
+            const response = await axios.get(`/api/clientes?${params.toString()}`);
+            if (response.data.success) {
+                actualizarTablaClientes(response.data.clientes);
+                renderPagination(response.data.totalPages, page);
+                if (showNotification && !searchTerm) {
+                    showToast(`<i class="fas fa-users me-2"></i> ${response.data.total} clientes cargados`, 'success');
                 }
-            })
-            .catch(function (error) {
-                console.error('Error cargando clientes:', error);
-                showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar clientes', 'error');
-            });
+            }
+        } catch (error) {
+            console.error('Error cargando clientes:', error);
+            showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar clientes', 'error');
+        }
     }
 
     const searchInput = document.querySelector('.search-box input');
@@ -279,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const customerDetailModal = new bootstrap.Modal(document.getElementById('customerDetailModal'));
     const saleDetailModal = new bootstrap.Modal(document.getElementById('saleDetailModal'));
 
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', async function (e) {
         const editBtn = e.target.closest('.edit-btn');
         const statusBtn = e.target.closest('.status-btn');
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
@@ -290,31 +270,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (editBtn) {
             const clienteId = editBtn.getAttribute('data-cliente-id');
-            axios.get(`/api/clientes/${clienteId}`)
-                .then(response => {
-                    if (response.data.success) {
-                        const cliente = response.data.cliente;
-                        document.getElementById('clienteId').value = cliente.cliente_id || '';
-                        document.getElementById('nombre').value = cliente.nombre || '';
-                        document.getElementById('ruc').value = cliente.ruc || '';
-                        document.getElementById('ciudad').value = cliente.ciudad || '';
-                        document.getElementById('telefono').value = cliente.telefono || '';
-                        document.getElementById('direccion').value = cliente.direccion || '';
-                        document.getElementById('email').value = cliente.email || '';
-                        document.getElementById('agencia').value = cliente.agencia || '';
+            try {
+                const response = await axios.get(`/api/clientes/${clienteId}`);
+                if (response.data.success) {
+                    const cliente = response.data.cliente;
+                    document.getElementById('clienteId').value = cliente.cliente_id || '';
+                    document.getElementById('nombre').value = cliente.nombre || '';
+                    document.getElementById('ruc').value = cliente.ruc || '';
+                    document.getElementById('ciudad').value = cliente.ciudad || '';
+                    document.getElementById('telefono').value = cliente.telefono || '';
+                    document.getElementById('direccion').value = cliente.direccion || '';
+                    document.getElementById('email').value = cliente.email || '';
+                    document.getElementById('agencia').value = cliente.agencia || '';
 
-                        const modalTitle = document.getElementById('modalTitle');
-                        if (modalTitle) {
-                            modalTitle.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Cliente';
-                        }
-                        if (btnGuardar) {
-                            btnGuardar.innerHTML = '<i class="fas fa-sync-alt me-2"></i> Actualizar';
-                        }
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i> Editar Cliente';
+                    if (btnGuardar) {
+                        btnGuardar.innerHTML = '<i class="fas fa-sync-alt me-2"></i> Actualizar';
                     }
-                })
-                .catch(error => {
-                    showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar cliente', 'error');
-                });
+                }
+            } catch (error) {
+                showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar cliente', 'error');
+            }
             return;
         }
 
@@ -332,19 +308,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButtonText: `Sí, ${accion}`,
                 cancelButtonText: 'Cancelar',
                 reverseButtons: true
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    axios.put(`/api/clientes/${clienteId}/status`, { activo: nuevoStatus === 1 })
-                        .then(response => {
-                            if (response.data.success) {
-                                showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> ${accion}do exitosamente`, 'success');
-                                cargarClientes(currentPage);
-                            }
-                        })
-                        .catch(error => {
-                            const mensaje = error.response?.data?.error || `Error al ${accion} el cliente.`;
-                            showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
-                        });
+                    try {
+                        const response = await axios.put(`/api/clientes/${clienteId}/status`, { activo: nuevoStatus === 1 });
+                        if (response.data.success) {
+                            showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${clienteNombre}</strong> ${accion}do exitosamente`, 'success');
+                            cargarClientes(currentPage);
+                        }
+                    } catch (error) {
+                        const mensaje = error.response?.data?.error || `Error al ${accion} el cliente.`;
+                        showToast(`<i class="fas fa-times-circle me-2"></i> ${mensaje}`, 'error');
+                    }
                 }
             });
             return;
@@ -357,32 +332,29 @@ document.addEventListener('DOMContentLoaded', function () {
             clienteIdParaNotas = clienteId;
             setNotasEditMode(false);
 
-            axios.get(`/api/clientes/${clienteId}`)
-                .then(response => {
-                    if (response.data.success) {
-                        const cliente = response.data.cliente || {};
-                        const setField = (id, value) => {
-                            const el = document.getElementById(id);
-                            if (el) el[el.tagName === 'TEXTAREA' ? 'value' : 'textContent'] = (value !== undefined && value !== null && String(value).trim() !== '') ? value : (el.tagName === 'TEXTAREA' ? '' : '-');
-                        };
+            try {
+                const response = await axios.get(`/api/clientes/${clienteId}`);
+                if (response.data.success) {
+                    const cliente = response.data.cliente || {};
+                    const setField = (id, value) => {
+                        const el = document.getElementById(id);
+                        if (el) el[el.tagName === 'TEXTAREA' ? 'value' : 'textContent'] = (value !== undefined && value !== null && String(value).trim() !== '') ? value : (el.tagName === 'TEXTAREA' ? '' : '-');
+                    };
 
-                        setField('detail-nombre', cliente.nombre);
-                        setField('detail-ciudad', cliente.ciudad);
-                        setField('detail-ruc', cliente.ruc);
-                        setField('detail-telefono', cliente.telefono);
-                        setField('detail-email', cliente.email);
-                        setField('detail-agencia', cliente.agencia);
-                        setField('detail-direccion', cliente.direccion);
-                        setField('detail-notas', cliente.notas);
+                    setField('detail-nombre', cliente.nombre);
+                    setField('detail-ciudad', cliente.ciudad);
+                    setField('detail-ruc', cliente.ruc);
+                    setField('detail-telefono', cliente.telefono);
+                    setField('detail-email', cliente.email);
+                    setField('detail-agencia', cliente.agencia);
+                    setField('detail-direccion', cliente.direccion);
+                    setField('detail-notas', cliente.notas);
 
-                        cargarHistorialCompras(clienteId);
-                    } else {
-                        showToast('<i class="fas fa-exclamation-triangle me-2"></i> No se encontraron datos del cliente', 'error');
-                    }
-                })
-                .catch(error => {
-                    showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar datos del cliente', 'error');
-                });
+                    cargarHistorialCompras(clienteId);
+                }
+            } catch (error) {
+                showToast('<i class="fas fa-exclamation-triangle me-2"></i> Error al cargar datos del cliente', 'error');
+            }
             return;
         }
 
@@ -427,22 +399,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Sí, anular venta',
                 cancelButtonText: 'Cancelar'
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    axios.put(`/api/ventas/${ventaId}/anular`)
-                        .then(response => {
-                            if (response.data.success) {
-                                showToast(response.data.message, 'success');
-                                saleDetailModal.hide();
-                                // El modal de cliente se mostrará automáticamente al cerrar el de venta.
-                                // Recargamos el historial para que se vea el cambio.
-                                cargarHistorialCompras(clienteIdParaNotas);
-                            }
-                        })
-                        .catch(error => {
-                            const mensaje = error.response?.data?.error || 'Error al anular la venta.';
-                            showToast(mensaje, 'error');
-                        });
+                    try {
+                        const response = await axios.put(`/api/ventas/${ventaId}/anular`);
+                        if (response.data.success) {
+                            showToast(response.data.message, 'success');
+                            saleDetailModal.hide();
+                            cargarHistorialCompras(clienteIdParaNotas);
+                        }
+                    } catch (error) {
+                        const mensaje = error.response?.data?.error || 'Error al anular la venta.';
+                        showToast(mensaje, 'error');
+                    }
                 }
             });
         }
@@ -654,8 +623,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.target.classList.contains('cantidad-input-venta')) {
             const row = e.target.closest('tr');
             const id = row.dataset.id;
-            const cantidad = parseInt(e.target.value) || 0;
+            let cantidad = parseInt(e.target.value) || 1; // Si no es un número, default a 1
             const stock = parseInt(row.dataset.stock);
+
+            if (cantidad < 1) {
+                cantidad = 1;
+                e.target.value = 1;
+            }
 
             if (cantidad > stock) {
                 showToast(`Stock insuficiente. Disponible: ${stock}`, 'error');
@@ -976,8 +950,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     const venta = response.data.venta;
                     const fechaVenta = new Date(venta.fecha);                    
                     const fechaFormateada = fechaVenta.toLocaleDateString('es-ES');
-                    const horaFormateada = fechaVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                    document.getElementById('saleDetailId').textContent = venta.compra_id;                    
+                    const horaFormateada = fechaVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });                    
+                    document.getElementById('saleDetailId').textContent = `VNT-10${venta.compra_id}`;
                     document.getElementById('saleDetailDate').textContent = `${fechaFormateada} - ${horaFormateada}`;
                     
                     // Ocultar o mostrar el botón de anular según el estado de la venta
