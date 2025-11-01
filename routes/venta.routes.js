@@ -14,4 +14,8 @@ router.get('/cliente/:cliente_id', ventaController.getVentasByCliente);
 // GET /api/ventas/:id - Obtener una venta específica con sus detalles
 router.get('/:id', ventaController.getVentaById);
 
+router.get('/:id/pdf', ventaController.generatePdfVenta);
+
+router.put('/:id/anular', ventaController.anularVenta);
+
 module.exports = router;
