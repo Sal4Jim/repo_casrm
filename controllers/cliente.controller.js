@@ -1,252 +1,196 @@
 const { pool } = require('../config/database');
 
-const createCliente = (req, res) => {
-  const { nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id } = req.body;
+const createCliente = async (req, res) => {
+    const { nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id } = req.body;
 
 
-  if (!nombre || !telefono || !ciudad) {
-    return res.status(400).json({
-      success: false,
-      error: "Los campos 'nombre', 'teléfono' y 'ciudad' son obligatorios."
-    });
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("❌ Error obteniendo conexión:", err.message);
-      return res.status(500).json({
-        success: false,
-        error: "Error de conexión a la base de datos: " + err.message
-      });
+    if (!nombre || !telefono || !ciudad) {
+        return res.status(400).json({
+            success: false,
+            error: "Los campos 'nombre', 'teléfono' y 'ciudad' son obligatorios."
+        });
     }
 
     const sql = `
-      INSERT INTO clientes (
-        nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id, fecha_log
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO clientes (
+            nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id, fecha_log
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
 
     const values = [
-      nombre.trim(),
-      direccion ? direccion.trim() : null,
-      ruc ? ruc.trim() : null,
-      ciudad.trim(),
-      telefono.trim(),
-      agencia ? agencia.trim() : null,
-      email ? email.trim() : null,
-      nota_id !== undefined ? parseInt(nota_id) : null
+        nombre.trim(),
+        direccion ? direccion.trim() : null,
+        ruc ? ruc.trim() : null,
+        ciudad.trim(),
+        telefono.trim(),
+        agencia ? agencia.trim() : null,
+        email ? email.trim() : null,
+        nota_id !== undefined ? parseInt(nota_id) : null
     ];
-    connection.execute(sql, values, (error, results) => {
-      connection.release();
+    try {
+        // Usamos pool.promise() para poder usar await
+        const [results] = await pool.promise().execute(sql, values);
 
-      if (error) {
-        console.error("❌ Error al insertar cliente:", error.message);
-        return res.status(500).json({
-          success: false,
-          error: "Error interno del servidor: " + error.message
+        console.log("✅ Cliente creado exitosamente, ID:", results.insertId);
+        res.status(201).json({
+            success: true,
+            message: "Cliente creado exitosamente",
+            id: results.insertId
         });
-      }
 
-      console.log("✅ Cliente creado exitosamente, ID:", results.insertId);
-      res.status(201).json({
-        success: true,
-        message: "Cliente creado exitosamente",
-        id: results.insertId
-      });
-    });
-  });
+    } catch (error) {
+        console.error("❌ Error al insertar cliente:", error.message);
+        res.status(500).json({
+            success: false,
+            error: "Error interno del servidor: " + error.message
+        });
+    }
 };
 
-const getAllClientes = (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const search = req.query.search || ''; 
-  const status = req.query.status || 'activo'; // 'activo', 'inactivo', o 'todos'
-  const offset = (page - 1) * limit;
+const getAllClientes = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const status = req.query.status || 'activo'; // 'activo', 'inactivo', o 'todos'
+    const offset = (page - 1) * limit;
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("❌ Error obteniendo conexión:", err.message);
-      return res.status(500).json({
-        success: false,
-        error: "Error de conexión a la base de datos",
-      });
-    }
+    try {
+        const searchTerm = `%${search.trim()}%`;
+        let statusCondition = 'c.activo = 1'; // Por defecto, solo activos
+        if (status === 'inactivo') {
+            statusCondition = 'c.activo = 0';
+        } else if (status === 'todos') {
+            statusCondition = '1=1'; // Siempre verdadero, para mostrar todos
+        }
 
-    const searchTerm = `%${search.trim()}%`;
-    let statusCondition = 'c.activo = 1'; // Por defecto, solo activos
-    if (status === 'inactivo') {
-      statusCondition = 'c.activo = 0';
-    } else if (status === 'todos') {
-      statusCondition = '1=1'; // Siempre verdadero, para mostrar todos
-    }
+        // Construimos la cláusula WHERE una sola vez para reutilizarla
+        const whereClause = `WHERE (${statusCondition}) AND (? = '' OR c.nombre LIKE ? OR c.ruc LIKE ? OR c.ciudad LIKE ? OR c.telefono LIKE ?)`;
+        const searchParams = [search, searchTerm, searchTerm, searchTerm, searchTerm];
 
-   
-    const countSql = `
-      SELECT COUNT(*) AS total 
-      FROM clientes 
-      WHERE ? = ''
-         OR nombre LIKE ? 
-         OR ruc LIKE ? 
-         OR ciudad LIKE ? 
-         OR telefono LIKE ? 
-    `;
+        // 1. Contar el total de clientes que coinciden con el filtro
+        const countSql = `SELECT COUNT(*) AS total FROM clientes c ${whereClause}`;
+        const [countResults] = await pool.promise().execute(countSql, searchParams);
+        const total = countResults[0].total;
+        const totalPages = Math.ceil(total / limit);
 
-    connection.execute(countSql, [search, searchTerm, searchTerm, searchTerm, searchTerm], (error, countResults) => {
-      if (error) {
-        connection.release();
-        return res.status(500).json({
-          success: false,
-          error: "Error al contar clientes"
-        });
-      }
-
-      const total = countResults[0].total;
-      const totalPages = Math.ceil(total / limit);
-
-      
-      const sql = `
+        // 2. Obtener los clientes para la página actual
+        const sql = `
         SELECT cliente_id, nombre, ruc, ciudad, telefono, direccion, email, c.activo
         FROM clientes c
-        WHERE (${statusCondition}) AND
-              (? = ''
-               OR c.nombre LIKE ? 
-               OR c.ruc LIKE ? 
-               OR c.ciudad LIKE ? 
-               OR c.telefono LIKE ?)
+        ${whereClause}
         ORDER BY nombre ASC 
         LIMIT ? OFFSET ?
       `;
 
-      connection.execute(
-        sql,
-        [search, searchTerm, searchTerm, searchTerm, searchTerm, limit, offset], // Los parámetros de statusCondition ya están en el string
-        (error, results) => {
-          connection.release();
+        // Añadimos los parámetros de paginación al final
+        const finalParams = [...searchParams, limit, offset];
+        const [results] = await pool.promise().execute(sql, finalParams);
 
-          if (error) {
-            console.error("❌ Error en consulta SQL:", error.message);
-            return res.status(500).json({
-              success: false,
-              error: "Error al obtener clientes"
-            });
-          }
-
-          res.json({
+        res.json({
             success: true,
             clientes: results,
             total,
             page,
             totalPages,
             limit,
-            search 
-          });
-        }
-      );
-    });
-  });
+            search
+        });
+
+    } catch (error) {
+        console.error("❌ Error en consulta SQL de clientes:", error.message);
+        res.status(500).json({
+            success: false,
+            error: "Error al obtener clientes"
+        });
+    }
 };
 
-const updateCliente = (req, res) => {
-  const { id } = req.params;
-  const { nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id } = req.body;
+const updateCliente = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, direccion, ruc, ciudad, telefono, agencia, email, nota_id } = req.body;
 
-
-  if (!nombre || !telefono || !ciudad) {
-    return res.status(400).json({
-      success: false,
-      error: "Los campos 'nombre', 'teléfono' y 'ciudad' son obligatorios."
-    });
-  }
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("❌ Error obteniendo conexión:", err.message);
-      return res.status(500).json({
-        success: false,
-        error: "Error de conexión a la base de datos"
-      });
+    if (!nombre || !telefono || !ciudad) {
+        return res.status(400).json({
+            success: false,
+            error: "Los campos 'nombre', 'teléfono' y 'ciudad' son obligatorios."
+        });
     }
 
     const sql = `
-      UPDATE clientes 
-      SET 
-        nombre = ?, 
-        direccion = ?, 
-        ruc = ?, 
-        ciudad = ?, 
-        telefono = ?, 
-        agencia = ?, 
-        email = ?, 
-        nota_id = ?
-      WHERE cliente_id = ?
+        UPDATE clientes 
+        SET 
+            nombre = ?, 
+            direccion = ?, 
+            ruc = ?, 
+            ciudad = ?, 
+            telefono = ?, 
+            agencia = ?, 
+            email = ?, 
+            nota_id = ?
+        WHERE cliente_id = ?
     `;
 
     const values = [
-      nombre.trim(),
-      direccion ? direccion.trim() : null,
-      ruc ? ruc.trim() : null,
-      ciudad.trim(),
-      telefono.trim(),
-      agencia ? agencia.trim() : null,
-      email ? email.trim() : null,
-      nota_id !== undefined ? parseInt(nota_id) : null,
-      id
+        nombre.trim(),
+        direccion ? direccion.trim() : null,
+        ruc ? ruc.trim() : null,
+        ciudad.trim(),
+        telefono.trim(),
+        agencia ? agencia.trim() : null,
+        email ? email.trim() : null,
+        nota_id !== undefined ? parseInt(nota_id) : null,
+        id
     ];
 
-    connection.execute(sql, values, (error, results) => {
-      connection.release();
+    try {
+        const [results] = await pool.promise().execute(sql, values);
 
-      if (error) {
+        if (results.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                error: "Cliente no encontrado"
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Cliente actualizado exitosamente",
+            id: id
+        });
+
+    } catch (error) {
         console.error("❌ Error al actualizar cliente:", error.message);
-        return res.status(500).json({
-          success: false,
-          error: "Error interno del servidor"
+        res.status(500).json({
+            success: false,
+            error: "Error interno del servidor"
         });
-      }
-
-      if (results.affectedRows === 0) {
-        return res.status(404).json({
-          success: false,
-          error: "Cliente no encontrado"
-        });
-      }
-
-      res.json({
-        success: true,
-        message: "Cliente actualizado exitosamente",
-        id: id
-      });
-    });
-  });
+    }
 };
 
-const getClienteById = (req, res) => {
-  const { id } = req.params;
-
-  pool.getConnection((err, connection) => {
-    if (err) {
-      return res.status(500).json({ success: false, error: "Error de conexión" });
-    }
+const getClienteById = async (req, res) => {
+    const { id } = req.params;
 
     const sql = `
-      SELECT 
-        c.cliente_id, c.nombre, c.ruc, c.ciudad, c.telefono, c.direccion, c.email, c.agencia, c.activo,
-        n.descripcion AS notas 
-      FROM clientes c
-      LEFT JOIN notas n ON c.nota_id = n.nota_id
-      WHERE c.cliente_id = ?`;
-    connection.execute(sql, [id], (error, results) => {
-      connection.release();
-      if (error) {
-        return res.status(500).json({ success: false, error: "Error en la consulta" });
-      }
-      if (results.length === 0) {
-        return res.status(404).json({ success: false, error: "Cliente no encontrado" });
-      }
-      res.json({ success: true, cliente: results[0] });
-    });
-  });
+        SELECT 
+            c.cliente_id, c.nombre, c.ruc, c.ciudad, c.telefono, c.direccion, c.email, c.agencia, c.activo,
+            n.descripcion AS notas 
+        FROM clientes c
+        LEFT JOIN notas n ON c.nota_id = n.nota_id
+        WHERE c.cliente_id = ?`;
+
+    try {
+        const [results] = await pool.promise().execute(sql, [id]);
+
+        if (results.length === 0) {
+            return res.status(404).json({ success: false, error: "Cliente no encontrado" });
+        }
+
+        res.json({ success: true, cliente: results[0] });
+
+    } catch (error) {
+        console.error(`❌ Error al obtener cliente ${id}:`, error.message);
+        res.status(500).json({ success: false, error: "Error en la consulta" });
+    }
 };
 
 /**
