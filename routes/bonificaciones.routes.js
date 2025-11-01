@@ -2,7 +2,14 @@ const express = require('express');
 const router = express.Router();
 const bonificacionController = require('../controllers/bonificacion.controller');
 
-// GET /api/bonificaciones/activas - Obtener todas las bonificaciones activas
-router.get('/activas', bonificacionController.getActiveBonificaciones);
+router.get('/activas', bonificacionController.getBonificacionesActivas);
+
+router.get('/con-stock', bonificacionController.getActiveBonificaciones);
+
+router.post('/', bonificacionController.createBonificacion);
+
+router.put('/:id', bonificacionController.updateBonificacion);
+
+router.delete('/:id', bonificacionController.deleteBonificacion);
 
 module.exports = router;

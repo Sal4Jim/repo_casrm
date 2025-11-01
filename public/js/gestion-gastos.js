@@ -1,106 +1,112 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let gastos = [
-        { descripcion: "Compra de azúcar y leche", monto: 450.00, fecha: "24/05/2025", persona: "María Gonzales" },
-        { descripcion: "Reparación congelador", monto: 850.00, fecha: "22/05/2025", persona: "Roberto Méndez" },
-        { descripcion: "Pago alquiler local", monto: 1200.00, fecha: "19/05/2025", persona: "Carlos López" },
-        { descripcion: "Compra de barquillos", monto: 320.00, fecha: "15/05/2025", persona: "Lucía Torres Davila" },
-        { descripcion: "Servicio de marketing digital", monto: 500.00, fecha: "10/05/2025", persona: "Jimmy Montoya Melendez" },
-        { descripcion: "Compra de frutas", monto: 210.00, fecha: "09/05/2025", persona: "Ana Ruiz" },
-        { descripcion: "Mantenimiento máquina", monto: 700.00, fecha: "08/05/2025", persona: "Pedro Salinas" },
-        { descripcion: "Compra de toppings", monto: 180.00, fecha: "07/05/2025", persona: "Sofía Castro" },
-        { descripcion: "Pago luz", monto: 350.00, fecha: "06/05/2025", persona: "Luis Paredes" },
-        { descripcion: "Compra de envases", monto: 120.00, fecha: "05/05/2025", persona: "Marta Rojas" },
-        { descripcion: "Publicidad en redes", monto: 400.00, fecha: "04/05/2025", persona: "Jorge Medina" },
-        { descripcion: "Compra de chocolate", monto: 250.00, fecha: "03/05/2025", persona: "Andrea Torres" },
-        { descripcion: "Pago agua", monto: 130.00, fecha: "02/05/2025", persona: "Miguel Díaz" },
-        { descripcion: "Compra de vainilla", monto: 160.00, fecha: "01/05/2025", persona: "Paula Sánchez" }
-    ];
-
+    let gastos = []; // El array ahora se cargará desde la API
     const gastosPorPagina = 6;
     let paginaActual = 1;
 
-    const tablaBody = document.querySelector('tbody');
-    const paginacionDiv = document.querySelector('[aria-label="Pagination"]');
-    const mostrarInfo = document.querySelector('.text-sm.text-gray-700');
+    const tablaBody = document.getElementById('gastosTableBody');
+    const paginationControls = document.getElementById('pagination-controls');
+    const paginationInfo = document.getElementById('pagination-info');
+    const searchInput = document.getElementById('searchGastos');
+
+    async function cargarGastos() {
+        try {
+            const response = await fetch('/api/gastos');
+            if (!response.ok) throw new Error('Error al cargar los gastos.');
+            const data = await response.json();
+            if (data.success) {
+                gastos = data.gastos;
+                mostrarGastos();
+            }
+        } catch (error) {
+            console.error(error);
+            showToast(error.message, 'error');
+        }
+    }
 
     function mostrarGastos() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const gastosFiltrados = gastos.filter(g => 
+            (g.descripcion && g.descripcion.toLowerCase().includes(searchTerm)) ||
+            (g.persona && String(g.persona).toLowerCase().includes(searchTerm))
+        );
+
         const inicio = (paginaActual - 1) * gastosPorPagina;
         const fin = inicio + gastosPorPagina;
-        const gastosPagina = gastos.slice(inicio, fin);
-
+        const gastosPagina = gastosFiltrados.slice(inicio, fin);
 
         tablaBody.innerHTML = '';
-        gastosPagina.forEach(gasto => {
-            const fila = document.createElement('tr');
-            fila.className = "table-row";
-            fila.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">${gasto.descripcion}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">S/. ${gasto.monto.toLocaleString('es-PE', {minimumFractionDigits:2})}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${gasto.fecha}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${gasto.persona}</div>
-                </td>
-            `;
-            tablaBody.appendChild(fila);
-        });
+        if (gastosPagina.length === 0) {
+            tablaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No se encontraron gastos.</td></tr>';
+        } else {
+            gastosPagina.forEach(gasto => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${gasto.descripcion}</td>
+                    <td>S/. ${Number(gasto.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</td>
+                    <td>${new Date(gasto.fecha).toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
+                    <td>${gasto.persona || 'N/A'}</td>
+                `;
+                tablaBody.appendChild(fila);
+            });
+        }
 
-        const total = gastos.length;
+        const total = gastosFiltrados.length;
         const desde = total === 0 ? 0 : inicio + 1;
         const hasta = Math.min(fin, total);
-        mostrarInfo.innerHTML = `Mostrando <span class="font-medium">${desde}</span> a <span class="font-medium">${hasta}</span> de <span class="font-medium">${total}</span> gastos`;
-
+        paginationInfo.innerHTML = `Mostrando <b>${desde}</b> a <b>${hasta}</b> de <b>${total}</b> gastos`;
 
         const totalPaginas = Math.ceil(total / gastosPorPagina);
-        paginacionDiv.innerHTML = '';
+        paginationControls.innerHTML = '';
 
-        const btnAnterior = document.createElement('a');
-        btnAnterior.href = "javascript:void(0)";
-        btnAnterior.className = "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50";
-        btnAnterior.innerHTML = `<span class="sr-only">Anterior</span><i class="fas fa-chevron-left"></i>`;
-        btnAnterior.onclick = () => {
+        if (totalPaginas <= 1) return;
+
+        // Botón Anterior
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${paginaActual === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Anterior">&laquo;</a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
             if (paginaActual > 1) {
                 paginaActual--;
                 mostrarGastos();
             }
-        };
-        paginacionDiv.appendChild(btnAnterior);
+        });
+        paginationControls.appendChild(prevLi);
 
+        // Números de página
         for (let i = 1; i <= totalPaginas; i++) {
-            const btnPagina = document.createElement('a');
-            btnPagina.href = "javascript:void(0)";
-            btnPagina.className = i === paginaActual
-                ? "z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium";
-            btnPagina.textContent = i;
-            btnPagina.onclick = () => {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === paginaActual ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
                 paginaActual = i;
                 mostrarGastos();
-            };
-            paginacionDiv.appendChild(btnPagina);
+            });
+            paginationControls.appendChild(li);
         }
 
         // Botón siguiente
-        const btnSiguiente = document.createElement('a');
-        btnSiguiente.href = "javascript:void(0)";
-        btnSiguiente.className = "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50";
-        btnSiguiente.innerHTML = `<span class="sr-only">Siguiente</span><i class="fas fa-chevron-right"></i>`;
-        btnSiguiente.onclick = () => {
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${paginaActual === totalPaginas ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente">&raquo;</a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
             if (paginaActual < totalPaginas) {
                 paginaActual++;
                 mostrarGastos();
             }
-        };
-        paginacionDiv.appendChild(btnSiguiente);
+        });
+        paginationControls.appendChild(nextLi);
     }
 
-    // Inicializar tabla paginada
-    mostrarGastos();
+    searchInput.addEventListener('input', () => {
+        paginaActual = 1;
+        mostrarGastos();
+    });
+
+    // Cargar los gastos iniciales desde la base de datos
+    cargarGastos();
 
     // Set current date by default
     const today = new Date();
@@ -112,12 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const formContainer = document.getElementById('gasto-form-container');
 
     toggleFormBtn.addEventListener('click', function() {
-        if (formContainer.classList.contains('hidden')) {
-        formContainer.classList.remove('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Cerrar Formulario';
+        if (formContainer.style.display === 'none' || formContainer.style.display === '') {
+            formContainer.style.display = 'block';
+            toggleFormBtn.innerHTML = '<i class="fas fa-times me-2"></i> Cerrar Formulario';
         } else {
-        formContainer.classList.add('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+            formContainer.style.display = 'none';
+            toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
         }
     });
     
@@ -126,71 +132,62 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('gasto-form').reset();
         document.getElementById('fecha').value = formattedDate;
         
-        // Hide form after clearing and reset button text
-        formContainer.classList.add('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+        // Ocultar formulario y restaurar texto del botón
+        formContainer.style.display = 'none';
+        toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
     });
     
     // Form submit handler
-    document.getElementById('gasto-form').addEventListener('submit', function(e) {
+    document.getElementById('gasto-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         // Form validation
-        const descripcion = document.getElementById('descripcion').value;
-        const monto = document.getElementById('monto').value;
-        const fecha = document.getElementById('fecha').value;
-        const persona = document.getElementById('persona').value;
+        const gastoData = {
+            descripcion: document.getElementById('descripcion').value.trim(),
+            monto: document.getElementById('monto').value,
+            fecha: document.getElementById('fecha').value, // Enviamos solo la fecha, el servidor pondrá la hora.
+            persona: document.getElementById('persona').value.trim()
+        };
         
-        if (!descripcion || !monto || !fecha || !persona) {
-        alert('Por favor complete todos los campos obligatorios');
-        return;
+        if (!gastoData.descripcion || !gastoData.monto || !gastoData.fecha || !gastoData.persona) {
+            showToast('Por favor complete todos los campos.', 'error');
+            return;
         }
-        
-        // In a real implementation, we would send the data to the server
-        // For this prototype, we'll just show a success toast
-        showSuccessToast();
-        document.getElementById('gasto-form').reset();
-        document.getElementById('fecha').value = formattedDate;
-        
-        // Hide form after submission and reset button text
-        formContainer.classList.add('hidden');
-        toggleFormBtn.innerHTML = '<i class="fas fa-ice-cream mr-2"></i> Agregar Gasto';
+
+        try {
+            const response = await fetch('/api/gastos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gastoData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) throw new Error(result.error || 'Error al guardar el gasto.');
+
+            showToast(result.message, 'success');
+            
+            // Añadir el nuevo gasto al inicio del array y recargar la tabla
+            gastos.unshift(result.gasto);
+            mostrarGastos();
+
+            // Limpiar y ocultar el formulario
+            document.getElementById('gasto-form').reset();
+            document.getElementById('fecha').value = formattedDate;
+            formContainer.style.display = 'none';
+            toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
+
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
     });
     
-    // Delete confirmation modal handling
-    const deleteButtons = document.querySelectorAll('.fa-trash-alt');
-    const deleteModal = document.getElementById('delete-modal');
-    const closeModalButtons = document.querySelectorAll('.delete-close-btn');
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-        deleteModal.classList.remove('hidden');
-        });
-    });
-    
-    closeModalButtons.forEach(button => {
-        button.addEventListener('click', function() {
-        deleteModal.classList.add('hidden');
-        });
-    });
-    
-    // Success toast handling
-    function showSuccessToast() {
-        const toast = document.getElementById('success-toast');
-        toast.classList.remove('hidden');
-        
-        setTimeout(function() {
-        toast.classList.add('hidden');
-        }, 3000);
-    }
-    
-    // Edit functionality
-    const editButtons = document.querySelectorAll('.fa-edit');
-    
-    editButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // In a real implementation, we would fetch the data from the server
-      // For this prototype, we'll just fill the form with sample data
+    // Funcionalidad de edición (ejemplo)
+    tablaBody.addEventListener('click', function(e) {
+        const editButton = e.target.closest('.edit-btn'); // Suponiendo que agregas botones de edición con esta clase
+        if (!editButton) return;
+
+        // Lógica para llenar el formulario con datos de la fila
         const row = button.closest('tr');
         const columns = row.querySelectorAll('td');
         
@@ -198,14 +195,32 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('monto').value = columns[1].textContent.trim().replace('S/. ', '').replace(',', '');
         
       // Convert date format
-        const dateParts = columns[2].textContent.trim().split('/');
-        const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-        document.getElementById('fecha').value = formattedEditDate;
-        
+        // const dateParts = columns[2].textContent.trim().split('/');
+        // const formattedEditDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        // document.getElementById('fecha').value = formattedEditDate;
+
         document.getElementById('persona').value = columns[3].textContent.trim();
-        
+
         // Scroll to form
-        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
-        });
+        formContainer.style.display = 'block';
+        formContainer.scrollIntoView({ behavior: 'smooth' });
     });
-    });
+
+    // Función para mostrar notificaciones Toast
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        const toastTypeClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        toast.className = `toast align-items-center text-white ${toastTypeClass} border-0 show`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+        
+        toastContainer.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
+        bsToast.show();
+    }
+});
