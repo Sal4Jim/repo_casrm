@@ -306,6 +306,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
         const printSaleBtn = e.target.closest('.print-sale-btn');
         const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
+        // const printSaleBtn = e.target.closest('.print-sale-btn');
+        // const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
         const anularVentaBtn = e.target.closest('#btnAnularVenta');
         const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
 
@@ -420,12 +422,24 @@ document.addEventListener('DOMContentLoaded', function () {
         //     return;
         // }
 
+        // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
         if (exportCsvBtn) {
+            // ...y tenemos un ID de cliente cargado en el modal...
             if (clienteIdParaNotas) {
+                // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
                 exportarHistorialCSV(clienteIdParaNotas);
             }
             return;
         }
+        // // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
+        // if (exportCsvBtn) {
+        //     // ...y tenemos un ID de cliente cargado en el modal...
+        //     if (clienteIdParaNotas) {
+        //         // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
+        //         exportarHistorialCSV(clienteIdParaNotas);
+        //     }
+        //     return;
+        // }
 
         if (anularVentaBtn) {
             const ventaId = anularVentaBtn.dataset.ventaId;
@@ -1063,52 +1077,122 @@ document.addEventListener('DOMContentLoaded', function () {
     //     }
     // }
 
+    /**
+     * @function exportarHistorialCSV
+     * @description Genera y descarga un archivo CSV con el historial de compras de un cliente.
+     * @param {number} clienteId - El ID del cliente cuyo historial se va a exportar.
+     */
     async function exportarHistorialCSV(clienteId) {
         const btn = document.getElementById('btnExportarHistorialCSV');
         const originalContent = btn.innerHTML;
         btn.disabled = true;
+        // Cambiamos el contenido del botón para dar feedback visual al usuario.
         btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+    // /**
+    //  * @function exportarHistorialCSV
+    //  * @description Genera y descarga un archivo CSV con el historial de compras de un cliente.
+    //  * @param {number} clienteId - El ID del cliente cuyo historial se va a exportar.
+    //  */
+    // async function exportarHistorialCSV(clienteId) {
+    //     const btn = document.getElementById('btnExportarHistorialCSV');
+    //     const originalContent = btn.innerHTML;
+    //     btn.disabled = true;
+    //     // Cambiamos el contenido del botón para dar feedback visual al usuario.
+    //     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
 
         try {
+            // 1. Hacemos una petición a la API para obtener todas las ventas del cliente.
             const response = await axios.get(`/api/ventas/cliente/${clienteId}`);
             if (!response.data.success || response.data.ventas.length === 0) {
                 showToast('No hay compras para exportar.', 'error');
                 return;
             }
+    //     try {
+    //         // 1. Hacemos una petición a la API para obtener todas las ventas del cliente.
+    //         const response = await axios.get(`/api/ventas/cliente/${clienteId}`);
+    //         if (!response.data.success || response.data.ventas.length === 0) {
+    //             showToast('No hay compras para exportar.', 'error');
+    //             return;
+    //         }
 
             const ventas = response.data.ventas;
             const totalVentas = ventas.length;
             const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
+    //         const ventas = response.data.ventas;
+    //         const totalVentas = ventas.length;
+    //         const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
 
             // Encabezados del CSV
+            // 2. Preparamos el contenido del CSV, empezando por los encabezados.
             let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
+    //         // Encabezados del CSV
+    //         // 2. Preparamos el contenido del CSV, empezando por los encabezados.
+    //         let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
 
             // Filas del CSV
+            // 3. Recorremos cada venta para añadir una fila al CSV.
             ventas.forEach((venta, index) => {
                 const numeroCompra = totalVentas - index;
                 const fecha = new Date(venta.fecha).toLocaleDateString('es-ES');
                 const total = Number(venta.total).toFixed(2);
+                // Añadimos la línea al contenido del CSV.
                 csvContent += `${numeroCompra},${fecha},${total}\n`;
             });
+    //         // Filas del CSV
+    //         // 3. Recorremos cada venta para añadir una fila al CSV.
+    //         ventas.forEach((venta, index) => {
+    //             const numeroCompra = totalVentas - index;
+    //             const fecha = new Date(venta.fecha).toLocaleDateString('es-ES');
+    //             const total = Number(venta.total).toFixed(2);
+    //             // Añadimos la línea al contenido del CSV.
+    //             csvContent += `${numeroCompra},${fecha},${total}\n`;
+    //         });
 
             // Crear y descargar el archivo
+            // 4. Creamos un "Blob", que es un objeto que representa datos crudos (nuestro texto CSV).
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            // 5. Creamos un enlace <a> temporal en memoria.
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
+            // 6. Le asignamos un nombre al archivo que se descargará.
             link.setAttribute("download", `historial_compras_${clienteNombre}.csv`);
             document.body.appendChild(link);
+            // 7. Simulamos un clic en el enlace para iniciar la descarga.
             link.click();
             document.body.removeChild(link);
+    //         // Crear y descargar el archivo
+    //         // 4. Creamos un "Blob", que es un objeto que representa datos crudos (nuestro texto CSV).
+    //         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    //         // 5. Creamos un enlace <a> temporal en memoria.
+    //         const link = document.createElement("a");
+    //         const url = URL.createObjectURL(blob);
+    //         link.setAttribute("href", url);
+    //         // 6. Le asignamos un nombre al archivo que se descargará.
+    //         link.setAttribute("download", `historial_compras_${clienteNombre}.csv`);
+    //         document.body.appendChild(link);
+    //         // 7. Simulamos un clic en el enlace para iniciar la descarga.
+    //         link.click();
+    //         document.body.removeChild(link);
 
         } catch (error) {
             console.error('Error al exportar historial a CSV:', error);
             showToast('Error al generar el archivo CSV.', 'error');
         } finally {
+            // 8. En cualquier caso (éxito o error), restauramos el botón a su estado original.
             btn.disabled = false;
             btn.innerHTML = originalContent;
         }
     }
+    //     } catch (error) {
+    //         console.error('Error al exportar historial a CSV:', error);
+    //         showToast('Error al generar el archivo CSV.', 'error');
+    //     } finally {
+    //         // 8. En cualquier caso (éxito o error), restauramos el botón a su estado original.
+    //         btn.disabled = false;
+    //         btn.innerHTML = originalContent;
+    //     }
+    // }
 
     // Volver a mostrar el modal de detalle de cliente cuando se cierre el de detalle de venta
     const saleDetailModalEl = document.getElementById('saleDetailModal');
