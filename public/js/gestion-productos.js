@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const productosPorPagina = 8;
+    const productosPorPagina = 7 ;
     let paginaActual = 1;
 
     function mostrarProductos() {

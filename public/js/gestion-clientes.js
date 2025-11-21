@@ -407,39 +407,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const numeroCompra = saleDetailBtn.dataset.numeroCompra;
             const clienteNombre = document.getElementById('detail-nombre').textContent;
             if (ventaId) {
-                customerDetailModal.hide(); // Ocultar el modal de cliente antes de mostrar el de venta
+                customerDetailModal.hide(); 
                 cargarDetalleVenta(ventaId, clienteNombre, numeroCompra);
             }
             return;
         }
 
-        // if (printSaleBtn) {
-        //     const ventaId = printSaleBtn.dataset.ventaId;
-        //     const numeroCompra = printSaleBtn.dataset.numeroCompra;
-        //     if (ventaId) {
-        //         descargarPdfVenta(ventaId, numeroCompra);
-        //     }
-        //     return;
-        // }
-
-        // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
         if (exportCsvBtn) {
-            // ...y tenemos un ID de cliente cargado en el modal...
             if (clienteIdParaNotas) {
-                // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
                 exportarHistorialCSV(clienteIdParaNotas);
             }
             return;
         }
-        // // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
-        // if (exportCsvBtn) {
-        //     // ...y tenemos un ID de cliente cargado en el modal...
-        //     if (clienteIdParaNotas) {
-        //         // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
-        //         exportarHistorialCSV(clienteIdParaNotas);
-        //     }
-        //     return;
-        // }
 
         if (anularVentaBtn) {
             const ventaId = anularVentaBtn.dataset.ventaId;

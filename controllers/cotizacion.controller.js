@@ -11,28 +11,6 @@ const COMPANY_INFO = {
     logoPath: 'public/images/logoCASRM.png'
 };
 
-/**
- * @function createCotizacion
- * @description Crea una nueva cotización en la base de datos con sus productos asociados.
- * Maneja una transacción de base de datos para asegurar la integridad de los datos.
- *
- * @param {object} req - Objeto de solicitud de Express.
- * @param {object} req.body - Cuerpo de la solicitud, debe contener los datos del cliente y la lista de productos.
- * @param {string} req.body.cliente_nombre - Nombre o razón social del cliente.
- * @param {string} req.body.cliente_ruc - RUC del cliente.
- * @param {string} [req.body.cliente_direccion] - Dirección del cliente (opcional).
- * @param {string} [req.body.cliente_telefono] - Teléfono del cliente (opcional).
- * @param {string} [req.body.cliente_email] - Email del cliente (opcional).
- * @param {number} req.body.subtotal - Subtotal general antes de descuentos.
- * @param {number} req.body.descuento_total - Descuento total aplicado.
- * @param {number} req.body.total - Monto total de la cotización.
- * @param {number} req.body.validez_dias - Días de validez de la oferta.
- * @param {string} [req.body.observaciones] - Observaciones adicionales (opcional).
- * @param {Array<object>} req.body.productos - Array de productos de la cotización.
- *
- * @param {object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} - Envía una respuesta JSON indicando éxito o error.
- */
 exports.createCotizacion = async (req, res) => {
     const {
         cliente_nombre,
@@ -54,7 +32,6 @@ exports.createCotizacion = async (req, res) => {
 
     let connection;
     try {
-        // Obtener una conexión del pool y Iniciar una transacción
         connection = await pool.promise().getConnection(); 
         await connection.beginTransaction();
 
@@ -111,17 +88,6 @@ exports.createCotizacion = async (req, res) => {
     }
 };
 
-/**
- * @function generatePdfCotizacion
- * @description Genera un archivo PDF de una cotización existente y lo envía como descarga.
- *
- * @param {object} req - Objeto de solicitud de Express.
- * @param {object} req.params - Parámetros de la URL.
- * @param {string} req.params.id - El ID de la cotización a generar.
- *
- * @param {object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} - Envía un stream de PDF o una respuesta JSON de error.
- */
 exports.generatePdfCotizacion = async (req, res) => {
     const { id } = req.params;
     const cotizacion_id = parseInt(id);
@@ -147,7 +113,7 @@ exports.generatePdfCotizacion = async (req, res) => {
             `SELECT * FROM detalle_cotizacion WHERE cotizacion_id = ?`,
             [cotizacion_id]
         );
-        cotizacion.productos = detalleRows; // Adjuntar productos al objeto principal
+        cotizacion.productos = detalleRows;
 
         // --- INICIO DE GENERACIÓN DE PDF ---
         const doc = new PDFDocument({ margin: 50 });
@@ -186,7 +152,7 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 60);
 
         // --- 2. INFORMACIÓN DE EMPRESA Y CLIENTE ---
-        const infoStartY = headerY + 100; // Espacio después del logo/caja
+        const infoStartY = headerY + 100; 
         let leftY = infoStartY;
         let rightY = infoStartY;
 
@@ -244,22 +210,21 @@ exports.generatePdfCotizacion = async (req, res) => {
             const productNameHeight = doc.heightOfString(prod.nombre_producto, { width: tableColumns.producto.width });
             const presentationHeight = doc.heightOfString(prod.presentacion, { width: tableColumns.presentacion.width });
             const actualRowContentHeight = Math.max(productNameHeight, presentationHeight);
-            const rowPadding = 10; // Padding vertical para la fila
+            const rowPadding = 10; 
             return actualRowContentHeight + rowPadding;
         };
 
         // Función para dibujar una fila de la tabla (con cálculo de altura)
         const drawTableRow = (prod, y, isEven, rowHeight) => {
-            // Dibujar fondo para filas impares (index % 2 !== 0)
             if (isEven) {
-                doc.fillColor('#f3f4f6') // Color gris claro
-                   .rect(50, y, doc.page.width - 100, rowHeight) // Dibujar rectángulo
-                   .fill(); // Rellenar, sin borde
-                doc.fillColor('black'); // Restablecer color de relleno para el texto
+                doc.fillColor('#f3f4f6') 
+                   .rect(50, y, doc.page.width - 100, rowHeight) 
+                   .fill(); 
+                doc.fillColor('black'); 
             }
 
             doc.fontSize(10).font('Helvetica');
-            const textY = y + 5; // Pequeño padding superior para el texto
+            const textY = y + 5;
 
             doc.text(prod.nombre_producto, tableColumns.producto.x, textY, { width: tableColumns.producto.width, align: 'left' });
             doc.text(prod.presentacion, tableColumns.presentacion.x, textY, { width: tableColumns.presentacion.width, align: 'left' });
@@ -275,8 +240,8 @@ exports.generatePdfCotizacion = async (req, res) => {
         cotizacion.productos.forEach((prod, index) => {
             const rowHeight = calculateRowHeight(prod);
 
-            // Salto de página si no hay suficiente espacio para la fila actual
-            if (doc.y + rowHeight > doc.page.height - 100) { // -100 para dejar espacio para el pie de página y totales
+            // Salto de página si no hay suficiente espacio O si es el 9no item (índice 8)
+            if ((doc.y + rowHeight > doc.page.height - 100) || (index === 8)) { // -100 para dejar espacio para el pie de página y totales
                 doc.addPage();
                 drawTableHeader(50); // Redibujar cabecera en la nueva página
                 doc.y = 75; // Posicionar cursor debajo de la nueva cabecera
@@ -289,17 +254,32 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.moveDown(2);
 
         // --- 4. OBSERVACIONES Y TOTALES ---
-        if (cotizacion.observaciones) {
-            doc.font('Helvetica-Bold').text('Observaciones:', 50, doc.y);
-            doc.font('Helvetica').fontSize(9).text(cotizacion.observaciones, { width: doc.page.width - 100 });
-            doc.moveDown();
+
+        // Estimar la altura necesaria para observaciones y totales
+        const observationsHeight = cotizacion.observaciones ? doc.heightOfString(cotizacion.observaciones, { width: 300 }) + 20 : 0;
+        const totalsHeight = 60; // Altura fija para el bloque de totales
+        const requiredHeight = Math.max(observationsHeight, totalsHeight) + 20;
+
+        // Si no hay espacio suficiente, crear una nueva página
+        if (doc.y + requiredHeight > doc.page.height - 80) { // 80 para el margen del pie de página
+            doc.addPage();
+            doc.y = 50; // Posicionar cursor al inicio
         }
 
-        // Totales (a la derecha)
+        const startOfSectionY = doc.y;
+
+        // Dibujar Observaciones (si existen)
+        if (cotizacion.observaciones) {
+            doc.font('Helvetica-Bold').fontSize(10).text('Observaciones:', 50, startOfSectionY);
+            doc.moveDown(0.5);
+            doc.font('Helvetica').fontSize(9).text(cotizacion.observaciones, 50, doc.y, { width: 300 });
+        }
+
+        // Dibujar Totales (a la derecha)
         const totalsLabelX = 350;
         const totalsValueX = 450;
         const totalsWidth = 100;
-        let totalsY = doc.y < tableTop + 60 ? tableTop + 60 : doc.y; // Asegurar que los totales no se superpongan si la tabla es muy corta
+        let totalsY = startOfSectionY; // Alinear con el inicio de la sección
 
         doc.font('Helvetica').fontSize(10).text('Subtotal:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
         doc.text(`S/. ${Number(cotizacion.subtotal).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });

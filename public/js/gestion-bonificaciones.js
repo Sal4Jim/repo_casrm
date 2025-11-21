@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const bonificacionesTable = document.getElementById('bonificacionesTable');
-    const pagination = document.getElementById('pagination');
     const btnSaveBonificacion = document.getElementById('btnSaveBonificacion');
     const btnUpdateBonificacion = document.getElementById('btnUpdateBonificacion');
-    const btnExportarBonificacionesCSV = document.getElementById('btnExportarBonificacionesCSV');
     const totalBonificacionesValorEl = document.getElementById('totalBonificacionesValor');
     const productoBaseSelect = document.getElementById('productoBase');
 
@@ -81,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${b.stock}</td>
                 <td>S/. ${Number(b.valor_bonif).toFixed(2)}</td>
                 <td>S/. ${valorTotal}</td>
-
-                <td>${estado}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" data-action="edit" data-id="${b.bonificacion_id}" title="Editar Bonificación">
                         <i class="fas fa-edit"></i>
@@ -236,49 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
         totalBonificacionesValorEl.textContent = `S/. ${valorTotalGeneral.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    // --- Exportar a CSV ---
-    function exportarBonificacionesACSV() {
-        if (bonificaciones.length === 0) {
-            showToast('No hay bonificaciones para exportar.', 'error');
-            return;
-        }
-
-        // Encabezados del CSV
-        const headers = ['Nombre', 'Categoría', 'Presentación', 'Stock', 'Valor Unitario (S/.)', 'Valor Total (S/.)', 'Estado'];
-
-        // Convertir datos a filas de CSV
-        const rows = bonificaciones.map(b => {
-            const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
-            const estado = b.activo ? 'Activo' : 'Inactivo';
-
-            return [
-                `"${b.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
-                `"${b.categoria_nombre || 'N/A'}"`,
-                `"${b.presentacion.replace(/"/g, '""')}"`,
-                b.stock,
-                Number(b.valor_bonif).toFixed(2),
-                valorTotal,
-                estado
-            ].join(',');
-        });
-
-        // Unir encabezados y filas
-        const csvContent = [headers.join(','), ...rows].join('\n');
-
-        // Crear un Blob y enlace de descarga
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `bonificaciones_${new Date().toISOString().slice(0, 10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
     // Iniciar la carga de datos
     cargarDatosIniciales();
-
-    // Evento para el botón de exportar
-    btnExportarBonificacionesCSV.addEventListener('click', exportarBonificacionesACSV);
 });
