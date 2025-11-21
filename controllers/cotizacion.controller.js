@@ -214,7 +214,7 @@ exports.generatePdfCotizacion = async (req, res) => {
             return actualRowContentHeight + rowPadding;
         };
 
-        // Función para dibujar una fila de la tabla (con cálculo de altura)
+        // Función para dibujar una fila de la tabla 
         const drawTableRow = (prod, y, isEven, rowHeight) => {
             if (isEven) {
                 doc.fillColor('#f3f4f6') 
@@ -240,14 +240,14 @@ exports.generatePdfCotizacion = async (req, res) => {
         cotizacion.productos.forEach((prod, index) => {
             const rowHeight = calculateRowHeight(prod);
 
-            // Salto de página si no hay suficiente espacio O si es el 9no item (índice 8)
-            if ((doc.y + rowHeight > doc.page.height - 100) || (index === 8)) { // -100 para dejar espacio para el pie de página y totales
+            // Salto de página si no hay suficiente espacio O si es el 9no item
+            if ((doc.y + rowHeight > doc.page.height - 100) || (index === 8)) { 
                 doc.addPage();
-                drawTableHeader(50); // Redibujar cabecera en la nueva página
-                doc.y = 75; // Posicionar cursor debajo de la nueva cabecera
+                drawTableHeader(50);
+                doc.y = 75; 
             }
             drawTableRow(prod, doc.y, index % 2 !== 0, rowHeight);
-            doc.y += rowHeight; // Avanzar doc.y por la altura real de la fila
+            doc.y += rowHeight; 
         });
 
         doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
@@ -257,11 +257,11 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         // Estimar la altura necesaria para observaciones y totales
         const observationsHeight = cotizacion.observaciones ? doc.heightOfString(cotizacion.observaciones, { width: 300 }) + 20 : 0;
-        const totalsHeight = 60; // Altura fija para el bloque de totales
+        const totalsHeight = 60; 
         const requiredHeight = Math.max(observationsHeight, totalsHeight) + 20;
 
         // Si no hay espacio suficiente, crear una nueva página
-        if (doc.y + requiredHeight > doc.page.height - 80) { // 80 para el margen del pie de página
+        if (doc.y + requiredHeight > doc.page.height - 80) { 
             doc.addPage();
             doc.y = 50; // Posicionar cursor al inicio
         }
