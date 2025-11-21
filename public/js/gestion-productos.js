@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Referencias
     const productModalEl = document.getElementById('productModal');
     const productModalLabel = document.getElementById('productModalLabel');
@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         `;
-        
+
         toastContainer.appendChild(toast);
-        
+
         const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
         bsToast.show();
     }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let container = document.createElement('div');
         container.id = 'toastContainer';
         container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '1090'; 
+        container.style.zIndex = '1090';
         document.body.appendChild(container);
         return container;
     }
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function cargarProductos() {
         fetch('/api/productos')
             .then(response => response.json())
-            .then(data => { 
+            .then(data => {
                 if (data && data.success && Array.isArray(data.productos)) {
                     productos = data.productos;
                 }
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
         categorySelect.innerHTML = '<option value="" selected disabled>Seleccione categoría</option>';
 
         // Agregar categorías
-        categorias.forEach(cat => { 
+        categorias.forEach(cat => {
             const opt = document.createElement('option');
             opt.value = cat.nombre;
             opt.textContent = cat.nombre;
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Evento para agregar nueva categoría
-    addCategoryForm.addEventListener('submit', function(e) {
+    addCategoryForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const nombre = categoryNameInput.value.trim();
         if (!nombre) return;
@@ -126,22 +126,22 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ nombre })
         })
-        .then(response => response.json())
-        .then(nuevaCategoria => {
-            // Agregar nueva categoría al array local
-            categorias.push(nuevaCategoria);
-            // Actualizar el select
-            actualizarSelectCategorias();
-            // Limpia el input y muestra mensaje de éxito
-            categoryNameInput.value = '';
-            categorySuccess.style.display = 'inline-block';
-            setTimeout(() => categorySuccess.style.display = 'none', 1800);
-        })
-        .catch(err => console.error('Error al crear categoría:', err));
+            .then(response => response.json())
+            .then(nuevaCategoria => {
+                // Agregar nueva categoría al array local
+                categorias.push(nuevaCategoria);
+                // Actualizar el select
+                actualizarSelectCategorias();
+                // Limpia el input y muestra mensaje de éxito
+                categoryNameInput.value = '';
+                categorySuccess.style.display = 'inline-block';
+                setTimeout(() => categorySuccess.style.display = 'none', 1800);
+            })
+            .catch(err => console.error('Error al crear categoría:', err));
     });
 
     // Evento para guardar nuevo producto
-    btnSave.addEventListener('click', function() {
+    btnSave.addEventListener('click', function () {
         const productId = document.getElementById('productId').value;
         const nombre = document.getElementById('productName').value.trim();
         const categoria = document.getElementById('productCategory').value;
@@ -193,51 +193,51 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(datosProducto)
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(esEdicion ? 'Error al actualizar' : 'Error al crear');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (esEdicion) {
-                // Actualizar producto en el array local
-                const index = productos.findIndex(p => p.producto_id == productId);
-                if (index !== -1) {
-                    // Para mantener el nombre de la categoría, lo fusionamos
-                    productos[index] = { ...productos[index], ...datosProducto, ...data };
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(esEdicion ? 'Error al actualizar' : 'Error al crear');
                 }
-                showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> actualizado.`, 'success');
-            } else {
-                // Agregar nuevo producto al array local
-                const productoCreado = { ...data, categoria_nombre: categoria };
-                productos.push(productoCreado);
-                showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> creado.`, 'success');
-            }
+                return response.json();
+            })
+            .then(data => {
+                if (esEdicion) {
+                    // Actualizar producto en el array local
+                    const index = productos.findIndex(p => p.producto_id == productId);
+                    if (index !== -1) {
+                        // Para mantener el nombre de la categoría, lo fusionamos
+                        productos[index] = { ...productos[index], ...datosProducto, ...data };
+                    }
+                    showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> actualizado.`, 'success');
+                } else {
+                    // Agregar nuevo producto al array local
+                    const productoCreado = { ...data, categoria_nombre: categoria };
+                    productos.push(productoCreado);
+                    showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> creado.`, 'success');
+                }
 
-            // Actualizar tabla
-            mostrarProductos();
+                // Actualizar tabla
+                mostrarProductos();
 
-            // Cerrar modal y limpiar formulario
-            const modal = bootstrap.Modal.getInstance(productModalEl);
-            modal.hide();
-        })
-        .catch(err => {
-            console.error('Error al guardar producto:', err);
-            const mensaje = esEdicion 
-                ? '<i class="fas fa-times-circle me-2"></i> Error al actualizar el producto.'
-                : '<i class="fas fa-times-circle me-2"></i> Error al crear el producto.';
-            showToast(mensaje, 'error');
-        })
-        .finally(() => {
-            // Restaurar botón
-            btnSave.disabled = false;
-            btnSave.innerHTML = 'Guardar';
-        });
+                // Cerrar modal y limpiar formulario
+                const modal = bootstrap.Modal.getInstance(productModalEl);
+                modal.hide();
+            })
+            .catch(err => {
+                console.error('Error al guardar producto:', err);
+                const mensaje = esEdicion
+                    ? '<i class="fas fa-times-circle me-2"></i> Error al actualizar el producto.'
+                    : '<i class="fas fa-times-circle me-2"></i> Error al crear el producto.';
+                showToast(mensaje, 'error');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Guardar';
+            });
     });
 
     // === LÓGICA PARA ABRIR MODAL EN MODO EDICIÓN ===
-    productsTable.addEventListener('click', function(e) {
+    productsTable.addEventListener('click', function (e) {
         const editButton = e.target.closest('button[data-action="edit"]');
         if (editButton) {
             const productId = editButton.dataset.id;
@@ -282,16 +282,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         fetch(`/api/productos/${productId}/status`, { // URL y método actualizados
                             method: 'PUT'
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (!data.success) throw new Error(data.error || 'Error al desactivar el producto.');
-                            showToast(`Producto <strong>${productoAEliminar.nombre}</strong> desactivado.`, 'success');
-                            cargarProductos(); // Recargar la lista desde el servidor
-                        }) 
-                        .catch(err => {
-                            showToast('No se pudo eliminar el producto.', 'error');
-                            console.error('Error al eliminar:', err);
-                        });
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.success) throw new Error(data.error || 'Error al desactivar el producto.');
+                                showToast(`Producto <strong>${productoAEliminar.nombre}</strong> desactivado.`, 'success');
+                                cargarProductos(); // Recargar la lista desde el servidor
+                            })
+                            .catch(err => {
+                                showToast('No se pudo eliminar el producto.', 'error');
+                                console.error('Error al eliminar:', err);
+                            });
                     }
                 });
             }
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Manejar cambio en el select de categoría
-    categorySelect.addEventListener('change', function() {
+    categorySelect.addEventListener('change', function () {
         if (this.value === 'new') {
             // Abrir modal de nueva categoría
             const modal = new bootstrap.Modal(document.getElementById('modalCategoria'));
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnAnterior.className = 'page-link';
         btnAnterior.href = '#';
         btnAnterior.innerHTML = '&laquo;';
-        btnAnterior.onclick = function(e) {
+        btnAnterior.onclick = function (e) {
             e.preventDefault();
             if (paginaActual > 1) {
                 paginaActual--;
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
             a.className = 'page-link';
             a.href = '#';
             a.textContent = i;
-            a.onclick = function(e) {
+            a.onclick = function (e) {
                 e.preventDefault();
                 paginaActual = i;
                 mostrarProductos();
@@ -414,7 +414,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnSiguiente.className = 'page-link';
         btnSiguiente.href = '#';
         btnSiguiente.innerHTML = '&raquo;';
-        btnSiguiente.onclick = function(e) {
+        btnSiguiente.onclick = function (e) {
             e.preventDefault();
             if (paginaActual < totalPaginas) {
                 paginaActual++;
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Actualizar al buscar
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
         paginaActual = 1;
         mostrarProductos();
     });
@@ -438,9 +438,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Encabezados del CSV
+        // Encabezados del CSV (usando punto y coma como separador para Excel en español)
         const headers = ['Nombre', 'Categoría', 'Presentación', 'Precio de Compra', 'Precio de Venta', 'Stock'];
-        
+
         // Convertir datos de productos a filas de CSV
         const rows = productos.map(prod => [
             `"${prod.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
@@ -449,20 +449,24 @@ document.addEventListener('DOMContentLoaded', function() {
             prod.precio_compra,
             prod.precio_venta,
             prod.stock
-        ].join(','));
+        ].join(';')); // Usar punto y coma como separador
 
         // Unir encabezados y filas
-        const csvContent = [headers.join(','), ...rows].join('\n');
+        const csvContent = [headers.join(';'), ...rows].join('\n');
 
-        // Crear un Blob para el contenido CSV
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
+        const BOM = '\uFEFF';
+        const csvContentWithBOM = BOM + csvContent;
+
+        // Crear un Blob para el contenido CSV con codificación UTF-8
+        const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
 
         // Crear un enlace temporal para la descarga
         const link = document.createElement('a');
         if (link.download !== undefined) { // Feature detection
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', `productos_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute('download', `productos_${new Date().toISOString().slice(0, 10)}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
