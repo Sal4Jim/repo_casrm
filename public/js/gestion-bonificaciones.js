@@ -259,14 +259,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 Number(b.valor_bonif).toFixed(2),
                 valorTotal,
                 estado
-            ].join(',');
+            ].join(';');
         });
 
         // Unir encabezados y filas
-        const csvContent = [headers.join(','), ...rows].join('\n');
+        const csvContent = [headers.join(';'), ...rows].join('\n');
+
+        // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
+        const BOM = '\uFEFF';
+        const csvContentWithBOM = BOM + csvContent;
 
         // Crear un Blob y enlace de descarga
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
