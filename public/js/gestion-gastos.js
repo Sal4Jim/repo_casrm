@@ -39,23 +39,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function cargarResponsables() {
         try {
-            const response = await fetch('/api/responsables');
+            const response = await fetch('/api/responsables?status=todos');
             if (!response.ok) throw new Error('Error al cargar responsables.');
             const data = await response.json();
             if (data.success) {
-                personaSelect.innerHTML = '<option value="" disabled selected>Seleccione un responsable</option>';
                 responsables = data.responsables; // Guardar la lista completa
-                data.responsables.forEach(r => {
-                    const option = document.createElement('option');
-                    option.value = r.responsable_id;
-                    option.textContent = r.nombre;
-                    personaSelect.appendChild(option);
-                });
+                llenarSelectResponsables(false); // Por defecto, solo activos
             }
         } catch (error) {
             console.error(error);
             showToast(error.message, 'error');
         }
+    }
+
+    function llenarSelectResponsables(incluirInactivos = false) {
+        personaSelect.innerHTML = '<option value="" disabled selected>Seleccione un responsable</option>';
+        const filtrados = incluirInactivos ? responsables : responsables.filter(r => r.activo);
+
+        filtrados.forEach(r => {
+            const option = document.createElement('option');
+            option.value = r.responsable_id;
+            option.textContent = r.nombre;
+            personaSelect.appendChild(option);
+        });
     }
 
     // --- Funciones para la gestión de responsables ---
@@ -216,6 +222,9 @@ document.addEventListener('DOMContentLoaded', function () {
         editandoId = null;
         document.querySelector('#gasto-form-container .card-header h5').innerHTML = '<i class="fas fa-file-invoice-dollar me-2"></i> Registro de Gastos';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-save me-2"></i> Guardar Gasto';
+        document.getElementById('persona').disabled = false;
+        llenarSelectResponsables(false); // Restaurar filtro de solo activos
+        document.getElementById('btn-limpiar').style.display = ''; // Mostrar botón limpiar
     }
 
     // Form clear button
@@ -226,6 +235,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ocultar formulario y restaurar texto del botón
         formContainer.style.display = 'none';
         toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
+        document.getElementById('persona').disabled = false;
+        llenarSelectResponsables(false); // Restaurar filtro de solo activos
     });
 
     // Form submit handler
@@ -291,16 +302,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('monto').value = gastoAEditar.monto;
                 // La fecha viene en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ), el input 'date' necesita 'YYYY-MM-DD'
                 document.getElementById('fecha').value = new Date(gastoAEditar.fecha).toISOString().split('T')[0];
+
                 // Buscamos el responsable_id correspondiente al nombre de la persona
                 const responsable = gastos.find(g => g.gasto_id == gastoId);
                 if (responsable) {
                     // Necesitamos el ID del responsable, no el nombre. Lo buscamos en la lista de gastos.
+                    // Mostrar todos los responsables (incluyendo inactivos) para que aparezca el asignado
+                    llenarSelectResponsables(true);
                     document.getElementById('persona').value = responsable.responsable_id;
                 }
 
                 // Cambiar UI del formulario a modo edición
                 document.querySelector('#gasto-form-container .card-header h5').innerHTML = '<i class="fas fa-edit me-2"></i> Editando Gasto';
                 document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync-alt me-2"></i> Actualizar Gasto';
+                document.getElementById('persona').disabled = true;
+                document.getElementById('btn-limpiar').style.display = 'none'; // Ocultar botón limpiar en edición
                 formContainer.style.display = 'block';
                 toggleFormBtn.innerHTML = '<i class="fas fa-times me-2"></i> Cerrar Formulario';
                 formContainer.scrollIntoView({ behavior: 'smooth' });
@@ -373,6 +389,12 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('responsableId').value = '';
         responsableModalLabel.innerHTML = '<i class="fas fa-user-plus me-2"></i> Nuevo Responsable';
         btnSaveResponsable.innerHTML = 'Guardar';
+
+        // Ocultar modal de gestión
+        const gestionModal = bootstrap.Modal.getInstance(gestionResponsablesModalEl);
+        if (gestionModal) gestionModal.hide();
+
+        responsableModal.show();
     });
 
     // Guardar (crear o editar) responsable
@@ -399,12 +421,23 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) throw new Error(result.error);
 
             showToast(result.message, 'success');
-            responsableModal.hide();
+
+            // Cerrar modal asegurando que usamos la instancia correcta
+            const modalEl = document.getElementById('responsableModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl) || responsableModal;
+            if (modalInstance) modalInstance.hide();
+
             await cargarResponsables(); // Recarga el select del formulario principal
-            await cargarTodosLosResponsables(); // Recarga la tabla del modal de gestión
+            // No es necesario cargarTodosLosResponsables() aquí porque al reabrirse el modal de gestión se recargará
         } catch (error) {
             showToast(error.message, 'error');
         }
+    });
+
+    // Reabrir el modal de gestión al cerrar el modal de edición/creación
+    document.getElementById('responsableModal').addEventListener('hidden.bs.modal', () => {
+        const gestionModal = bootstrap.Modal.getInstance(gestionResponsablesModalEl) || new bootstrap.Modal(gestionResponsablesModalEl);
+        gestionModal.show();
     });
 
     // Delegación de eventos en la tabla de responsables
@@ -421,6 +454,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('responsableName').value = responsable.nombre;
                 responsableModalLabel.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Responsable';
                 btnSaveResponsable.innerHTML = 'Actualizar';
+
+                // Ocultar modal de gestión
+                const gestionModal = bootstrap.Modal.getInstance(gestionResponsablesModalEl);
+                if (gestionModal) gestionModal.hide();
+
                 responsableModal.show();
             }
         }

@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
         bonificacionesPagina.forEach(b => {
             const fila = document.createElement('tr');
             const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
-            const estado = b.activo ? `<span class="badge bg-success">Activo</span>` : `<span class="badge bg-secondary">Inactivo</span>`;
+
 
             fila.innerHTML = `
                 <td>${b.nombre}</td>
@@ -326,12 +326,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Encabezados del CSV
-        const headers = ['Nombre', 'Categoría', 'Presentación', 'Stock', 'Valor Unitario (S/.)', 'Valor Total (S/.)', 'Estado'];
+        const headers = ['Nombre', 'Categoría', 'Presentación', 'Stock', 'Valor Unitario (S/.)', 'Valor Total (S/.)'];
 
         // Convertir datos a filas de CSV
         const rows = bonificaciones.map(b => {
             const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
-            const estado = b.activo ? 'Activo' : 'Inactivo';
 
             return [
                 `"${b.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
@@ -339,8 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 `"${b.presentacion.replace(/"/g, '""')}"`,
                 b.stock,
                 Number(b.valor_bonif).toFixed(2),
-                valorTotal,
-                estado
+                valorTotal
             ].join(';');
         });
 
@@ -361,6 +359,9 @@ document.addEventListener('DOMContentLoaded', function () {
         link.click();
         document.body.removeChild(link);
     }
+
+    // Event listener para el botón de exportar
+    document.getElementById('btnExportarBonificacionesCSV').addEventListener('click', exportarBonificacionesACSV);
 
     // Iniciar la carga de datos
     cargarDatosIniciales();
