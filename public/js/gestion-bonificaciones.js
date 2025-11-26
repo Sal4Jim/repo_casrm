@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const bonificacionesTable = document.getElementById('bonificacionesTable');
-    const pagination = document.getElementById('pagination');
     const btnSaveBonificacion = document.getElementById('btnSaveBonificacion');
     const btnUpdateBonificacion = document.getElementById('btnUpdateBonificacion');
-    const btnExportarBonificacionesCSV = document.getElementById('btnExportarBonificacionesCSV');
     const totalBonificacionesValorEl = document.getElementById('totalBonificacionesValor');
     const productoBaseSelect = document.getElementById('productoBase');
 
@@ -104,8 +102,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${b.stock}</td>
                 <td>S/. ${Number(b.valor_bonif).toFixed(2)}</td>
                 <td>S/. ${valorTotal}</td>
-
-                <td>${estado}</td>
                 <td>
                     <button class="btn btn-sm btn-primary me-1" data-action="edit" data-id="${b.bonificacion_id}" title="Editar Bonificación">
                         <i class="fas fa-edit"></i>
@@ -368,7 +364,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Iniciar la carga de datos
     cargarDatosIniciales();
-
-    // Evento para el botón de exportar
-    btnExportarBonificacionesCSV.addEventListener('click', exportarBonificacionesACSV);
 });

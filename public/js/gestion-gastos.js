@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gastoForm = document.getElementById('gasto-form');
     const formContainer = document.getElementById('gasto-form-container');
     const toggleFormBtn = document.getElementById('toggle-form-btn');
-    let editandoId = null; // Variable para saber si estamos editando
+    let editandoId = null;
     const personaSelect = document.getElementById('persona');
 
     // --- Referencias para la gestión de responsables ---

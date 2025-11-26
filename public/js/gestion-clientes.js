@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const numeroCompra = saleDetailBtn.dataset.numeroCompra;
             const clienteNombre = document.getElementById('detail-nombre').textContent;
             if (ventaId) {
-                customerDetailModal.hide(); // Ocultar el modal de cliente antes de mostrar el de venta
+                customerDetailModal.hide(); 
                 cargarDetalleVenta(ventaId, clienteNombre, numeroCompra);
             }
             return;
