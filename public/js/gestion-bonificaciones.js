@@ -13,11 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let productos = [];
     let productoChoices = null;
 
-    // Variables de paginación
-    const bonificacionesPorPagina = 6;
-    let paginaActualBonificaciones = 1;
-    const paginationInfoBonificaciones = document.getElementById('pagination-info-bonificaciones');
-    const paginationControlsBonificaciones = document.getElementById('pagination-controls-bonificaciones');
+    // Variables de paginación eliminadas
     const searchBonificaciones = document.getElementById('searchBonificaciones');
 
     // --- Funciones de notificación (Toast) ---
@@ -66,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
         productoChoices.setChoices(opcionesProductos, 'value', 'label', true);
     }
 
-    // --- Renderizado de la tabla con paginación y búsqueda ---
+    // --- Renderizado de la tabla con búsqueda (sin paginación) ---
     function renderizarBonificaciones() {
         // Filtrar bonificaciones según el término de búsqueda
         const searchTerm = searchBonificaciones.value.toLowerCase();
@@ -79,18 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
         bonificacionesTable.innerHTML = '';
         if (bonificacionesFiltradas.length === 0) {
             bonificacionesTable.innerHTML = '<tr><td colspan="8" class="text-center">No se encontraron bonificaciones.</td></tr>';
-            paginationInfoBonificaciones.innerHTML = '';
-            paginationControlsBonificaciones.innerHTML = '';
             return;
         }
 
-        // Calcular paginación con bonificaciones filtradas
-        const inicio = (paginaActualBonificaciones - 1) * bonificacionesPorPagina;
-        const fin = inicio + bonificacionesPorPagina;
-        const bonificacionesPagina = bonificacionesFiltradas.slice(inicio, fin);
-
-        // Renderizar solo las bonificaciones de la página actual
-        bonificacionesPagina.forEach(b => {
+        // Renderizar todas las bonificaciones filtradas (sin paginación)
+        bonificacionesFiltradas.forEach(b => {
             const fila = document.createElement('tr');
             const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
 
@@ -113,68 +102,11 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             bonificacionesTable.appendChild(fila);
         });
-
-        // Actualizar controles de paginación con bonificaciones filtradas
-        actualizarPaginacionBonificaciones(bonificacionesFiltradas);
     }
 
-    // --- Función para actualizar controles de paginación ---
-    function actualizarPaginacionBonificaciones(bonificacionesFiltradas = bonificaciones) {
-        const total = bonificacionesFiltradas.length;
-        const inicio = (paginaActualBonificaciones - 1) * bonificacionesPorPagina;
-        const desde = total === 0 ? 0 : inicio + 1;
-        const hasta = Math.min(inicio + bonificacionesPorPagina, total);
-
-        paginationInfoBonificaciones.innerHTML = `Mostrando <b>${desde}</b> a <b>${hasta}</b> de <b>${total}</b> bonificaciones`;
-
-        const totalPaginas = Math.ceil(total / bonificacionesPorPagina);
-        paginationControlsBonificaciones.innerHTML = '';
-
-        if (totalPaginas <= 1) return;
-
-        // Botón Anterior
-        const prevLi = document.createElement('li');
-        prevLi.className = `page-item ${paginaActualBonificaciones === 1 ? 'disabled' : ''}`;
-        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Anterior">&laquo;</a>`;
-        prevLi.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (paginaActualBonificaciones > 1) {
-                paginaActualBonificaciones--;
-                renderizarBonificaciones();
-            }
-        });
-        paginationControlsBonificaciones.appendChild(prevLi);
-
-        // Números de página
-        for (let i = 1; i <= totalPaginas; i++) {
-            const li = document.createElement('li');
-            li.className = `page-item ${i === paginaActualBonificaciones ? 'active' : ''}`;
-            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            li.addEventListener('click', (e) => {
-                e.preventDefault();
-                paginaActualBonificaciones = i;
-                renderizarBonificaciones();
-            });
-            paginationControlsBonificaciones.appendChild(li);
-        }
-
-        // Botón Siguiente
-        const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${paginaActualBonificaciones === totalPaginas ? 'disabled' : ''}`;
-        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente">&raquo;</a>`;
-        nextLi.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (paginaActualBonificaciones < totalPaginas) {
-                paginaActualBonificaciones++;
-                renderizarBonificaciones();
-            }
-        });
-        paginationControlsBonificaciones.appendChild(nextLi);
-    }
 
     // Event listener para búsqueda
     searchBonificaciones.addEventListener('input', () => {
-        paginaActualBonificaciones = 1; // Resetear a página 1 al buscar
         renderizarBonificaciones();
     });
 
@@ -278,26 +210,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Eliminar bonificación
+    // Eliminar bonificación (Soft Delete)
     function handleDelete(id) {
         const bonificacion = bonificaciones.find(b => b.bonificacion_id == id);
         if (!bonificacion) return;
 
         Swal.fire({
             title: '¿Estás seguro?',
-            html: `Se eliminará permanentemente la bonificación <strong>${bonificacion.nombre}</strong>.`,
+            html: `Se desactivará la bonificación <strong>${bonificacion.nombre}</strong>.`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, eliminar', // Mantener texto "eliminar" visualmente como pidió el usuario
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`/api/bonificaciones/${id}`, { method: 'DELETE' });
-                    if (response.status !== 204) throw new Error('Error en el servidor.');
+                    // Soft delete: actualizar activo = 0
+                    const response = await fetch(`/api/bonificaciones/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ activo: 0 }) // Asumiendo que el backend acepta esto para desactivar
+                    });
 
+                    if (!response.ok) throw new Error('Error en el servidor.');
+
+                    // Eliminar de la lista local para que desaparezca de la vista
                     bonificaciones = bonificaciones.filter(b => b.bonificacion_id != id);
                     renderizarBonificaciones();
                     calcularYMostrarValorTotal();
@@ -317,51 +256,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 0);
         totalBonificacionesValorEl.textContent = `S/. ${valorTotalGeneral.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-
-    // --- Exportar a CSV ---
-    function exportarBonificacionesACSV() {
-        if (bonificaciones.length === 0) {
-            showToast('No hay bonificaciones para exportar.', 'error');
-            return;
-        }
-
-        // Encabezados del CSV
-        const headers = ['Nombre', 'Categoría', 'Presentación', 'Stock', 'Valor Unitario (S/.)', 'Valor Total (S/.)'];
-
-        // Convertir datos a filas de CSV
-        const rows = bonificaciones.map(b => {
-            const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
-
-            return [
-                `"${b.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
-                `"${b.categoria_nombre || 'N/A'}"`,
-                `"${b.presentacion.replace(/"/g, '""')}"`,
-                b.stock,
-                Number(b.valor_bonif).toFixed(2),
-                valorTotal
-            ].join(';');
-        });
-
-        // Unir encabezados y filas
-        const csvContent = [headers.join(';'), ...rows].join('\n');
-
-        // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
-        const BOM = '\uFEFF';
-        const csvContentWithBOM = BOM + csvContent;
-
-        // Crear un Blob y enlace de descarga
-        const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `bonificaciones_${new Date().toISOString().slice(0, 10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // Event listener para el botón de exportar
-    document.getElementById('btnExportarBonificacionesCSV').addEventListener('click', exportarBonificacionesACSV);
 
     // Iniciar la carga de datos
     cargarDatosIniciales();
