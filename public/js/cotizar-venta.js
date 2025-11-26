@@ -36,11 +36,11 @@ document.addEventListener('DOMContentLoaded', function () {
         toast.className = `toast align-items-center text-white ${toastTypeClass} border-0 show`;
         toast.setAttribute('role', 'alert');
         toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        `;
+<div class="d-flex">
+    <div class="toast-body">${message}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+</div>
+`;
 
         toastContainer.appendChild(toast);
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Rellenar campos del cliente al seleccionar uno
-        clienteSearchEl.addEventListener('change', async function (event) {
+    clienteSearchEl.addEventListener('change', async function (event) {
         const clienteId = event.detail.value;
 
         if (clienteId) {
@@ -166,9 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Añadir producto a la cotización al seleccionarlo
     productoSearchEl.addEventListener('change', function (event) {
-        console.log('Evento change de productoSearchEl disparado.');
         const selectedValue = event.detail.value;
-        console.log('Valor seleccionado:', selectedValue);
 
         if (selectedValue) {
             // Buscar el producto completo en nuestro array de productos disponibles
@@ -178,17 +176,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            console.log('Producto seleccionado (selectedOption.data):', producto);
-
             // Verificar si el producto ya está en la lista
             const existingProduct = productosEnCotizacion.find(p => p.producto_id == producto.producto_id);
 
             if (existingProduct) {
-                console.log('Producto existente encontrado:', existingProduct);
                 existingProduct.cantidad++; // Incrementar cantidad si ya existe
                 showToast(`Cantidad de "${producto.nombre}" incrementada.`, 'info');
             } else {
-                console.log('Producto NO existente, añadiendo nuevo.');
                 productosEnCotizacion.push({
                     idUnico: Date.now() + Math.random(), // ID único para la fila en el frontend
                     producto_id: producto.producto_id,
@@ -203,47 +197,44 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             renderProductosCotizacion();
             productosChoices.setChoiceByValue(''); // Limpiar el select después de añadir
-        } else {
-            console.log('No se seleccionó ningún valor válido.');
         }
     });
 
     // --- Renderizado y Lógica de la Tabla de Productos ---
     function renderProductosCotizacion() {
         productosCotizacionTable.innerHTML = '';
-        console.log('Renderizando productos de cotización. productosEnCotizacion:', productosEnCotizacion);
         if (productosEnCotizacion.length === 0) {
             productosCotizacionTable.innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
-                        No hay productos en la cotización
-                    </td>
-                </tr>
-            `;
+    <tr>
+        <td colspan="7" class="text-center text-muted py-4">
+            <i class="fas fa-box-open fa-2x mb-2 d-block"></i>
+            No hay productos en la cotización
+        </td>
+    </tr>
+`;
         } else {
             productosEnCotizacion.forEach(prod => {
                 const row = document.createElement('tr');
                 row.dataset.idUnico = prod.idUnico;
                 row.innerHTML = `
-                    <td>${prod.nombre_producto}</td>
-                    <td>${prod.presentacion}</td>
-                    <td>S/. ${prod.precio_unitario.toFixed(2)}</td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm cantidad-input"
-                               value="${prod.cantidad}" min="1" data-id-unico="${prod.idUnico}" style="width: 80px;">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control form-control-sm descuento-input"
-                               value="${prod.descuento_item.toFixed(2)}" min="0" step="0.01" data-id-unico="${prod.idUnico}" style="width: 100px;">
-                    </td>
-                    <td>S/. <span class="subtotal-item">${prod.subtotal.toFixed(2)}</span></td>
-                    <td class="actions-column">
-                        <button class="btn btn-sm btn-danger delete-product-btn" data-id-unico="${prod.idUnico}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
+        <td>${prod.nombre_producto}</td>
+        <td>${prod.presentacion}</td>
+        <td>S/. ${prod.precio_unitario.toFixed(2)}</td>
+        <td>
+            <input type="number" class="form-control form-control-sm cantidad-input"
+                   value="${prod.cantidad}" min="1" data-id-unico="${prod.idUnico}" style="width: 80px;">
+        </td>
+        <td>
+            <input type="number" class="form-control form-control-sm descuento-input"
+                   value="${prod.descuento_item.toFixed(2)}" min="0" step="0.01" data-id-unico="${prod.idUnico}" style="width: 100px;">
+        </td>
+        <td>S/. <span class="subtotal-item">${prod.subtotal.toFixed(2)}</span></td>
+        <td class="actions-column">
+            <button class="btn btn-sm btn-danger delete-product-btn" data-id-unico="${prod.idUnico}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
                 productosCotizacionTable.appendChild(row);
             });
         }

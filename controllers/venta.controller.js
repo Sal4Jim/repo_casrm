@@ -237,11 +237,11 @@ exports.generatePdfVenta = async (req, res) => {
         const boxX = doc.page.width - boxWidth - 50;
         doc.rect(boxX, headerY, boxWidth, 60).stroke();
         doc.fillColor('#28a745') // Color verde para el título
-           .fontSize(14).font('Helvetica-Bold').text('RECIBO DE VENTA', boxX, headerY + 10, { width: boxWidth, align: 'center' });
-        
+            .fontSize(14).font('Helvetica-Bold').text('RECIBO DE VENTA', boxX, headerY + 10, { width: boxWidth, align: 'center' });
+
         doc.fillColor('black') // Restaurar color negro
-           .fontSize(10).font('Helvetica')
-           .text(`Nro: ${numeroVentaSecuencial}`, boxX + 10, headerY + 35);
+            .fontSize(10).font('Helvetica')
+            .text(`Nro: ${numeroVentaSecuencial}`, boxX + 10, headerY + 35);
         doc.text(`Fecha: ${new Date(venta.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 50);
 
         // --- INFORMACIÓN DEL CLIENTE ---
@@ -260,10 +260,10 @@ exports.generatePdfVenta = async (req, res) => {
 
         const drawTableHeader = (y) => {
             doc.fontSize(10).font('Helvetica-Bold')
-               .text('Ítem', 50, y)
-               .text('P. Unit.', 300, y, { width: 70, align: 'right' })
-               .text('Cant.', 380, y, { width: 50, align: 'center' })
-               .text('Subtotal', 440, y, { width: 100, align: 'right' });
+                .text('Ítem', 50, y)
+                .text('P. Unit.', 300, y, { width: 70, align: 'right' })
+                .text('Cant.', 380, y, { width: 50, align: 'center' })
+                .text('Subtotal', 440, y, { width: 100, align: 'right' });
             doc.moveTo(50, y + 20).lineTo(doc.page.width - 50, y + 20).stroke();
         };
 
@@ -272,7 +272,7 @@ exports.generatePdfVenta = async (req, res) => {
 
         venta.detalles.forEach((item, index) => {
             const nombreItem = item.es_bonificacion ? `${item.nombre_bonificacion} (Bonificación)` : item.nombre_producto;
-            
+
             // Calcular altura de la fila dinámicamente
             const rowHeight = Math.max(
                 doc.heightOfString(nombreItem, { width: 240 }),
@@ -397,7 +397,7 @@ exports.getVentaById = async (req, res) => {
 exports.getAllVentas = async (req, res) => {
     try {
         const query = `
-            SELECT compra_id, cliente_id, fecha, total FROM venta ORDER BY fecha DESC
+            SELECT compra_id, cliente_id, fecha, total FROM venta WHERE activa = 1 ORDER BY fecha DESC
         `;
         const [ventas] = await pool.promise().query(query);
         res.json({ success: true, ventas });

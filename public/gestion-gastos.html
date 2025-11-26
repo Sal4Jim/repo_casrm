@@ -1,320 +1,359 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CASRM - Gestión de Gastos</title> 
-  
-  <!-- Tailwind CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Fuente Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Choices.js (para selects mejorados en bonificaciones) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CASRM - Gestión de Gastos</title>
 
-  <!-- Framework CSS de Bootstrap para estilos y componentes -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fuente Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Choices.js (para selects mejorados en bonificaciones) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 
-  <link rel="stylesheet" href="css/gestion-gastos.css">
+    <!-- Framework CSS de Bootstrap para estilos y componentes -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/gestion-gastos.css">
+    <link rel="icon" href="images/logoCASRM.png" type="image/png">
 </head>
 
 <body class="bg-blue-50">
-  <!-- Header -->
-  <div id="header-placeholder"></div>
+    <!-- Header -->
+    <div id="header-placeholder"></div>
 
-  <!-- Main Content -->
-  <main class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h2 class="mb-0 mt-5">Gestión de Gastos y Bonificaciones</h2>
-        <p class="text-muted">Registro de los gastos recurrentes</p>
-      </div>
-      <div>
-        <button id="toggle-form-btn" class="btn btn-primary">
-          <i class="fas fa-plus-circle me-2"></i> Agregar Gasto
-        </button>
-        <button id="btn-gestionar-responsables" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#gestionResponsablesModal">
-            <i class="fas fa-users-cog me-2"></i> Gestionar Responsables
-        </button>
-      </div>
-    </div>
-
-    <!-- Formulario de gasto (oculto por defecto) -->
-    <div id="gasto-form-container" class="card mb-4" style="display: none;">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> Registro de Gastos</h5>
+    <!-- Main Content -->
+    <main class="container mt-5 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-0 mt-5">Gestión de Gastos y Bonificaciones</h2>
+                <p class="text-muted">Registro de los gastos recurrentes</p>
+            </div>
+            <div>
+                <button id="toggle-form-btn" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i> Agregar Gasto
+                </button>
+                <button id="btn-gestionar-responsables" class="btn btn-secondary" data-bs-toggle="modal"
+                    data-bs-target="#gestionResponsablesModal">
+                    <i class="fas fa-users-cog me-2"></i> Gestionar Responsables
+                </button>
+            </div>
         </div>
-        <div class="card-body">
-            <form id="gasto-form">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <input type="text" id="descripcion" name="descripcion" placeholder="Ej. Compra de insumos para helados" class="form-control">
+
+        <!-- Formulario de gasto (oculto por defecto) -->
+        <div id="gasto-form-container" class="card mb-4" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> Registro de Gastos</h5>
+            </div>
+            <div class="card-body">
+                <form id="gasto-form">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <input type="text" id="descripcion" name="descripcion"
+                                placeholder="Ej. Compra de insumos para helados" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="monto" class="form-label">Monto (S/.)</label>
+                            <input type="number" id="monto" name="monto" placeholder="0.00" step="0.01" min="0"
+                                class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" id="fecha" name="fecha" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="persona" class="form-label">Persona Responsable</label>
+                            <select id="persona" name="persona" class="form-select" required>
+                                <option value="" disabled selected>Cargando responsables...</option>
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end gap-2">
+                            <button type="button" id="btn-limpiar" class="btn btn-secondary">
+                                <i class="fas fa-eraser me-2"></i> Limpiar
+                            </button>
+                            <button type="submit" id="btn-guardar" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Guardar Gasto
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="monto" class="form-label">Monto (S/.)</label>
-                        <input type="number" id="monto" name="monto" placeholder="0.00" step="0.01" min="0" class="form-control">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="fecha" class="form-label">Fecha</label>
-                        <input type="date" id="fecha" name="fecha" class="form-control">
-                    </div>
-                    <div class="col-12">
-                        <label for="persona" class="form-label">Persona Responsable</label>
-                        <select id="persona" name="persona" class="form-select" required>
-                            <option value="" disabled selected>Cargando responsables...</option>
-                        </select>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end gap-2">
-                        <button type="button" id="btn-limpiar" class="btn btn-secondary">
-                            <i class="fas fa-eraser me-2"></i> Limpiar
-                        </button>
-                        <button type="submit" id="btn-guardar" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i> Guardar Gasto
-                        </button>
-                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de gastos -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i> Lista de Gastos</h5>
+                <div class="w-25">
+                    <input type="text" id="searchGastos" placeholder="Buscar gastos..." class="form-control">
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Tabla de gastos -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i> Lista de Gastos</h5>
-            <div class="w-25">
-                <input type="text" id="searchGastos" placeholder="Buscar gastos..." class="form-control">
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Fecha</th>
+                                <th>Persona</th>
+                                <th class="actions-column">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gastosTableBody">
+                            <!-- Las filas de gastos se generan dinámicamente desde JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div id="pagination-info"></div>
+                <nav aria-label="Pagination">
+                    <ul class="pagination mb-0" id="pagination-controls">
+                        <!-- Controles de paginación generados por JS -->
+                    </ul>
+                </nav>
             </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            <th>Descripción</th>
-                            <th>Monto</th>
-                            <th>Fecha</th>
-                            <th>Persona</th>
-                            <th class="actions-column">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="gastosTableBody">
-                        <!-- Las filas de gastos se generan dinámicamente desde JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <div id="pagination-info"></div>
-            <nav aria-label="Pagination">
-                <ul class="pagination mb-0" id="pagination-controls">
-                    <!-- Controles de paginación generados por JS -->
-                </ul>
-            </nav>
-        </div>
-    </div>
-  </main>
+    </main>
 
-  <!-- ===================================================== -->
-  <!-- INICIO: Sección de Gestión de Bonificaciones          -->
-  <!-- ===================================================== -->
-  <div class="container mb-5">
-      <div class="card">
-          <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <!-- ===================================================== -->
+    <!-- INICIO: Sección de Gestión de Bonificaciones          -->
+    <!-- ===================================================== -->
+    <div class="container mb-5">
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
                 <div class="d-flex flex-column flex-md-row gap-2 align-items-center">
                     <h4 class="mb-0 me-md-3"><i class="fas fa-gift me-2"></i> Gestión de Bonificaciones</h4>
-                    <button id="btnNuevaBonificacion" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bonificacionModal">
+                    <button id="btnNuevaBonificacion" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#bonificacionModal">
                         <i class="fas fa-plus-circle me-2"></i> Nueva Bonificación
                     </button>
                     <button id="btnExportarBonificacionesCSV" class="btn btn-success">
                         <i class="fas fa-file-csv me-2"></i> Exportar a CSV
                     </button>
+                    <div class="w-25">
+
+                        <input type="text" id="searchBonificaciones" placeholder="Buscar bonificaciones..."
+                            class="form-control">
+
+                    </div>
+
                 </div>
                 <div class="text-end">
-                    <h5 class="mb-0">Valor Total: <span id="totalBonificacionesValor" class="badge bg-primary fs-6">S/. 0.00</span></h5>
+                    <h5 class="mb-0">Valor Total: <span id="totalBonificacionesValor" class="badge bg-primary fs-6">S/.
+                            0.00</span></h5>
                 </div>
-          </div>
-  
-          <div class="card-body">
-              <!-- Tabla de bonificaciones -->
-              <div class="table-responsive">
-                  <table class="table table-hover table-striped">
-                      <thead>
-                          <tr>
-                              <th>Nombre</th>
-                              <th>Categoría</th>
-                              <th>Presentación</th>
-                              <th>Stock</th>
-                              <th>Valor Unit.</th>
-                              <th>Valor Total</th>
-                              <th>Estado</th>
-                              <th class="actions-column">Acciones</th>
-                          </tr>
-                      </thead>
-                      <tbody id="bonificacionesTable">
-                          <!-- Las filas se generan dinámicamente desde JS -->
-                      </tbody>
-                  </table>
-              </div>
-          </div>
-      </div>
-  </div>
-  
-  <!-- Modal: Crear Nueva Bonificación -->
-  <div class="modal fade" id="bonificacionModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title">
-                      <i class="fas fa-plus-circle me-2"></i> Nueva Bonificación
-                  </h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <form id="bonificacionForm">
-                      <div class="mb-3">
-                          <label for="productoBase" class="form-label">Producto Base*</label>
-                          <select id="productoBase" required>
-                              <option value="">Cargando productos...</option>
-                          </select>
-                      </div>
-                      <div class="mb-3">
-                          <label for="bonificacionStock" class="form-label">Stock Inicial*</label>
-                          <input type="number" class="form-control" id="bonificacionStock" min="0" placeholder="Cantidad inicial" required>
-                      </div>
-                  </form>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="button" class="btn btn-primary" id="btnSaveBonificacion">Guardar</button>
-              </div>
-          </div>
-      </div>
-  </div>
+            </div>
 
-  <!-- Modal: Editar Bonificación -->
-  <div class="modal fade" id="editBonificacionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i> Editar Bonificación
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editBonificacionForm">
-                    <input type="hidden" id="editBonificacionId">
-                    <p class="mb-3">Editando: <strong id="editBonificacionName"></strong></p>
-                    <div class="mb-3">
-                        <label for="editBonificacionPresentacion" class="form-label">Presentación*</label>
-                        <input type="text" class="form-control" id="editBonificacionPresentacion" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editBonificacionStock" class="form-label">Stock*</label>
-                        <input type="number" class="form-control" id="editBonificacionStock" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editBonificacionValor" class="form-label">Valor Unitario (S/.)*</label>
-                        <input type="number" class="form-control" id="editBonificacionValor" min="0" step="0.01" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="btnUpdateBonificacion">Actualizar</button>
+            <div class="card-body">
+                <!-- Tabla de bonificaciones -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Presentación</th>
+                                <th>Stock</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Estado</th>
+                                <th class="actions-column">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bonificacionesTable">
+                            <!-- Las filas se generan dinámicamente desde JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+
+                    <div id="pagination-info-bonificaciones"></div>
+
+                    <nav aria-label="Pagination">
+
+                        <ul class="pagination mb-0" id="pagination-controls-bonificaciones">
+
+                            <!-- Controles de paginación generados por JS -->
+
+                        </ul>
+
+                    </nav>
+
+                </div>
+
             </div>
         </div>
     </div>
-  </div>
 
-  <!-- ===================================================== -->
-  <!-- INICIO: Modales de Gestión de Responsables            -->
-  <!-- ===================================================== -->
-
-  <!-- Modal Principal: Gestión de Responsables (Contiene la tabla) -->
-  <div class="modal fade" id="gestionResponsablesModal" tabindex="-1" aria-labelledby="gestionResponsablesModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="gestionResponsablesModalLabel"><i class="fas fa-users-cog me-2"></i> Gestión de Responsables</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Modal: Crear Nueva Bonificación -->
+    <div class="modal fade" id="bonificacionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle me-2"></i> Nueva Bonificación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bonificacionForm">
+                        <div class="mb-3">
+                            <label for="productoBase" class="form-label">Producto Base*</label>
+                            <select id="productoBase" required>
+                                <option value="">Cargando productos...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bonificacionStock" class="form-label">Stock Inicial*</label>
+                            <input type="number" class="form-control" id="bonificacionStock" min="0"
+                                placeholder="Cantidad inicial" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveBonificacion">Guardar</button>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <div class="d-flex justify-content-end mb-3">
-            <button id="btnNuevoResponsable" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#responsableModal">
-              <i class="fas fa-user-plus me-2"></i> Nuevo Responsable
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover table-striped">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Estado</th>
-                  <th class="actions-column">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="responsablesTableBody">
-                <!-- Las filas se generan dinámicamente desde JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Modal Secundario: Crear/Editar Responsable -->
-  <div class="modal fade" id="responsableModal" tabindex="-1" aria-labelledby="responsableModalLabel" aria-hidden="true" data-bs-keyboard="false">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="responsableModalLabel">
-                      <i class="fas fa-user-plus me-2"></i> Nuevo Responsable
-                  </h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <form id="responsableForm">
-                      <input type="hidden" id="responsableId">
-                      <div class="mb-3">
-                          <label for="responsableName" class="form-label">Nombre Completo*</label>
-                          <input type="text" class="form-control" id="responsableName" placeholder="Nombre del responsable" required>
-                      </div>
-                  </form>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="button" class="btn btn-primary" id="btnSaveResponsable">Guardar</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <!-- Contenedor para Toasts (si no existe ya) -->
-  <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>  
-  <footer class="bg-dark text-white py-4 mt-auto">
-    <div class="container mx-auto px-4 text-center text-sm">
-      <p>© 2025 CASRM - Todos los derechos reservados</p>
+    <!-- Modal: Editar Bonificación -->
+    <div class="modal fade" id="editBonificacionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i> Editar Bonificación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editBonificacionForm">
+                        <input type="hidden" id="editBonificacionId">
+                        <p class="mb-3">Editando: <strong id="editBonificacionName"></strong></p>
+                        <div class="mb-3">
+                            <label for="editBonificacionPresentacion" class="form-label">Presentación*</label>
+                            <input type="text" class="form-control" id="editBonificacionPresentacion" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editBonificacionStock" class="form-label">Stock*</label>
+                            <input type="number" class="form-control" id="editBonificacionStock" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editBonificacionValor" class="form-label">Valor Unitario (S/.)*</label>
+                            <input type="number" class="form-control" id="editBonificacionValor" min="0" step="0.01"
+                                required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnUpdateBonificacion">Actualizar</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </footer>
 
-  <!-- Bootstrap JS (obligatorio para modales, etc.) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- SweetAlert2 (para confirmaciones) -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- Choices.js (para selects mejorados) -->
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <!-- Script principal para cargar componentes comunes -->
-  <script src="js/main.js"></script>
-  <!-- Script principal -->
-  <script src="js/gestion-gastos.js"></script>
-  <script src="js/gestion-bonificaciones.js"></script>
+    <!-- ===================================================== -->
+    <!-- INICIO: Modales de Gestión de Responsables            -->
+    <!-- ===================================================== -->
+
+    <!-- Modal Principal: Gestión de Responsables (Contiene la tabla) -->
+    <div class="modal fade" id="gestionResponsablesModal" tabindex="-1" aria-labelledby="gestionResponsablesModalLabel"
+        aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gestionResponsablesModalLabel"><i class="fas fa-users-cog me-2"></i>
+                        Gestión de Responsables</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-end mb-3">
+                        <button id="btnNuevoResponsable" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#responsableModal">
+                            <i class="fas fa-user-plus me-2"></i> Nuevo Responsable
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th class="actions-column">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="responsablesTableBody">
+                                <!-- Las filas se generan dinámicamente desde JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Secundario: Crear/Editar Responsable -->
+    <div class="modal fade" id="responsableModal" tabindex="-1" aria-labelledby="responsableModalLabel"
+        aria-hidden="true" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="responsableModalLabel">
+                        <i class="fas fa-user-plus me-2"></i> Nuevo Responsable
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="responsableForm">
+                        <input type="hidden" id="responsableId">
+                        <div class="mb-3">
+                            <label for="responsableName" class="form-label">Nombre Completo*</label>
+                            <input type="text" class="form-control" id="responsableName"
+                                placeholder="Nombre del responsable" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveResponsable">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Toasts (si no existe ya) -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>
+    <footer class="bg-dark text-white py-4 mt-auto">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>© 2025 CASRM - Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS (obligatorio para modales, etc.) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 (para confirmaciones) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Choices.js (para selects mejorados) -->
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <!-- Script principal para cargar componentes comunes -->
+    <script src="js/main.js"></script>
+    <!-- Script principal -->
+    <script src="js/gestion-gastos.js"></script>
+    <script src="js/gestion-bonificaciones.js"></script>
 </body>
+
 </html>

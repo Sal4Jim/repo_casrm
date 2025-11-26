@@ -431,6 +431,7 @@ document.addEventListener('DOMContentLoaded', function () {
         mostrarProductos();
     });
 
+
     // === FUNCIÓN PARA EXPORTAR A CSV ===
     function exportarProductosACSV() {
         if (productos.length === 0) {
@@ -471,6 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
         }
 
         showToast('<i class="fas fa-file-download me-2"></i> Exportación a CSV iniciada.', 'success');

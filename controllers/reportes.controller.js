@@ -21,6 +21,7 @@ exports.getReportesProductos = async (req, res) => {
             JOIN venta v ON dv.compra_id = v.compra_id
             JOIN productos p ON dv.producto_id = p.producto_id
             WHERE v.fecha BETWEEN ? AND ?
+              AND v.activa = 1
               AND dv.es_bonificacion = 0
               AND dv.producto_id IS NOT NULL
             GROUP BY p.producto_id, p.nombre

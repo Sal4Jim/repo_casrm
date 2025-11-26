@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Script de reportes cargado.');
+    // console.log('Script de reportes cargado.');
 
     // --- Variables globales para almacenar todos los datos ---
     let allVentas = [];
@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error al cargar gastos:', gastosData.error);
             }
 
-            console.log('Todas las ventas cargadas:', allVentas);
-            console.log('Todos los gastos cargados:', allGastos);
+            // console.log('Todas las ventas cargadas:', allVentas);
+            // console.log('Todos los gastos cargados:', allGastos);
 
             // Si se proporciona un callback, ejecutarlo.
             // Esto se usará para aplicar el filtro después de cargar los datos.
@@ -154,9 +154,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return gasto.fecha >= startDate && gasto.fecha <= endDate;
             });
 
-            console.log(`Datos filtrados para el período ${period} (${formatDate(startDate)} - ${formatDate(endDate)}):`);
-            console.log('Ventas filtradas:', filteredVentas);
-            console.log('Gastos filtrados:', filteredGastos);
+            // console.log(`Datos filtrados para el período ${period} (${formatDate(startDate)} - ${formatDate(endDate)}):`);
+            // console.log('Ventas filtradas:', filteredVentas);
+            // console.log('Gastos filtrados:', filteredGastos);
 
             updateKPIs();
             renderCharts(startDate, endDate); // Renderizar los gráficos con los datos filtrados y las fechas

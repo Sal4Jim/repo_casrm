@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     let gastos = []; // El array ahora se cargará desde la API
     let responsables = []; // Array para almacenar los responsables
     const gastosPorPagina = 6;
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function mostrarGastos() {
         const searchTerm = searchInput.value.toLowerCase();
-        const gastosFiltrados = gastos.filter(g => 
+        const gastosFiltrados = gastos.filter(g =>
             (g.descripcion && g.descripcion.toLowerCase().includes(searchTerm)) ||
             (g.persona && String(g.persona).toLowerCase().includes(searchTerm))
         );
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fila.dataset.gastoId = gasto.gasto_id;
                 fila.innerHTML = `
                     <td>${gasto.descripcion}</td>
-                    <td>S/. ${Number(gasto.monto).toLocaleString('es-PE', {minimumFractionDigits:2})}</td>
+                    <td>S/. ${Number(gasto.monto).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
                     <td>${new Date(gasto.fecha).toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
                     <td>${gasto.persona || 'N/A'}</td>
                     <td>
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const today = new Date();
     const formattedDate = today.toISOString().substr(0, 10);
     document.getElementById('fecha').value = formattedDate;
-    
+
     // Toggle form visibility
     toggleFormBtn.addEventListener('click', () => {
         if (formContainer.style.display === 'none' || formContainer.style.display === '') {
@@ -217,21 +217,21 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#gasto-form-container .card-header h5').innerHTML = '<i class="fas fa-file-invoice-dollar me-2"></i> Registro de Gastos';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-save me-2"></i> Guardar Gasto';
     }
-    
+
     // Form clear button
-    document.getElementById('btn-limpiar').addEventListener('click', function() {
+    document.getElementById('btn-limpiar').addEventListener('click', function () {
         document.getElementById('gasto-form').reset();
         document.getElementById('fecha').value = formattedDate;
-        
+
         // Ocultar formulario y restaurar texto del botón
         formContainer.style.display = 'none';
         toggleFormBtn.innerHTML = '<i class="fas fa-plus-circle me-2"></i> Agregar Gasto';
     });
-    
+
     // Form submit handler
-    gastoForm.addEventListener('submit', async function(e) {
+    gastoForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        
+
         // Form validation
         const gastoData = {
             descripcion: document.getElementById('descripcion').value.trim(),
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fecha: document.getElementById('fecha').value, // Enviamos solo la fecha, el servidor pondrá la hora.
             responsable_id: document.getElementById('persona').value
         };
-        
+
         if (!gastoData.descripcion || !gastoData.monto || !gastoData.fecha || !gastoData.responsable_id) {
             showToast('Por favor complete todos los campos.', 'error');
             return;
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) throw new Error(result.error || (esEdicion ? 'Error al actualizar el gasto.' : 'Error al guardar el gasto.'));
 
             showToast(result.message, 'success');
-            
+
             // Recargar todos los gastos para reflejar el cambio
             await cargarGastos();
 
@@ -274,9 +274,9 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast(error.message, 'error');
         }
     });
-    
+
     // Funcionalidad de edición y eliminación
-    tablaBody.addEventListener('click', function(e) {
+    tablaBody.addEventListener('click', function (e) {
         const editBtn = e.target.closest('.edit-btn');
         const deleteBtn = e.target.closest('.delete-btn');
 
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const response = await fetch(`/api/gastos/${gastoId}`, { method: 'DELETE' });
                             const data = await response.json();
                             if (!response.ok) throw new Error(data.error || 'Error en el servidor.');
-                            
+
                             showToast(data.message, 'success');
                             await cargarGastos(); // Recargar la lista
 
@@ -352,9 +352,9 @@ document.addEventListener('DOMContentLoaded', function() {
         toast.className = `toast align-items-center text-white ${toastTypeClass} border-0 show`;
         toast.setAttribute('role', 'alert');
         toast.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-        
+
         toastContainer.appendChild(toast);
-        
+
         const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
         bsToast.show();
     }
@@ -400,7 +400,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             showToast(result.message, 'success');
             responsableModal.hide();
-            await cargarResponsables(); // Recarga tanto el select como la tabla
+            await cargarResponsables(); // Recarga el select del formulario principal
+            await cargarTodosLosResponsables(); // Recarga la tabla del modal de gestión
         } catch (error) {
             showToast(error.message, 'error');
         }
@@ -452,7 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!response.ok) throw new Error(data.error);
 
                         showToast(data.message, 'success');
-                        await cargarResponsables(); // Recargar todo
+                        await cargarResponsables(); // Recargar select
+                        await cargarTodosLosResponsables(); // Recargar tabla y actualizar array global
                     } catch (error) {
                         showToast(error.message, 'error');
                     }

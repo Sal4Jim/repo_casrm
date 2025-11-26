@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const nombreInput = document.getElementById('nombre');
     const ciudadInput = document.getElementById('ciudad');
 
-    const filterNumbers = function(e) {
+    const filterNumbers = function (e) {
         // Reemplaza cualquier dígito por una cadena vacía
         e.target.value = e.target.value.replace(/\d/g, '');
     };
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ciudadInput) ciudadInput.addEventListener('input', filterNumbers);
 
 
- 
+
     cargarClientes(1, true);
 
     const btnGuardar = document.getElementById('btnGuardar');
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await axios[method](url, cliente);
             if (response.data.success) {
                 showToast(`<i class="fas fa-check-circle me-2"></i> Cliente <strong>${cliente.nombre}</strong> ${actionText} exitosamente`, 'success');
-                
+
                 // Usamos un pequeño delay para que el usuario vea el toast antes de cerrar el modal
                 setTimeout(() => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
@@ -153,10 +153,10 @@ document.addEventListener('DOMContentLoaded', function () {
                <button class="btn btn-sm btn-primary me-1 edit-btn" data-bs-toggle="modal" data-bs-target="#clientModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-edit"></i>
                </button>
-               ${cliente.activo === 1 
-                ? `<button class="btn btn-sm btn-danger me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="0" title="Desactivar Cliente"><i class="fas fa-user-slash"></i></button>`
-                : `<button class="btn btn-sm btn-success me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="1" title="Reactivar Cliente"><i class="fas fa-user-check"></i></button>`
-               }
+               ${cliente.activo === 1
+                    ? `<button class="btn btn-sm btn-danger me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="0" title="Desactivar Cliente"><i class="fas fa-user-slash"></i></button>`
+                    : `<button class="btn btn-sm btn-success me-1 status-btn" data-cliente-id="${cliente.cliente_id}" data-status="1" title="Reactivar Cliente"><i class="fas fa-user-check"></i></button>`
+                }
                <button class="btn btn-sm btn-info me-1" data-bs-toggle="modal" data-bs-target="#customerDetailModal" data-cliente-id="${cliente.cliente_id}">
                <i class="fas fa-info-circle"></i>
                </button>
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const mostrarInactivos = document.getElementById('switchMostrarInactivos').checked;
         const status = mostrarInactivos ? 'todos' : 'activo';
 
-        console.log(`🔄 Cargando clientes - Página ${page} ${searchTerm ? `(Búsqueda: "${searchTerm}")` : ''}`);
+        // console.log(`🔄 Cargando clientes - Página ${page} ${searchTerm ? `(Búsqueda: "${searchTerm}")` : ''}`);
 
         const params = new URLSearchParams({
             page: page,
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const switchInactivos = document.getElementById('switchMostrarInactivos');
     if (switchInactivos) {
-        switchInactivos.addEventListener('change', function() {
+        switchInactivos.addEventListener('change', function () {
             currentPage = 1;
             cargarClientes(1, false);
         });
@@ -306,10 +306,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const detailModalBtn = e.target.closest('[data-bs-target="#customerDetailModal"]');
         const printSaleBtn = e.target.closest('.print-sale-btn');
         const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
-        // const printSaleBtn = e.target.closest('.print-sale-btn');
-        // const exportCsvBtn = e.target.closest('#btnExportarHistorialCSV');
+
         const anularVentaBtn = e.target.closest('#btnAnularVenta');
         const addSaleModalBtn = e.target.closest('[data-bs-target="#addSaleModal"]');
+        const saleDetailBtn = e.target.closest('.sale-detail-btn');
 
         if (editBtn) {
             const clienteId = editBtn.getAttribute('data-cliente-id');
@@ -401,7 +401,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const saleDetailBtn = e.target.closest('.sale-detail-btn');
         if (saleDetailBtn) {
             const ventaId = saleDetailBtn.dataset.ventaId;
             const numeroCompra = saleDetailBtn.dataset.numeroCompra;
@@ -413,33 +412,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // if (printSaleBtn) {
-        //     const ventaId = printSaleBtn.dataset.ventaId;
-        //     const numeroCompra = printSaleBtn.dataset.numeroCompra;
-        //     if (ventaId) {
-        //         descargarPdfVenta(ventaId, numeroCompra);
-        //     }
-        //     return;
-        // }
-
-        // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
         if (exportCsvBtn) {
-            // ...y tenemos un ID de cliente cargado en el modal...
             if (clienteIdParaNotas) {
-                // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
                 exportarHistorialCSV(clienteIdParaNotas);
             }
             return;
         }
-        // // EVENTO DE EXPORTACIÓN: Si el botón presionado es el de exportar a CSV...
-        // if (exportCsvBtn) {
-        //     // ...y tenemos un ID de cliente cargado en el modal...
-        //     if (clienteIdParaNotas) {
-        //         // ...llamamos a la función que se encarga de generar y descargar el archivo CSV.
-        //         exportarHistorialCSV(clienteIdParaNotas);
-        //     }
-        //     return;
-        // }
+
 
         if (anularVentaBtn) {
             const ventaId = anularVentaBtn.dataset.ventaId;
@@ -486,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (saleClientNameInput) {
                 saleClientNameInput.value = clienteNombre;
             }
-            
+
             const addSaleModalEl = document.getElementById('addSaleModal');
             if (addSaleModalEl) {
                 const modal = bootstrap.Modal.getOrCreateInstance(addSaleModalEl);
@@ -511,7 +490,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (response.data && Array.isArray(response.data.productos)) {
                     productosVenta = response.data.productos;
                     const selectEl = document.getElementById('productoSearch');
-                    
+
                     if (!productoSearchChoices) {
                         productoSearchChoices = new Choices(selectEl, {
                             searchEnabled: true,
@@ -674,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.getElementById('tablaProductos')?.addEventListener('input', function(e) {
+    document.getElementById('tablaProductos')?.addEventListener('input', function (e) {
         if (e.target.classList.contains('cantidad-input-venta')) {
             const row = e.target.closest('tr');
             const id = row.dataset.id;
@@ -707,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.getElementById('tablaProductos')?.addEventListener('click', function(e) {
+    document.getElementById('tablaProductos')?.addEventListener('click', function (e) {
         if (e.target.closest('.eliminar-producto-venta')) {
             const id = e.target.closest('tr').dataset.id;
             productosSeleccionadosVenta = productosSeleccionadosVenta.filter(p => p.id != id);
@@ -741,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Guardar la venta
-    document.getElementById('guardarVenta')?.addEventListener('click', async function() {
+    document.getElementById('guardarVenta')?.addEventListener('click', async function () {
         const btn = this;
         const clienteId = document.getElementById('saleClientId').value;
 
@@ -853,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => {
                 if (response.data.success) {
                     showToast('<i class="fas fa-check-circle me-2"></i> Notas guardadas exitosamente', 'success');
-                    setNotasEditMode(false); 
+                    setNotasEditMode(false);
                 }
             })
             .catch(error => {
@@ -885,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const historialContainer = document.getElementById('historialComprasContainer');
         const badgeContainer = document.querySelector('#customerDetailModal .card-header .badge');
         const paginacionContainer = document.getElementById('historialComprasPaginacionContainer');
-        
+
         historialContainer.innerHTML = '<div class="list-group-item text-center"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</div>';
         badgeContainer.textContent = '...';
         paginacionContainer.innerHTML = '';
@@ -961,7 +940,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const prevLi = document.createElement('li');
                         prevLi.className = `page-item ${page === 1 ? 'disabled' : ''}`;
                         prevLi.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
-                        prevLi.addEventListener('click', (e) => { e.preventDefault(); if(page > 1) cargarHistorialCompras(clienteId, page - 1); });
+                        prevLi.addEventListener('click', (e) => { e.preventDefault(); if (page > 1) cargarHistorialCompras(clienteId, page - 1); });
                         ul.appendChild(prevLi);
 
                         // Indicador de página
@@ -974,7 +953,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         const nextLi = document.createElement('li');
                         nextLi.className = `page-item ${page === totalPages ? 'disabled' : ''}`;
                         nextLi.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
-                        nextLi.addEventListener('click', (e) => { e.preventDefault(); if(page < totalPages) cargarHistorialCompras(clienteId, page + 1); });
+                        nextLi.addEventListener('click', (e) => { e.preventDefault(); if (page < totalPages) cargarHistorialCompras(clienteId, page + 1); });
                         ul.appendChild(nextLi);
 
                         paginacionContainer.appendChild(ul);
@@ -996,19 +975,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const summaryDiv = document.getElementById('saleDetailSummary');
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
         document.getElementById('btnAnularVenta').dataset.ventaId = ventaId;
-        
+
         saleDetailModal.show();
 
         axios.get(`/api/ventas/${ventaId}`)
             .then(response => {
                 if (response.data.success) {
                     const venta = response.data.venta;
-                    const fechaVenta = new Date(venta.fecha);                    
+                    const fechaVenta = new Date(venta.fecha);
                     const fechaFormateada = fechaVenta.toLocaleDateString('es-ES');
-                    const horaFormateada = fechaVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });                    
+                    const horaFormateada = fechaVenta.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
                     document.getElementById('saleDetailId').textContent = `VNT-10${venta.compra_id}`;
                     document.getElementById('saleDetailDate').textContent = `${fechaFormateada} - ${horaFormateada}`;
-                    
+
                     // Ocultar o mostrar el botón de anular según el estado de la venta
                     const btnAnular = document.getElementById('btnAnularVenta');
                     if (venta.activa === 0) {
@@ -1088,17 +1067,17 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.disabled = true;
         // Cambiamos el contenido del botón para dar feedback visual al usuario.
         btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
-    // /**
-    //  * @function exportarHistorialCSV
-    //  * @description Genera y descarga un archivo CSV con el historial de compras de un cliente.
-    //  * @param {number} clienteId - El ID del cliente cuyo historial se va a exportar.
-    //  */
-    // async function exportarHistorialCSV(clienteId) {
-    //     const btn = document.getElementById('btnExportarHistorialCSV');
-    //     const originalContent = btn.innerHTML;
-    //     btn.disabled = true;
-    //     // Cambiamos el contenido del botón para dar feedback visual al usuario.
-    //     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+        // /**
+        //  * @function exportarHistorialCSV
+        //  * @description Genera y descarga un archivo CSV con el historial de compras de un cliente.
+        //  * @param {number} clienteId - El ID del cliente cuyo historial se va a exportar.
+        //  */
+        // async function exportarHistorialCSV(clienteId) {
+        //     const btn = document.getElementById('btnExportarHistorialCSV');
+        //     const originalContent = btn.innerHTML;
+        //     btn.disabled = true;
+        //     // Cambiamos el contenido del botón para dar feedback visual al usuario.
+        //     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
 
         try {
             // 1. Hacemos una petición a la API para obtener todas las ventas del cliente.
@@ -1107,27 +1086,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 showToast('No hay compras para exportar.', 'error');
                 return;
             }
-    //     try {
-    //         // 1. Hacemos una petición a la API para obtener todas las ventas del cliente.
-    //         const response = await axios.get(`/api/ventas/cliente/${clienteId}`);
-    //         if (!response.data.success || response.data.ventas.length === 0) {
-    //             showToast('No hay compras para exportar.', 'error');
-    //             return;
-    //         }
+            //     try {
+            //         // 1. Hacemos una petición a la API para obtener todas las ventas del cliente.
+            //         const response = await axios.get(`/api/ventas/cliente/${clienteId}`);
+            //         if (!response.data.success || response.data.ventas.length === 0) {
+            //             showToast('No hay compras para exportar.', 'error');
+            //             return;
+            //         }
 
             const ventas = response.data.ventas;
             const totalVentas = ventas.length;
             const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
-    //         const ventas = response.data.ventas;
-    //         const totalVentas = ventas.length;
-    //         const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
+            //         const ventas = response.data.ventas;
+            //         const totalVentas = ventas.length;
+            //         const clienteNombre = document.getElementById('detail-nombre').textContent.trim().replace(/\s+/g, '_');
 
             // Encabezados del CSV
             // 2. Preparamos el contenido del CSV, empezando por los encabezados.
             let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
-    //         // Encabezados del CSV
-    //         // 2. Preparamos el contenido del CSV, empezando por los encabezados.
-    //         let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
+            //         // Encabezados del CSV
+            //         // 2. Preparamos el contenido del CSV, empezando por los encabezados.
+            //         let csvContent = "Nro. Compra,Fecha,Total (S/.)\n";
 
             // Filas del CSV
             // 3. Recorremos cada venta para añadir una fila al CSV.
@@ -1138,15 +1117,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Añadimos la línea al contenido del CSV.
                 csvContent += `${numeroCompra},${fecha},${total}\n`;
             });
-    //         // Filas del CSV
-    //         // 3. Recorremos cada venta para añadir una fila al CSV.
-    //         ventas.forEach((venta, index) => {
-    //             const numeroCompra = totalVentas - index;
-    //             const fecha = new Date(venta.fecha).toLocaleDateString('es-ES');
-    //             const total = Number(venta.total).toFixed(2);
-    //             // Añadimos la línea al contenido del CSV.
-    //             csvContent += `${numeroCompra},${fecha},${total}\n`;
-    //         });
+            //         // Filas del CSV
+            //         // 3. Recorremos cada venta para añadir una fila al CSV.
+            //         ventas.forEach((venta, index) => {
+            //             const numeroCompra = totalVentas - index;
+            //             const fecha = new Date(venta.fecha).toLocaleDateString('es-ES');
+            //             const total = Number(venta.total).toFixed(2);
+            //             // Añadimos la línea al contenido del CSV.
+            //             csvContent += `${numeroCompra},${fecha},${total}\n`;
+            //         });
 
             // Crear y descargar el archivo
             // 4. Creamos un "Blob", que es un objeto que representa datos crudos (nuestro texto CSV).
@@ -1161,19 +1140,19 @@ document.addEventListener('DOMContentLoaded', function () {
             // 7. Simulamos un clic en el enlace para iniciar la descarga.
             link.click();
             document.body.removeChild(link);
-    //         // Crear y descargar el archivo
-    //         // 4. Creamos un "Blob", que es un objeto que representa datos crudos (nuestro texto CSV).
-    //         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    //         // 5. Creamos un enlace <a> temporal en memoria.
-    //         const link = document.createElement("a");
-    //         const url = URL.createObjectURL(blob);
-    //         link.setAttribute("href", url);
-    //         // 6. Le asignamos un nombre al archivo que se descargará.
-    //         link.setAttribute("download", `historial_compras_${clienteNombre}.csv`);
-    //         document.body.appendChild(link);
-    //         // 7. Simulamos un clic en el enlace para iniciar la descarga.
-    //         link.click();
-    //         document.body.removeChild(link);
+            //         // Crear y descargar el archivo
+            //         // 4. Creamos un "Blob", que es un objeto que representa datos crudos (nuestro texto CSV).
+            //         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            //         // 5. Creamos un enlace <a> temporal en memoria.
+            //         const link = document.createElement("a");
+            //         const url = URL.createObjectURL(blob);
+            //         link.setAttribute("href", url);
+            //         // 6. Le asignamos un nombre al archivo que se descargará.
+            //         link.setAttribute("download", `historial_compras_${clienteNombre}.csv`);
+            //         document.body.appendChild(link);
+            //         // 7. Simulamos un clic en el enlace para iniciar la descarga.
+            //         link.click();
+            //         document.body.removeChild(link);
 
         } catch (error) {
             console.error('Error al exportar historial a CSV:', error);
@@ -1200,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saleDetailModalEl.addEventListener('hidden.bs.modal', function (event) {
             // Solo volver a mostrar el modal de cliente si no se está cerrando la página o cambiando de modal principal
             if (document.body.classList.contains('modal-open')) {
-                 customerDetailModal.show();
+                customerDetailModal.show();
             }
         });
     }

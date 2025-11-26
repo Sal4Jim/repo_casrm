@@ -7,7 +7,7 @@ const { pool } = require('../config/database');
 exports.getGastos = async (req, res) => {
     try {
         const query = `
-            SELECT g.gasto_id, g.descripcion, g.monto, g.fecha, r.nombre as persona
+            SELECT g.gasto_id, g.descripcion, g.monto, g.fecha, g.responsable_id, r.nombre as persona
             FROM gastos g
             LEFT JOIN responsables r ON g.responsable_id = r.responsable_id
             ORDER BY g.fecha DESC, g.gasto_id DESC

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const bonificacionesTable = document.getElementById('bonificacionesTable');
     const pagination = document.getElementById('pagination');
     const btnSaveBonificacion = document.getElementById('btnSaveBonificacion');
@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let bonificaciones = [];
     let productos = [];
     let productoChoices = null;
+
+    // Variables de paginación
+    const bonificacionesPorPagina = 6;
+    let paginaActualBonificaciones = 1;
+    const paginationInfoBonificaciones = document.getElementById('pagination-info-bonificaciones');
+    const paginationControlsBonificaciones = document.getElementById('pagination-controls-bonificaciones');
+    const searchBonificaciones = document.getElementById('searchBonificaciones');
 
     // --- Funciones de notificación (Toast) ---
     function showToast(message, type = 'success') {
@@ -35,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ]);
             bonificaciones = bonificacionesData;
             productos = productosData.productos;
-            
+
             renderizarBonificaciones();
             calcularYMostrarValorTotal();
             inicializarSelectProductos();
@@ -61,15 +68,31 @@ document.addEventListener('DOMContentLoaded', function() {
         productoChoices.setChoices(opcionesProductos, 'value', 'label', true);
     }
 
-    // --- Renderizado de la tabla ---
+    // --- Renderizado de la tabla con paginación y búsqueda ---
     function renderizarBonificaciones() {
+        // Filtrar bonificaciones según el término de búsqueda
+        const searchTerm = searchBonificaciones.value.toLowerCase();
+        const bonificacionesFiltradas = bonificaciones.filter(b =>
+            (b.nombre && b.nombre.toLowerCase().includes(searchTerm)) ||
+            (b.categoria_nombre && b.categoria_nombre.toLowerCase().includes(searchTerm)) ||
+            (b.presentacion && b.presentacion.toLowerCase().includes(searchTerm))
+        );
+
         bonificacionesTable.innerHTML = '';
-        if (bonificaciones.length === 0) {
-            bonificacionesTable.innerHTML = '<tr><td colspan="8" class="text-center">No hay bonificaciones registradas.</td></tr>';
+        if (bonificacionesFiltradas.length === 0) {
+            bonificacionesTable.innerHTML = '<tr><td colspan="8" class="text-center">No se encontraron bonificaciones.</td></tr>';
+            paginationInfoBonificaciones.innerHTML = '';
+            paginationControlsBonificaciones.innerHTML = '';
             return;
         }
 
-        bonificaciones.forEach(b => {
+        // Calcular paginación con bonificaciones filtradas
+        const inicio = (paginaActualBonificaciones - 1) * bonificacionesPorPagina;
+        const fin = inicio + bonificacionesPorPagina;
+        const bonificacionesPagina = bonificacionesFiltradas.slice(inicio, fin);
+
+        // Renderizar solo las bonificaciones de la página actual
+        bonificacionesPagina.forEach(b => {
             const fila = document.createElement('tr');
             const valorTotal = (b.stock * b.valor_bonif).toFixed(2);
             const estado = b.activo ? `<span class="badge bg-success">Activo</span>` : `<span class="badge bg-secondary">Inactivo</span>`;
@@ -94,7 +117,70 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             bonificacionesTable.appendChild(fila);
         });
+
+        // Actualizar controles de paginación con bonificaciones filtradas
+        actualizarPaginacionBonificaciones(bonificacionesFiltradas);
     }
+
+    // --- Función para actualizar controles de paginación ---
+    function actualizarPaginacionBonificaciones(bonificacionesFiltradas = bonificaciones) {
+        const total = bonificacionesFiltradas.length;
+        const inicio = (paginaActualBonificaciones - 1) * bonificacionesPorPagina;
+        const desde = total === 0 ? 0 : inicio + 1;
+        const hasta = Math.min(inicio + bonificacionesPorPagina, total);
+
+        paginationInfoBonificaciones.innerHTML = `Mostrando <b>${desde}</b> a <b>${hasta}</b> de <b>${total}</b> bonificaciones`;
+
+        const totalPaginas = Math.ceil(total / bonificacionesPorPagina);
+        paginationControlsBonificaciones.innerHTML = '';
+
+        if (totalPaginas <= 1) return;
+
+        // Botón Anterior
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${paginaActualBonificaciones === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" aria-label="Anterior">&laquo;</a>`;
+        prevLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (paginaActualBonificaciones > 1) {
+                paginaActualBonificaciones--;
+                renderizarBonificaciones();
+            }
+        });
+        paginationControlsBonificaciones.appendChild(prevLi);
+
+        // Números de página
+        for (let i = 1; i <= totalPaginas; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === paginaActualBonificaciones ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                paginaActualBonificaciones = i;
+                renderizarBonificaciones();
+            });
+            paginationControlsBonificaciones.appendChild(li);
+        }
+
+        // Botón Siguiente
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${paginaActualBonificaciones === totalPaginas ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente">&raquo;</a>`;
+        nextLi.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (paginaActualBonificaciones < totalPaginas) {
+                paginaActualBonificaciones++;
+                renderizarBonificaciones();
+            }
+        });
+        paginationControlsBonificaciones.appendChild(nextLi);
+    }
+
+    // Event listener para búsqueda
+    searchBonificaciones.addEventListener('input', () => {
+        paginaActualBonificaciones = 1; // Resetear a página 1 al buscar
+        renderizarBonificaciones();
+    });
 
     // --- Lógica de Eventos ---
 
@@ -119,13 +205,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const nuevaBonificacion = await response.json();
             bonificaciones.unshift(nuevaBonificacion); // Añadir al inicio
-            
+
             renderizarBonificaciones();
             bonificacionModal.hide();
 
             document.getElementById('bonificacionForm').reset();
             productoChoices.clearInput();
-            productoChoices.setChoiceByValue(''); 
+            productoChoices.setChoiceByValue('');
             showToast('Bonificación creada exitosamente.', 'success');
             calcularYMostrarValorTotal();
         } catch (error) {
