@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // console.log('Script de reportes cargado.');
 
     // --- Variables globales para almacenar todos los datos ---
@@ -71,6 +71,49 @@ document.addEventListener('DOMContentLoaded', function() {
         return { startDate, endDate };
     }
 
+    // Determina la granularidad (dia o mes) basada en el rango de fechas
+    function determinarGranularidad(fechaInicio, fechaFin) {
+        // Convertir a objetos Date si son strings
+        const inicio = new Date(fechaInicio);
+        const fin = new Date(fechaFin);
+
+        const diffTime = Math.abs(fin - inicio);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        return diffDays > 30 ? 'mes' : 'dia';
+    }
+
+    // Agrupa los datos según la granularidad especificada
+    function agruparDatosPorGranularidad(datos, granularidad) {
+        const agrupado = {};
+
+        datos.forEach(d => {
+            let key;
+            // Asegurarse de que d.fecha sea un objeto Date
+            const fecha = new Date(d.fecha);
+
+            if (granularidad === 'mes') {
+                const year = fecha.getFullYear();
+                const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                key = `${year}-${month}`;
+            } else {
+                // dia
+                const year = fecha.getFullYear();
+                const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                const day = String(fecha.getDate()).padStart(2, '0');
+                key = `${year}-${month}-${day}`;
+            }
+
+            if (!agrupado[key]) {
+                agrupado[key] = { ventas: 0, gastos: 0 };
+            }
+            agrupado[key].ventas += (d.ventas || 0);
+            agrupado[key].gastos += (d.gastos || 0);
+        });
+
+        return agrupado;
+    }
+
     // --- Funciones principales ---
 
     // Función para cargar todos los datos necesarios
@@ -127,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Construir fechas personalizadas explícitamente en la zona horaria local
             const [startYear, startMonth, startDay] = customStart.split('-').map(Number);
             startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0); // Inicio del día en hora local
-            
+
             const [endYear, endMonth, endDay] = customEnd.split('-').map(Number);
             endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999); // Fin del día en hora local
 
@@ -177,12 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Funciones para renderizar gráficos ---
 
     async function renderCharts(startDate, endDate) {
-        renderVentasGastosChart();
+        renderVentasGastosChart(startDate, endDate);
         renderGastosPersonaChart();
         await renderTopProductosCharts(startDate, endDate);
     }
 
-    function renderVentasGastosChart() {
+    function renderVentasGastosChart(startDate, endDate) { // Recibe fechas para determinar granularidad
         const ctx = document.getElementById('ventasGastosChart').getContext('2d');
 
         // Destruir el gráfico anterior si existe para evitar solapamientos
@@ -190,34 +233,38 @@ document.addEventListener('DOMContentLoaded', function() {
             ventasGastosChartInstance.destroy();
         }
 
-        // Agrupar datos siempre por día
-        const dataAgrupada = {};
+        // 1. Determinar granularidad
+        const granularidad = determinarGranularidad(startDate, endDate);
 
-        // Agrupar ventas
-        filteredVentas.forEach(venta => {
-            const key = formatDate(venta.fecha);
-            if (!dataAgrupada[key]) {
-                dataAgrupada[key] = { ventas: 0, gastos: 0 };
-            }
-            dataAgrupada[key].ventas += venta.total;
+        // 2. Preparar datos unificados para la función de agrupación
+        let combinedData = [];
+        filteredVentas.forEach(v => {
+            combinedData.push({ fecha: v.fecha, ventas: v.total, gastos: 0 });
+        });
+        filteredGastos.forEach(g => {
+            combinedData.push({ fecha: g.fecha, ventas: 0, gastos: g.monto });
         });
 
-        // Agrupar gastos
-        filteredGastos.forEach(gasto => {
-            const key = formatDate(gasto.fecha);
-            if (!dataAgrupada[key]) {
-                dataAgrupada[key] = { ventas: 0, gastos: 0 };
-            }
-            dataAgrupada[key].gastos += gasto.monto;
-        });
+        // 3. Agrupar datos
+        const dataAgrupada = agruparDatosPorGranularidad(combinedData, granularidad);
 
         // Ordenar por fecha y preparar para el gráfico
         const labels = Object.keys(dataAgrupada).sort();
         const ventasData = labels.map(label => dataAgrupada[label].ventas);
         const gastosData = labels.map(label => dataAgrupada[label].gastos);
-        
-        // Formatear etiquetas del gráfico
-        const chartLabels = labels.map(l => new Date(l + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' }));
+
+        // Formatear etiquetas del gráfico según granularidad
+        const chartLabels = labels.map(l => {
+            if (granularidad === 'mes') {
+                // l es 'YYYY-MM'
+                const [year, month] = l.split('-');
+                const date = new Date(year, month - 1);
+                return date.toLocaleDateString('es-PE', { month: 'short', year: 'numeric' });
+            } else {
+                // l es 'YYYY-MM-DD'
+                return new Date(l + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' });
+            }
+        });
 
         ventasGastosChartInstance = new Chart(ctx, {
             type: 'line',
@@ -242,11 +289,11 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
+                scales: { y: { beginAtZero: true } },
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -320,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 let label = context.label || '';
                                 if (label) {
                                     label += ': ';
@@ -426,7 +473,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Eventos para los botones de período predefinidos
     periodButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const period = this.dataset.period;
             // Siempre llamar a applyFilter, incluso si el botón ya está activo.
             applyFilter(period);
@@ -438,7 +485,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Evento para el botón de filtro personalizado
-    btnFiltrarPersonalizado.addEventListener('click', function() {
+    btnFiltrarPersonalizado.addEventListener('click', function () {
         periodButtons.forEach(btn => btn.classList.remove('active')); // Quitar 'active' de todos
         const startDate = fechaInicioEl.value;
         const endDate = fechaFinEl.value;

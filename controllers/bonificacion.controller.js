@@ -24,6 +24,7 @@ exports.getBonificacionesActivas = (req, res) => {
         SELECT b.*, c.nombre as categoria_nombre
         FROM bonificaciones b
         LEFT JOIN categorias c ON b.categoria_id = c.categoria_id
+        WHERE b.activo = 1
         ORDER BY b.bonificacion_id DESC;
     `;
     pool.execute(query, (err, results) => {
