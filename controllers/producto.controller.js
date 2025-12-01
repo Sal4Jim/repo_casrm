@@ -2,56 +2,60 @@
 
 const { pool } = require('../config/database');
 
-// Obtener todos los productos con nombre de categoría
-exports.getProducts = (req, res) => {
+// Obtener todos los productos con paginación
+exports.getProducts = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 0; // Si el límite es 0, se devuelven todos
+  const limit = parseInt(req.query.limit) || 10; // Default limit 10 if not specified
   const search = req.query.search || '';
   const offset = (page - 1) * limit;
 
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error("❌ Error obteniendo conexión:", err.message);
-      return res.status(500).json({ success: false, error: "Error de conexión a la base de datos" });
-    }
-
+  try {
     const searchTerm = `%${search.trim()}%`;
-    let sql;
-    let params;
 
-    // Construcción de la consulta SQL
-    const baseQuery = `
+    const whereClause = `WHERE p.activo = 1 AND (? = '' OR p.nombre LIKE ?)`;
+    const searchParams = [search, searchTerm];
+
+    // 1. Contar el total de productos que coinciden con el filtro
+    const countSql = `
+      SELECT COUNT(*) AS total 
+      FROM productos p 
+      ${whereClause}
+    `;
+    const [countResults] = await pool.promise().execute(countSql, searchParams);
+    const total = countResults[0].total;
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+
+    // 2. Obtener los productos para la página actual
+    let sql = `
       SELECT p.*, c.nombre AS categoria_nombre
       FROM productos p
       JOIN categorias c ON p.categoria_id = c.categoria_id
+      ${whereClause}
+      ORDER BY p.nombre ASC
     `;
-    const whereClause = `WHERE p.activo = 1 AND (? = '' OR p.nombre LIKE ?)`;
-    const orderClause = `ORDER BY p.nombre ASC`;
-    const limitClause = limit > 0 ? `LIMIT ? OFFSET ?` : '';
 
-    sql = `${baseQuery} ${whereClause} ${orderClause} ${limitClause}`;
+    const queryParams = [...searchParams];
 
-    // Parámetros para la consulta
-    params = [search, searchTerm];
     if (limit > 0) {
-      params.push(limit, offset);
+      sql += ` LIMIT ? OFFSET ?`;
+      queryParams.push(limit, offset);
     }
 
-    connection.execute(sql, params, (error, results) => {
-      connection.release();
+    const [results] = await pool.promise().execute(sql, queryParams);
 
-      if (error) {
-        console.error("❌ Error en consulta SQL de productos:", error.message);
-        return res.status(500).json({ success: false, error: "Error al obtener productos" });
-      }
-
-      // Devolver siempre el mismo formato de objeto para consistencia
-      res.json({
-        success: true,
-        productos: results,
-      });
+    res.json({
+      success: true,
+      productos: results,
+      total,
+      page,
+      totalPages,
+      limit
     });
-  });
+
+  } catch (error) {
+    console.error("❌ Error en consulta SQL de productos:", error.message);
+    res.status(500).json({ success: false, error: "Error al obtener productos" });
+  }
 };
 
 // Crear un nuevo producto
@@ -120,7 +124,7 @@ exports.toggleProductStatus = (req, res) => {
       return res.status(500).json({ success: false, error: 'Error al desactivar el producto' });
     }
     if (result.affectedRows === 0) return res.status(404).json({ success: false, error: 'Producto no encontrado' });
-    
+
     res.json({ success: true, message: 'Producto desactivado correctamente' });
   });
 };

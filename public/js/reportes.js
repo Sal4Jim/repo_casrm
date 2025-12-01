@@ -1,11 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     // console.log('Script de reportes cargado.');
 
-    // --- Variables globales para almacenar todos los datos ---
-    let allVentas = [];
-    let allGastos = [];
-
-    // --- Variables para almacenar los datos filtrados ---
+    // --- Variables para almacenar los datos filtrados (ahora son los únicos datos) ---
     let filteredVentas = [];
     let filteredGastos = [];
 
@@ -80,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const diffTime = Math.abs(fin - inicio);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        return diffDays > 30 ? 'mes' : 'dia';
+        return diffDays > 35 ? 'mes' : 'dia';
     }
 
     // Agrupa los datos según la granularidad especificada
@@ -116,63 +112,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Funciones principales ---
 
-    // Función para cargar todos los datos necesarios
-    async function cargarDatos(callback) {
-        try {
-            // Usamos Promise.all para cargar ventas y gastos en paralelo
-            const [ventasRes, gastosRes] = await Promise.all([
-                fetch('/api/ventas'), // Asumimos que esta ruta devuelve todas las ventas
-                fetch('/api/gastos')  // Asumimos que esta ruta devuelve todos los gastos
-            ]);
-
-            const ventasData = await ventasRes.json();
-            const gastosData = await gastosRes.json();
-
-            if (ventasData.success) {
-                allVentas = ventasData.ventas.map(v => ({
-                    ...v,
-                    fecha: new Date(v.fecha), // Convertir la fecha a objeto Date
-                    total: parseFloat(v.total) // Asegurar que el total sea un número
-                }));
-            } else {
-                console.error('Error al cargar ventas:', ventasData.error);
-            }
-
-            if (gastosData.success) {
-                allGastos = gastosData.gastos.map(g => ({
-                    ...g,
-                    fecha: new Date(g.fecha), // Convertir la fecha a objeto Date
-                    monto: parseFloat(g.monto) // Asegurar que el monto sea un número
-                }));
-            } else {
-                console.error('Error al cargar gastos:', gastosData.error);
-            }
-
-            // console.log('Todas las ventas cargadas:', allVentas);
-            // console.log('Todos los gastos cargados:', allGastos);
-
-            // Si se proporciona un callback, ejecutarlo.
-            // Esto se usará para aplicar el filtro después de cargar los datos.
-            if (callback && typeof callback === 'function') {
-                callback();
-            }
-
-        } catch (error) {
-            console.error('Error al cargar los datos para los reportes:', error);
-        }
-    }
-
-    // Aplica el filtro de fecha a los datos y actualiza los KPIs
+    // Aplica el filtro de fecha, descarga los datos y actualiza la UI
     async function applyFilter(period, customStart = null, customEnd = null) {
         let startDate, endDate;
 
         if (period === 'custom' && customStart && customEnd) {
-            // Construir fechas personalizadas explícitamente en la zona horaria local
             const [startYear, startMonth, startDay] = customStart.split('-').map(Number);
             startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0); // Inicio del día en hora local
 
             const [endYear, endMonth, endDay] = customEnd.split('-').map(Number);
-            endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999); // Fin del día en hora local
+            endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59, 999);
 
         } else {
             const dates = getPeriodDates(period);
@@ -180,30 +129,42 @@ document.addEventListener('DOMContentLoaded', function () {
             endDate = dates.endDate;
         }
 
-        // Actualizar los inputs de fecha para reflejar el filtro aplicado
         fechaInicioEl.value = formatDate(startDate);
         fechaFinEl.value = formatDate(endDate);
 
-        // Volver a cargar los datos de ventas y gastos antes de filtrar
-        await cargarDatos(() => {
-            // Este código se ejecuta DESPUÉS de que los datos se hayan recargado
-            // Filtrar ventas
-            filteredVentas = allVentas.filter(venta => {
-                return venta.fecha >= startDate && venta.fecha <= endDate;
-            });
+        // Descargar datos filtrados del servidor
+        try {
+            const startStr = formatDate(startDate);
+            const endStr = formatDate(endDate);
 
-            // Filtrar gastos
-            filteredGastos = allGastos.filter(gasto => {
-                return gasto.fecha >= startDate && gasto.fecha <= endDate;
-            });
+            const [ventasRes, gastosRes] = await Promise.all([
+                fetch(`/api/ventas?startDate=${startStr}&endDate=${endStr}`),
+                fetch(`/api/gastos?startDate=${startStr}&endDate=${endStr}`)
+            ]);
 
-            // console.log(`Datos filtrados para el período ${period} (${formatDate(startDate)} - ${formatDate(endDate)}):`);
-            // console.log('Ventas filtradas:', filteredVentas);
-            // console.log('Gastos filtrados:', filteredGastos);
+            const ventasData = await ventasRes.json();
+            const gastosData = await gastosRes.json();
+
+            if (ventasData.success) {
+                filteredVentas = ventasData.ventas.map(v => ({ ...v, fecha: new Date(v.fecha), total: parseFloat(v.total) }));
+            } else {
+                console.error('Error al cargar ventas:', ventasData.error);
+                filteredVentas = [];
+            }
+
+            if (gastosData.success) {
+                filteredGastos = gastosData.gastos.map(g => ({ ...g, fecha: new Date(g.fecha), monto: parseFloat(g.monto) }));
+            } else {
+                console.error('Error al cargar gastos:', gastosData.error);
+                filteredGastos = [];
+            }
 
             updateKPIs();
-            renderCharts(startDate, endDate); // Renderizar los gráficos con los datos filtrados y las fechas
-        });
+            renderCharts(startDate, endDate);
+
+        } catch (error) {
+            console.error('Error al cargar datos filtrados:', error);
+        }
     }
 
     // Calcula y actualiza los KPIs en el DOM
@@ -496,9 +457,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Cargar datos al iniciar la página
-    // Ahora, la carga inicial también aplica el filtro del mes actual como callback
-    cargarDatos(() => {
-        applyFilter('month');
-    });
+    // Carga inicial: Aplicar filtro del mes actual
+    applyFilter('month');
 });

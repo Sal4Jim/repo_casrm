@@ -187,13 +187,61 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         pagination.appendChild(prevLi);
 
-        for (let i = 1; i <= totalPages; i++) {
+        // Números de página con ventana deslizante
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Primera página
+        if (startPage > 1) {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            li.innerHTML = `<a class="page-link" href="#">1</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                cargarClientes(1);
+            });
+            pagination.appendChild(li);
+
+            if (startPage > 2) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                pagination.appendChild(liDots);
+            }
+        }
+
+        // Páginas centrales
+        for (let i = startPage; i <= endPage; i++) {
             const li = document.createElement('li');
             li.className = `page-item ${i === currentPage ? 'active' : ''}`;
             li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
             li.addEventListener('click', (e) => {
                 e.preventDefault();
                 cargarClientes(i);
+            });
+            pagination.appendChild(li);
+        }
+
+        // Última página
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                pagination.appendChild(liDots);
+            }
+
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            li.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                cargarClientes(totalPages);
             });
             pagination.appendChild(li);
         }
@@ -406,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const numeroCompra = saleDetailBtn.dataset.numeroCompra;
             const clienteNombre = document.getElementById('detail-nombre').textContent;
             if (ventaId) {
-                customerDetailModal.hide(); 
+                customerDetailModal.hide();
                 cargarDetalleVenta(ventaId, clienteNombre, numeroCompra);
             }
             return;

@@ -15,8 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnNuevo = document.getElementById('btnNuevo');
 
     let categorias = [];
-    let productos = [];
+    let productos = []; // Ahora solo contendrá los productos de la página actual
     let choicesInstance = null;
+    let totalPages = 1;
+    const productosPorPagina = 7;
+    let paginaActual = 1;
 
     function showToast(message, type = 'success') {
         const toastContainer = document.getElementById('toastContainer') || createToastContainer();
@@ -60,15 +63,27 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => console.error('Error al cargar categorías:', err));
     }
 
-    // Cargar productos desde la API
-    function cargarProductos() {
-        fetch('/api/productos')
+    // Cargar productos desde la API con paginación
+    function cargarProductos(page = 1) {
+        paginaActual = page;
+        const searchTerm = searchInput.value.trim();
+        const params = new URLSearchParams({
+            page: page,
+            limit: productosPorPagina,
+            search: searchTerm
+        });
+
+        fetch(`/api/productos?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
-                if (data && data.success && Array.isArray(data.productos)) {
+                if (data && data.success) {
                     productos = data.productos;
+                    totalPages = data.totalPages;
+                    mostrarProductos();
+                    renderPagination();
+                } else {
+                    console.error('Error en respuesta de productos:', data.error);
                 }
-                mostrarProductos();
             })
             .catch(err => console.error('Error al cargar productos:', err));
     }
@@ -200,23 +215,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(data => {
-                if (esEdicion) {
-                    // Actualizar producto en el array local
-                    const index = productos.findIndex(p => p.producto_id == productId);
-                    if (index !== -1) {
-                        // Para mantener el nombre de la categoría, lo fusionamos
-                        productos[index] = { ...productos[index], ...datosProducto, ...data };
-                    }
-                    showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> actualizado.`, 'success');
-                } else {
-                    // Agregar nuevo producto al array local
-                    const productoCreado = { ...data, categoria_nombre: categoria };
-                    productos.push(productoCreado);
-                    showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> creado.`, 'success');
-                }
+                const accion = esEdicion ? 'actualizado' : 'creado';
+                showToast(`<i class="fas fa-check-circle me-2"></i> Producto <strong>${datosProducto.nombre}</strong> ${accion}.`, 'success');
 
-                // Actualizar tabla
-                mostrarProductos();
+                // Recargar tabla en la página actual (o en la 1 si es nuevo)
+                cargarProductos(esEdicion ? paginaActual : 1);
 
                 // Cerrar modal y limpiar formulario
                 const modal = bootstrap.Modal.getInstance(productModalEl);
@@ -286,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             .then(data => {
                                 if (!data.success) throw new Error(data.error || 'Error al desactivar el producto.');
                                 showToast(`Producto <strong>${productoAEliminar.nombre}</strong> desactivado.`, 'success');
-                                cargarProductos(); // Recargar la lista desde el servidor
+                                cargarProductos(paginaActual); // Recargar la lista desde el servidor manteniendo la página
                             })
                             .catch(err => {
                                 showToast('No se pudo eliminar el producto.', 'error');
@@ -320,26 +323,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    const productosPorPagina = 7 ;
-    let paginaActual = 1;
-
     function mostrarProductos() {
-        // Filtrado por búsqueda
-        const searchTerm = searchInput.value.trim().toLowerCase();
-        let productosFiltrados = productos.filter(prod =>
-            prod.nombre.toLowerCase().includes(searchTerm)
-        );
-
-        // Calcular paginación
-        const total = productosFiltrados.length;
-        const totalPaginas = Math.ceil(total / productosPorPagina);
-        const inicio = (paginaActual - 1) * productosPorPagina;
-        const fin = inicio + productosPorPagina;
-        const productosPagina = productosFiltrados.slice(inicio, fin);
-
         // Renderizar filas
         productsTable.innerHTML = '';
-        productosPagina.forEach(prod => {
+        productos.forEach(prod => {
             const fila = document.createElement('tr');
 
             // Lógica para colorear la fila según el stock
@@ -369,8 +356,9 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
             productsTable.appendChild(fila);
         });
+    }
 
-        // Renderizar paginación
+    function renderPagination() {
         pagination.innerHTML = '';
 
         // Botón anterior
@@ -383,15 +371,46 @@ document.addEventListener('DOMContentLoaded', function () {
         btnAnterior.onclick = function (e) {
             e.preventDefault();
             if (paginaActual > 1) {
-                paginaActual--;
-                mostrarProductos();
+                cargarProductos(paginaActual - 1);
             }
         };
         liAnterior.appendChild(btnAnterior);
         pagination.appendChild(liAnterior);
 
-        // Números de página
-        for (let i = 1; i <= totalPaginas; i++) {
+        // Números de página con ventana deslizante
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, paginaActual - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Primera página
+        if (startPage > 1) {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = 1;
+            a.onclick = function (e) {
+                e.preventDefault();
+                cargarProductos(1);
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+
+            if (startPage > 2) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                pagination.appendChild(liDots);
+            }
+        }
+
+        // Páginas centrales
+        for (let i = startPage; i <= endPage; i++) {
             const li = document.createElement('li');
             li.className = 'page-item' + (i === paginaActual ? ' active' : '');
             const a = document.createElement('a');
@@ -400,8 +419,30 @@ document.addEventListener('DOMContentLoaded', function () {
             a.textContent = i;
             a.onclick = function (e) {
                 e.preventDefault();
-                paginaActual = i;
-                mostrarProductos();
+                cargarProductos(i);
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+
+        // Última página
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                pagination.appendChild(liDots);
+            }
+
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = totalPages;
+            a.onclick = function (e) {
+                e.preventDefault();
+                cargarProductos(totalPages);
             };
             li.appendChild(a);
             pagination.appendChild(li);
@@ -409,73 +450,89 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Botón siguiente
         const liSiguiente = document.createElement('li');
-        liSiguiente.className = 'page-item' + (paginaActual === totalPaginas || totalPaginas === 0 ? ' disabled' : '');
+        liSiguiente.className = 'page-item' + (paginaActual === totalPages || totalPages === 0 ? ' disabled' : '');
         const btnSiguiente = document.createElement('a');
         btnSiguiente.className = 'page-link';
         btnSiguiente.href = '#';
         btnSiguiente.innerHTML = '&raquo;';
         btnSiguiente.onclick = function (e) {
             e.preventDefault();
-            if (paginaActual < totalPaginas) {
-                paginaActual++;
-                mostrarProductos();
+            if (paginaActual < totalPages) {
+                cargarProductos(paginaActual + 1);
             }
         };
         liSiguiente.appendChild(btnSiguiente);
         pagination.appendChild(liSiguiente);
     }
 
-    // Actualizar al buscar
+    // Actualizar al buscar con debounce
+    let searchTimeout;
     searchInput.addEventListener('input', function () {
-        paginaActual = 1;
-        mostrarProductos();
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            cargarProductos(1);
+        }, 300);
     });
 
 
     // === FUNCIÓN PARA EXPORTAR A CSV ===
     function exportarProductosACSV() {
-        if (productos.length === 0) {
-            showToast('<i class="fas fa-info-circle me-2"></i> No hay productos para exportar.', 'error');
-            return;
-        }
+        // Para exportar, necesitamos TODOS los productos, no solo los de la página actual.
+        // Hacemos una petición especial con limit=0 (o muy alto)
+        showToast('<i class="fas fa-spinner fa-spin me-2"></i> Preparando exportación...', 'info');
 
-        // Encabezados del CSV (usando punto y coma como separador para Excel en español)
-        const headers = ['Nombre', 'Categoría', 'Presentación', 'Precio de Compra', 'Precio de Venta', 'Stock'];
+        fetch('/api/productos?limit=10000') // Pedimos "todos" (o un número muy grande)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success || !Array.isArray(data.productos) || data.productos.length === 0) {
+                    showToast('<i class="fas fa-info-circle me-2"></i> No hay productos para exportar.', 'error');
+                    return;
+                }
 
-        // Convertir datos de productos a filas de CSV
-        const rows = productos.map(prod => [
-            `"${prod.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
-            `"${prod.categoria_nombre}"`,
-            `"${prod.presentacion}"`,
-            prod.precio_compra,
-            prod.precio_venta,
-            prod.stock
-        ].join(';')); // Usar punto y coma como separador
+                const productosExportar = data.productos;
 
-        // Unir encabezados y filas
-        const csvContent = [headers.join(';'), ...rows].join('\n');
+                // Encabezados del CSV (usando punto y coma como separador para Excel en español)
+                const headers = ['Nombre', 'Categoría', 'Presentación', 'Precio de Compra', 'Precio de Venta', 'Stock'];
 
-        // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
-        const BOM = '\uFEFF';
-        const csvContentWithBOM = BOM + csvContent;
+                // Convertir datos de productos a filas de CSV
+                const rows = productosExportar.map(prod => [
+                    `"${prod.nombre.replace(/"/g, '""')}"`, // Escapar comillas dobles
+                    `"${prod.categoria_nombre}"`,
+                    `"${prod.presentacion}"`,
+                    prod.precio_compra,
+                    prod.precio_venta,
+                    prod.stock
+                ].join(';')); // Usar punto y coma como separador
 
-        // Crear un Blob para el contenido CSV con codificación UTF-8
-        const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
+                // Unir encabezados y filas
+                const csvContent = [headers.join(';'), ...rows].join('\n');
 
-        // Crear un enlace temporal para la descarga
-        const link = document.createElement('a');
-        if (link.download !== undefined) { // Feature detection
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `productos_${new Date().toISOString().slice(0, 10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        }
+                // Agregar BOM UTF-8 para que Excel reconozca correctamente los caracteres especiales
+                const BOM = '\uFEFF';
+                const csvContentWithBOM = BOM + csvContent;
 
-        showToast('<i class="fas fa-file-download me-2"></i> Exportación a CSV iniciada.', 'success');
+                // Crear un Blob para el contenido CSV con codificación UTF-8
+                const blob = new Blob([csvContentWithBOM], { type: 'text/csv;charset=utf-8;' });
+
+                // Crear un enlace temporal para la descarga
+                const link = document.createElement('a');
+                if (link.download !== undefined) { // Feature detection
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `productos_${new Date().toISOString().slice(0, 10)}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                }
+
+                showToast('<i class="fas fa-file-download me-2"></i> Exportación a CSV iniciada.', 'success');
+            })
+            .catch(err => {
+                console.error('Error al exportar:', err);
+                showToast('Error al exportar productos.', 'error');
+            });
     }
 
     // Evento para el botón de exportar

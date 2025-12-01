@@ -370,36 +370,40 @@ exports.getVentaById = async (req, res) => {
 
         // Obtener detalles (productos y bonificaciones)
         const detalleQuery = `
-            SELECT 
-                dv.*,
-                p.nombre AS nombre_producto,
+        SELECT
+        dv.*,
+            p.nombre AS nombre_producto,
                 b.nombre AS nombre_bonificacion
             FROM detalle_venta dv
             LEFT JOIN productos p ON dv.producto_id = p.producto_id
             LEFT JOIN bonificaciones b ON dv.bonificacion_id = b.bonificacion_id
             WHERE dv.compra_id = ?
-        `;
+            `;
         const [detalles] = await pool.promise().query(detalleQuery, [id]);
 
         venta.detalles = detalles;
 
         res.json({ success: true, venta });
     } catch (error) {
-        console.error(`❌ Error al obtener detalle de la venta ${id}:`, error);
+        console.error(`❌ Error al obtener detalle de la venta ${id}: `, error);
         res.status(500).json({ success: false, error: 'Error interno del servidor.' });
     }
 };
 
-/**
- * @function getAllVentas
- * @description Obtiene todas las ventas de la base de datos para los reportes.
- */
 exports.getAllVentas = async (req, res) => {
     try {
-        const query = `
-            SELECT compra_id, cliente_id, fecha, total FROM venta WHERE activa = 1 ORDER BY fecha DESC
-        `;
-        const [ventas] = await pool.promise().query(query);
+        const { startDate, endDate } = req.query;
+        let query = `SELECT compra_id, cliente_id, fecha, total FROM venta WHERE activa = 1`;
+        const params = [];
+
+        if (startDate && endDate) {
+            query += ` AND fecha BETWEEN ? AND ?`;
+            params.push(startDate, endDate + ' 23:59:59');
+        }
+
+        query += ` ORDER BY fecha DESC`;
+
+        const [ventas] = await pool.promise().query(query, params);
         res.json({ success: true, ventas });
     } catch (error) {
         console.error('❌ Error al obtener todas las ventas:', error);

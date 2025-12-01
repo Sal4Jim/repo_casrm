@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
-    let gastos = []; // El array ahora se cargará desde la API
+    let gastos = []; // Ahora solo contendrá los gastos de la página actual
     let responsables = []; // Array para almacenar los responsables
     const gastosPorPagina = 6;
     let paginaActual = 1;
+    let totalPages = 1;
 
     const tablaBody = document.getElementById('gastosTableBody');
     const paginationControls = document.getElementById('pagination-controls');
@@ -22,14 +23,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const responsableModalLabel = document.getElementById('responsableModalLabel');
     const btnSaveResponsable = document.getElementById('btnSaveResponsable');
 
-    async function cargarGastos() {
+    async function cargarGastos(page = 1) {
+        paginaActual = page;
+        const searchTerm = searchInput.value.trim();
+        const params = new URLSearchParams({
+            page: page,
+            limit: gastosPorPagina,
+            search: searchTerm
+        });
+
         try {
-            const response = await fetch('/api/gastos');
+            const response = await fetch(`/api/gastos?${params.toString()}`);
             if (!response.ok) throw new Error('Error al cargar los gastos.');
             const data = await response.json();
             if (data.success) {
                 gastos = data.gastos;
-                mostrarGastos();
+                totalPages = data.totalPages;
+                mostrarGastos(data.total);
+                renderPagination();
             }
         } catch (error) {
             console.error(error);
@@ -103,22 +114,12 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function mostrarGastos() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const gastosFiltrados = gastos.filter(g =>
-            (g.descripcion && g.descripcion.toLowerCase().includes(searchTerm)) ||
-            (g.persona && String(g.persona).toLowerCase().includes(searchTerm))
-        );
-
-        const inicio = (paginaActual - 1) * gastosPorPagina;
-        const fin = inicio + gastosPorPagina;
-        const gastosPagina = gastosFiltrados.slice(inicio, fin);
-
+    function mostrarGastos(totalItems) {
         tablaBody.innerHTML = '';
-        if (gastosPagina.length === 0) {
+        if (gastos.length === 0) {
             tablaBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron gastos.</td></tr>';
         } else {
-            gastosPagina.forEach(gasto => {
+            gastos.forEach(gasto => {
                 const fila = document.createElement('tr');
                 fila.dataset.gastoId = gasto.gasto_id;
                 fila.innerHTML = `
@@ -139,15 +140,24 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        const total = gastosFiltrados.length;
-        const desde = total === 0 ? 0 : inicio + 1;
-        const hasta = Math.min(fin, total);
-        paginationInfo.innerHTML = `Mostrando <b>${desde}</b> a <b>${hasta}</b> de <b>${total}</b> gastos`;
+        const inicio = (paginaActual - 1) * gastosPorPagina + 1;
+        const fin = Math.min(inicio + gastosPorPagina - 1, totalItems);
+        paginationInfo.innerHTML = `Mostrando <b>${totalItems > 0 ? inicio : 0}</b> a <b>${fin}</b> de <b>${totalItems}</b> gastos`;
+    }
 
-        const totalPaginas = Math.ceil(total / gastosPorPagina);
+    function renderPagination() {
         paginationControls.innerHTML = '';
 
-        if (totalPaginas <= 1) return;
+        if (totalPages <= 1) return;
+
+        // Números de página con ventana deslizante
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, paginaActual - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
 
         // Botón Anterior
         const prevLi = document.createElement('li');
@@ -156,42 +166,80 @@ document.addEventListener('DOMContentLoaded', function () {
         prevLi.addEventListener('click', (e) => {
             e.preventDefault();
             if (paginaActual > 1) {
-                paginaActual--;
-                mostrarGastos();
+                cargarGastos(paginaActual - 1);
             }
         });
         paginationControls.appendChild(prevLi);
 
-        // Números de página
-        for (let i = 1; i <= totalPaginas; i++) {
+        // Primera página
+        if (startPage > 1) {
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            li.innerHTML = `<a class="page-link" href="#">1</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                cargarGastos(1);
+            });
+            paginationControls.appendChild(li);
+
+            if (startPage > 2) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(liDots);
+            }
+        }
+
+        // Páginas centrales
+        for (let i = startPage; i <= endPage; i++) {
             const li = document.createElement('li');
             li.className = `page-item ${i === paginaActual ? 'active' : ''}`;
             li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
             li.addEventListener('click', (e) => {
                 e.preventDefault();
-                paginaActual = i;
-                mostrarGastos();
+                cargarGastos(i);
+            });
+            paginationControls.appendChild(li);
+        }
+
+        // Última página
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const liDots = document.createElement('li');
+                liDots.className = 'page-item disabled';
+                liDots.innerHTML = `<span class="page-link">...</span>`;
+                paginationControls.appendChild(liDots);
+            }
+
+            const li = document.createElement('li');
+            li.className = 'page-item';
+            li.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+            li.addEventListener('click', (e) => {
+                e.preventDefault();
+                cargarGastos(totalPages);
             });
             paginationControls.appendChild(li);
         }
 
         // Botón siguiente
         const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${paginaActual === totalPaginas ? 'disabled' : ''}`;
+        nextLi.className = `page-item ${paginaActual === totalPages ? 'disabled' : ''}`;
         nextLi.innerHTML = `<a class="page-link" href="#" aria-label="Siguiente">&raquo;</a>`;
         nextLi.addEventListener('click', (e) => {
             e.preventDefault();
-            if (paginaActual < totalPaginas) {
-                paginaActual++;
-                mostrarGastos();
+            if (paginaActual < totalPages) {
+                cargarGastos(paginaActual + 1);
             }
         });
         paginationControls.appendChild(nextLi);
     }
 
+    let searchTimeout;
     searchInput.addEventListener('input', () => {
-        paginaActual = 1;
-        mostrarGastos();
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            cargarGastos(1);
+        }, 300);
     });
 
     // Cargar los gastos iniciales desde la base de datos
@@ -273,8 +321,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             showToast(result.message, 'success');
 
-            // Recargar todos los gastos para reflejar el cambio
-            await cargarGastos();
+            // Recargar gastos en la página actual o en la 1 si es nuevo
+            await cargarGastos(esEdicion ? paginaActual : 1);
 
             // Limpiar y ocultar el formulario
             resetFormulario();
@@ -304,12 +352,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('fecha').value = new Date(gastoAEditar.fecha).toISOString().split('T')[0];
 
                 // Buscamos el responsable_id correspondiente al nombre de la persona
-                const responsable = gastos.find(g => g.gasto_id == gastoId);
-                if (responsable) {
-                    // Necesitamos el ID del responsable, no el nombre. Lo buscamos en la lista de gastos.
+                // Como 'gastoAEditar' ya tiene el responsable_id (si el backend lo devuelve), lo usamos.
+                // Si el backend no devuelve responsable_id en el listado, tendríamos que buscarlo o pedirlo.
+                // Asumimos que el backend devuelve responsable_id en getGastos (lo agregué en el controller).
+
+                if (gastoAEditar.responsable_id) {
                     // Mostrar todos los responsables (incluyendo inactivos) para que aparezca el asignado
                     llenarSelectResponsables(true);
-                    document.getElementById('persona').value = responsable.responsable_id;
+                    document.getElementById('persona').value = gastoAEditar.responsable_id;
                 }
 
                 // Cambiar UI del formulario a modo edición
@@ -346,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (!response.ok) throw new Error(data.error || 'Error en el servidor.');
 
                             showToast(data.message, 'success');
-                            await cargarGastos(); // Recargar la lista
+                            await cargarGastos(paginaActual); // Recargar la lista manteniendo página
 
                         } catch (error) {
                             showToast(error.message, 'error');
