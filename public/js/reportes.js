@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Calcula el rango de fechas para un período dado
     function getPeriodDates(period) {
+
         const now = new Date();
         let startDate, endDate;
 
