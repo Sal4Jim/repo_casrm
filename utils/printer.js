@@ -27,6 +27,21 @@ const imprimirTicket = (venta) => {
             console.log(`Subtotal:   S/ ${Number(venta.subtotal).toFixed(2)}`);
             console.log(`Descuento: -S/ ${Number(venta.descuento?.monto || 0).toFixed(2)}`);
             console.log(`TOTAL:      S/ ${Number(venta.total).toFixed(2)}`);
+            console.log('----------------------------------------');
+            console.log('       ¡Gracias por su compra!          ');
+            console.log('--- [FIN DE SIMULACIÓN] ---\n\n');
+
+
+            // --- IMPRESIÓN REAL (RED / WIFI) ---
+            // CAMBIAR ESTA IP POR LA DE TU IMPRESORA
+            const PRINTER_IP = '192.168.100.83'; // IP REAL DE LA IMPRESORA
+            const PRINTER_PORT = 9100; // Puerto estándar para impresoras
+
+            const device = new Network(PRINTER_IP, PRINTER_PORT);
+            // Usamos 'IBM850' (cp850) que es el estándar para tildes/ñ en estas impresoras
+            const options = { encoding: "IBM850" };
+            const printer = new escpos.Printer(device, options);
+
             device.open(function (error) {
                 if (error) {
                     console.error("Error al abrir el dispositivo de impresión:", error);
@@ -35,17 +50,18 @@ const imprimirTicket = (venta) => {
 
                 // Encabezado
                 printer
-                    .font('a')
+                    .font('a')         // Fuente normal para título
                     .align('ct')
-                    .style('bu')
+                    .style('b')        // Solo negrita (bold), sin subrayado raro
                     .size(1, 1)
                     .text('TUMISOFT - Ticket de Venta')
                     .text('--------------------------------');
 
                 // Información de la venta
                 printer
+                    .font('b')         // Fuente B (más pequeña) para el contenido
                     .align('lt')
-                    .style('normal')
+                    .style('normal')   // Resetear estilos
                     .text(`Fecha: ${new Date(venta.fecha).toLocaleString()}`)
                     .text(`Cliente ID: ${venta.cliente_id || 'N/A'}`)
                     .text('--------------------------------');
@@ -67,8 +83,9 @@ const imprimirTicket = (venta) => {
                     .align('rt')
                     .text(`Subtotal: S/ ${Number(venta.subtotal).toFixed(2)}`)
                     .text(`Descuento: -S/ ${Number(venta.descuento?.monto || 0).toFixed(2)}`)
-                    .size(1, 1)
+                    .style('b') // Negrita para el total
                     .text(`TOTAL: S/ ${Number(venta.total).toFixed(2)}`)
+                    .style('normal')
                     .text('--------------------------------')
                     .align('ct')
                     .text('¡Gracias por su compra!')
