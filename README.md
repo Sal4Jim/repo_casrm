@@ -100,3 +100,40 @@ Este es el paso más importante.
     ```
 
 ¡Listo\! Reinicia la nueva PC. La aplicación se iniciará sola, en segundo plano y sin mostrar ninguna ventana de CMD.
+
+
+
+
+Para conectar una impresora térmica real (por ejemplo, una USB), deberás hacer 3 cambios principales en el archivo 
+utils/printer.js
+ cuando estés listo:
+
+1. Instalar el adaptador
+Primero, necesitarás instalar el adaptador para USB (o red, según tu impresora). En tu terminal ejecutarías: npm install escpos-usb
+
+2. Cambiar la importación (Línea 3)
+Cambiarías la línea que importa la consola por la del adaptador USB. Actual:
+
+javascript
+const Console = require('escpos-console');
+Cambiar a:
+
+javascript
+const USB = require('escpos-usb');
+3. Configurar el dispositivo (Línea 37 aprox.)
+Cambiarías la línea donde creas el device. Actual:
+
+javascript
+const device = new Console();
+Cambiar a:
+
+javascript
+// A veces funciona automático:
+const device = new USB();
+
+// Si no, necesitas los códigos ID de tu impresora (VID, PID):
+// const device = new USB(0x0416, 0x5011);
+
+Nota: Para saber los códigos VID y PID de tu impresora USB, hay herramientas o comandos en Windows (Administrador de Dispositivos) que te los dan.
+
+¡Eso es todo! El resto del código (printer.text(...), etc.) funcionará igual porque es el mismo lenguaje estándar.

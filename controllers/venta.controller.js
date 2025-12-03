@@ -2,6 +2,7 @@ const { pool } = require('../config/database');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const { imprimirTicket } = require('../utils/printer');
 
 
 exports.createVenta = async (req, res) => {
@@ -82,6 +83,16 @@ exports.createVenta = async (req, res) => {
 
         // 3. Confirmar transacción
         await connection.commit();
+
+        // 4. Imprimir ticket (sin bloquear la respuesta)
+        imprimirTicket({
+            cliente_id,
+            fecha,
+            productos,
+            subtotal,
+            descuento,
+            total
+        }).catch(err => console.error('Error al imprimir ticket:', err));
 
         res.status(201).json({
             success: true,
