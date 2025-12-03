@@ -1,6 +1,6 @@
 const escpos = require('escpos');
-// Importamos el adaptador específico de USB
-const USB = require('escpos-usb');
+// Importamos el adaptador de RED (WiFi/Ethernet)
+const Network = require('escpos-network');
 
 // Función para imprimir el ticket
 const imprimirTicket = (venta) => {
@@ -27,17 +27,6 @@ const imprimirTicket = (venta) => {
             console.log(`Subtotal:   S/ ${Number(venta.subtotal).toFixed(2)}`);
             console.log(`Descuento: -S/ ${Number(venta.descuento?.monto || 0).toFixed(2)}`);
             console.log(`TOTAL:      S/ ${Number(venta.total).toFixed(2)}`);
-            console.log('----------------------------------------');
-            console.log('       ¡Gracias por su compra!          ');
-            console.log('--- [FIN DE SIMULACIÓN] ---\n\n');
-
-
-            // --- IMPRESIÓN REAL (CÓDIGOS ESC/POS) ---
-            // Esto es lo que se enviará a la impresora real (o se verá como hex en consola si no hay impresora)
-            const device = new USB();
-            const options = { encoding: "GB18030" };
-            const printer = new escpos.Printer(device, options);
-
             device.open(function (error) {
                 if (error) {
                     console.error("Error al abrir el dispositivo de impresión:", error);
