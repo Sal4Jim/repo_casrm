@@ -59,20 +59,21 @@ exports.getProducts = async (req, res) => {
 };
 
 // Crear un nuevo producto
-exports.createProduct = (req, res) => {
+exports.createProduct = async (req, res) => {
   const { nombre, precio_compra, precio_venta, stock, categoria_id, presentacion } = req.body;
 
-  const query = `
-    INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion)
-    VALUES (?, ?, ?, ?, ?, ?);
-  `;
-  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion];
+  if (precio_compra < 0 || precio_venta < 0 || stock < 0) {
+    return res.status(400).json({ success: false, error: 'Los precios y el stock no pueden ser negativos.' });
+  }
 
-  pool.execute(query, values, (err, result) => {
-    if (err) {
-      console.error('Error al crear producto:', err);
-      return res.status(500).json({ error: 'Error al crear producto' });
-    }
+  try {
+    const query = `
+      INSERT INTO productos (nombre, precio_compra, precio_venta, stock, categoria_id, presentacion)
+      VALUES (?, ?, ?, ?, ?, ?);
+    `;
+    const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion];
+    const [result] = await pool.promise().execute(query, values);
+
     const nuevoProducto = {
       producto_id: result.insertId,
       nombre,
@@ -83,48 +84,54 @@ exports.createProduct = (req, res) => {
       presentacion
     };
     res.status(201).json(nuevoProducto);
-  });
+  } catch (err) {
+    console.error('Error al crear producto:', err);
+    return res.status(500).json({ error: 'Error al crear producto' });
+  }
 };
 
 // Actualizar producto
-exports.updateProduct = (req, res) => {
+exports.updateProduct = async (req, res) => {
   const { id } = req.params;
   const { nombre, precio_compra, precio_venta, stock, categoria_id, presentacion } = req.body;
 
-  const query = `
-    UPDATE productos
-    SET nombre = ?, precio_compra = ?, precio_venta = ?, stock = ?, categoria_id = ?, presentacion = ?
-    WHERE producto_id = ?;
-  `;
-  const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion, id];
+  if (precio_compra < 0 || precio_venta < 0 || stock < 0) {
+    return res.status(400).json({ success: false, error: 'Los precios y el stock no pueden ser negativos.' });
+  }
 
-  pool.execute(query, values, (err, result) => {
-    if (err) {
-      console.error('Error al actualizar producto:', err);
-      return res.status(500).json({ error: 'Error al actualizar producto' });
-    }
+  try {
+    const query = `
+      UPDATE productos
+      SET nombre = ?, precio_compra = ?, precio_venta = ?, stock = ?, categoria_id = ?, presentacion = ?
+      WHERE producto_id = ?;
+    `;
+    const values = [nombre, precio_compra, precio_venta, stock, categoria_id, presentacion, id];
+    const [result] = await pool.promise().execute(query, values);
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Producto no encontrado' });
     }
     res.json({ message: 'Producto actualizado correctamente' });
-  });
+  } catch (err) {
+    console.error('Error al actualizar producto:', err);
+    return res.status(500).json({ error: 'Error al actualizar producto' });
+  }
 };
 
 // Desactivar/Eliminar lógicamente un producto
-exports.toggleProductStatus = (req, res) => {
+exports.toggleProductStatus = async (req, res) => {
   const { id } = req.params;
-  // Por ahora, solo desactivamos. El body podría usarse para reactivar en el futuro.
   const nuevoEstado = 0; // 0 para inactivo
 
-  const query = 'UPDATE productos SET activo = ? WHERE producto_id = ?';
+  try {
+    const query = 'UPDATE productos SET activo = ? WHERE producto_id = ?';
+    const [result] = await pool.promise().execute(query, [nuevoEstado, id]);
 
-  pool.execute(query, [nuevoEstado, id], (err, result) => {
-    if (err) {
-      console.error('Error al desactivar producto:', err);
-      return res.status(500).json({ success: false, error: 'Error al desactivar el producto' });
-    }
     if (result.affectedRows === 0) return res.status(404).json({ success: false, error: 'Producto no encontrado' });
 
     res.json({ success: true, message: 'Producto desactivado correctamente' });
-  });
+  } catch (err) {
+    console.error('Error al desactivar producto:', err);
+    return res.status(500).json({ success: false, error: 'Error al desactivar el producto' });
+  }
 };

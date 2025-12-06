@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const path = require('path');
 
 const COMPANY_INFO = {
     name: 'CASRM',
@@ -8,7 +9,7 @@ const COMPANY_INFO = {
     phone: '+51 940 230 855',
     ruc: '20609736811',
     email: 'ventas@casrm.com',
-    logoPath: 'public/images/logoCASRM.png'
+    logoPath: path.join(__dirname, '..', 'public', 'images', 'logoCASRM.png')
 };
 
 exports.createCotizacion = async (req, res) => {
@@ -22,7 +23,7 @@ exports.createCotizacion = async (req, res) => {
         descuento_total,
         total,
         validez_dias,
-        observaciones, 
+        observaciones,
         productos
     } = req.body;
 
@@ -32,7 +33,7 @@ exports.createCotizacion = async (req, res) => {
 
     let connection;
     try {
-        connection = await pool.promise().getConnection(); 
+        connection = await pool.promise().getConnection();
         await connection.beginTransaction();
 
         // 1. Insertar en la tabla principal `cotizaciones`
@@ -61,7 +62,7 @@ exports.createCotizacion = async (req, res) => {
                 `INSERT INTO detalle_cotizacion (cotizacion_id, producto_id, nombre_producto, presentacion, precio_unitario, cantidad, descuento_item, subtotal)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    cotizacion_id, 
+                    cotizacion_id,
                     prod.producto_id || null,
                     prod.nombre_producto,
                     prod.presentacion,
@@ -148,11 +149,11 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, headerY + 5, { width: boxWidth, align: 'center' });
         doc.fontSize(10).font('Helvetica');
         doc.text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, headerY + 30);
-        doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
+        doc.text(`Fecha: ${new Date(cotizacion.fecha_creacion).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
         doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 60);
 
         // --- 2. INFORMACIÓN DE EMPRESA Y CLIENTE ---
-        const infoStartY = headerY + 100; 
+        const infoStartY = headerY + 100;
         let leftY = infoStartY;
         let rightY = infoStartY;
 
@@ -210,17 +211,17 @@ exports.generatePdfCotizacion = async (req, res) => {
             const productNameHeight = doc.heightOfString(prod.nombre_producto, { width: tableColumns.producto.width });
             const presentationHeight = doc.heightOfString(prod.presentacion, { width: tableColumns.presentacion.width });
             const actualRowContentHeight = Math.max(productNameHeight, presentationHeight);
-            const rowPadding = 10; 
+            const rowPadding = 10;
             return actualRowContentHeight + rowPadding;
         };
 
         // Función para dibujar una fila de la tabla 
         const drawTableRow = (prod, y, isEven, rowHeight) => {
             if (isEven) {
-                doc.fillColor('#f3f4f6') 
-                   .rect(50, y, doc.page.width - 100, rowHeight) 
-                   .fill(); 
-                doc.fillColor('black'); 
+                doc.fillColor('#f3f4f6')
+                    .rect(50, y, doc.page.width - 100, rowHeight)
+                    .fill();
+                doc.fillColor('black');
             }
 
             doc.fontSize(10).font('Helvetica');
@@ -241,13 +242,13 @@ exports.generatePdfCotizacion = async (req, res) => {
             const rowHeight = calculateRowHeight(prod);
 
             // Salto de página si no hay suficiente espacio O si es el 9no item
-            if ((doc.y + rowHeight > doc.page.height - 100) || (index === 8)) { 
+            if ((doc.y + rowHeight > doc.page.height - 100) || (index === 8)) {
                 doc.addPage();
                 drawTableHeader(50);
-                doc.y = 75; 
+                doc.y = 75;
             }
             drawTableRow(prod, doc.y, index % 2 !== 0, rowHeight);
-            doc.y += rowHeight; 
+            doc.y += rowHeight;
         });
 
         doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
@@ -257,11 +258,11 @@ exports.generatePdfCotizacion = async (req, res) => {
 
         // Estimar la altura necesaria para observaciones y totales
         const observationsHeight = cotizacion.observaciones ? doc.heightOfString(cotizacion.observaciones, { width: 300 }) + 20 : 0;
-        const totalsHeight = 60; 
+        const totalsHeight = 60;
         const requiredHeight = Math.max(observationsHeight, totalsHeight) + 20;
 
         // Si no hay espacio suficiente, crear una nueva página
-        if (doc.y + requiredHeight > doc.page.height - 80) { 
+        if (doc.y + requiredHeight > doc.page.height - 80) {
             doc.addPage();
             doc.y = 50; // Posicionar cursor al inicio
         }

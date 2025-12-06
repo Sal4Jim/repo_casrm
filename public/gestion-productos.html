@@ -105,11 +105,10 @@
                         <!-- Campo oculto para guardar el ID del producto en modo edición -->
                         <input type="hidden" id="productId">
                         <div class="row mb-3">
-                            <div class="col-md-6">  
+                            <div class="col-md-6">
                                 <label for="productName" class="form-label">Nombre*</label>
                                 <input type="text" class="form-control" id="productName" required
-                                    oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')"
-                                    pattern="[A-Z]*" title="Solo se permiten letras, números y puntos.">
+                                    title="Ingrese el nombre del producto">
                             </div>
                             <div class="col-md-6">
                                 <label for="productCategory" class="form-label">Categoría*</label>
@@ -126,12 +125,11 @@
                                 <label for="productPresentation" class="form-label">Presentación*</label>
                                 <input type="text" class="form-control" id="productPresentation"
                                     placeholder="Ej: caja, saco 20KG, pqt 1.2kg, etc..." required
-                                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9.]/g, '')"
-                                    pattern="[A-Z0-9.]*" title="Solo se permiten letras, números y puntos.">
+                                    title="Ingrese la presentación del producto">
                             </div>
                             <div class="col-md-6">
                                 <label for="productStock" class="form-label">Stock*</label>
-                                <input type="number" class="form-control" id="productStock" min="0" 
+                                <input type="number" class="form-control" id="productStock" min="0"
                                     placeholder="Cantidad inicial" required>
                             </div>
                         </div>

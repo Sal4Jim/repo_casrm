@@ -32,10 +32,10 @@ exports.createVenta = async (req, res) => {
         `;
         const [ventaResult] = await connection.execute(ventaQuery, [
             cliente_id,
-            fecha, // Usamos la fecha y hora completas que vienen del frontend
+            fecha,
             subtotal,
             total,
-            descuento.monto
+            descuento ? descuento.monto : 0
         ]);
 
         const compra_id = ventaResult.insertId;
@@ -44,8 +44,8 @@ exports.createVenta = async (req, res) => {
         for (const prod of productos) {
             // Insertar detalle
             const detalleQuery = `
-                INSERT INTO detalle_venta (compra_id, producto_id, precio_unitario, cantidad, subtotal)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO detalle_venta(compra_id, producto_id, precio_unitario, cantidad, subtotal)
+                VALUES(?, ?, ?, ?, ?)
             `;
             await connection.execute(detalleQuery, [
                 compra_id,
@@ -56,7 +56,7 @@ exports.createVenta = async (req, res) => {
             ]);
 
             // Actualizar stock del producto
-            const stockQuery = `UPDATE productos SET stock = stock - ? WHERE producto_id = ?`;
+            const stockQuery = `UPDATE productos SET stock = stock - ? WHERE producto_id = ? `;
             await connection.execute(stockQuery, [prod.cantidad, prod.id]);
         }
 
@@ -64,8 +64,8 @@ exports.createVenta = async (req, res) => {
         if (bonificaciones && bonificaciones.length > 0) {
             for (const bonif of bonificaciones) {
                 const detalleBonifQuery = `
-                    INSERT INTO detalle_venta (compra_id, producto_id, precio_unitario, cantidad, subtotal, es_bonificacion, bonificacion_id)
-                    VALUES (?, NULL, 0, ?, 0, 1, ?)
+                    INSERT INTO detalle_venta(compra_id, producto_id, precio_unitario, cantidad, subtotal, es_bonificacion, bonificacion_id)
+                    VALUES(?, NULL, 0, ?, 0, 1, ?)
                 `;
                 await connection.execute(detalleBonifQuery, [
                     compra_id,
@@ -74,13 +74,12 @@ exports.createVenta = async (req, res) => {
                 ]);
 
                 // Actualizar stock de la bonificación
-                const stockBonifQuery = `UPDATE bonificaciones SET stock = stock - ? WHERE bonificacion_id = ?`;
+                const stockBonifQuery = `UPDATE bonificaciones SET stock = stock - ? WHERE bonificacion_id = ? `;
                 await connection.execute(stockBonifQuery, [bonif.cantidad, bonif.id]);
             }
         }
 
-
-        // 3. Confirmar transacción
+        // 4. Confirmar transacción
         await connection.commit();
 
         res.status(201).json({
@@ -158,8 +157,8 @@ exports.getVentasByCliente = async (req, res) => {
         const query = `
             SELECT compra_id, fecha, total, activa
             FROM venta 
-            WHERE cliente_id = ? 
-            ORDER BY fecha DESC
+            WHERE cliente_id = ?
+        ORDER BY fecha DESC
         `;
         const [ventas] = await pool.promise().query(query, [cliente_id]);
         res.json({ success: true, ventas });
@@ -191,7 +190,7 @@ exports.generatePdfVenta = async (req, res) => {
             `SELECT v.*, c.nombre as cliente_nombre, c.ruc as cliente_ruc, c.direccion as cliente_direccion, c.telefono as cliente_telefono
              FROM venta v 
              JOIN clientes c ON v.cliente_id = c.cliente_id 
-             WHERE v.compra_id = ?`,
+             WHERE v.compra_id = ? `,
             [ventaId]
         );
 
@@ -207,21 +206,21 @@ exports.generatePdfVenta = async (req, res) => {
              FROM detalle_venta dv 
              LEFT JOIN productos p ON dv.producto_id = p.producto_id 
              LEFT JOIN bonificaciones b ON dv.bonificacion_id = b.bonificacion_id 
-             WHERE dv.compra_id = ?`,
+             WHERE dv.compra_id = ? `,
             [ventaId]
         );
         venta.detalles = detalleRows;
 
         // --- INICIO DE GENERACIÓN DE PDF ---
         const doc = new PDFDocument({ margin: 50, size: 'A4' });
-        const numeroVentaSecuencial = `VTA-${venta.compra_id.toString().padStart(5, '0')}`;
+        const numeroVentaSecuencial = `VTA - ${venta.compra_id.toString().padStart(5, '0')} `;
         const filename = `recibo_venta_${numeroVentaSecuencial}.pdf`;
 
-        doc.info.Title = `Recibo de Venta - ${numeroVentaSecuencial}`;
+        doc.info.Title = `Recibo de Venta - ${numeroVentaSecuencial} `;
         doc.info.Author = COMPANY_INFO.name;
 
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Disposition', `attachment; filename = "${filename}"`);
 
         doc.pipe(res);
 
@@ -241,18 +240,18 @@ exports.generatePdfVenta = async (req, res) => {
 
         doc.fillColor('black') // Restaurar color negro
             .fontSize(10).font('Helvetica')
-            .text(`Nro: ${numeroVentaSecuencial}`, boxX + 10, headerY + 35);
-        doc.text(`Fecha: ${new Date(venta.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 50);
+            .text(`Nro: ${numeroVentaSecuencial} `, boxX + 10, headerY + 35);
+        doc.text(`Fecha: ${new Date(venta.fecha).toLocaleDateString('es-ES')} `, boxX + 10, headerY + 50);
 
         // --- INFORMACIÓN DEL CLIENTE ---
         doc.y = headerY + 100;
         doc.fillColor('#444').fontSize(11).font('Helvetica-Bold').text('Cliente:', 50, doc.y);
         doc.moveDown(0.5);
         doc.fontSize(10).font('Helvetica').fillColor('black');
-        doc.text(`Nombre / Razón Social: ${venta.cliente_nombre}`);
-        doc.text(`RUC / DNI: ${venta.cliente_ruc}`);
-        if (venta.cliente_telefono) doc.text(`Teléfono: ${venta.cliente_telefono}`);
-        if (venta.cliente_direccion) doc.text(`Dirección: ${venta.cliente_direccion}`);
+        doc.text(`Nombre / Razón Social: ${venta.cliente_nombre} `);
+        doc.text(`RUC / DNI: ${venta.cliente_ruc} `);
+        if (venta.cliente_telefono) doc.text(`Teléfono: ${venta.cliente_telefono} `);
+        if (venta.cliente_direccion) doc.text(`Dirección: ${venta.cliente_direccion} `);
 
         // --- TABLA DE PRODUCTOS ---
         doc.moveDown(2);
@@ -298,9 +297,9 @@ exports.generatePdfVenta = async (req, res) => {
             // Dibujar el contenido de la fila
             doc.font('Helvetica').fontSize(10);
             doc.text(nombreItem, 55, textY, { width: 240 });
-            doc.text(`S/. ${Number(item.precio_unitario).toFixed(2)}`, 300, textY, { width: 70, align: 'right' });
+            doc.text(`S /.${Number(item.precio_unitario).toFixed(2)} `, 300, textY, { width: 70, align: 'right' });
             doc.text(item.cantidad.toString(), 380, textY, { width: 50, align: 'center' });
-            doc.text(`S/. ${Number(item.subtotal).toFixed(2)}`, 440, textY, { width: 100, align: 'right' });
+            doc.text(`S /.${Number(item.subtotal).toFixed(2)} `, 440, textY, { width: 100, align: 'right' });
             doc.y += rowHeight;
         });
 
@@ -319,16 +318,16 @@ exports.generatePdfVenta = async (req, res) => {
 
         doc.font('Helvetica').fontSize(10);
         doc.text('Subtotal:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
-        doc.text(`S/. ${Number(venta.subtotal).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
+        doc.text(`S /.${Number(venta.subtotal).toFixed(2)} `, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
         totalsY += 15;
 
         doc.text('Descuento:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' });
-        doc.text(`- S/. ${Number(venta.descuento_venta).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
+        doc.text(`- S /.${Number(venta.descuento_venta).toFixed(2)} `, totalsValueX, totalsY, { width: totalsWidth, align: 'right' });
         totalsY += 20;
 
         doc.font('Helvetica-Bold').fontSize(12);
         doc.text('TOTAL:', totalsLabelX, totalsY, { width: totalsWidth, align: 'right' }).fillColor('#28a745'); // Color verde para el total
-        doc.text(`S/. ${Number(venta.total).toFixed(2)}`, totalsValueX, totalsY, { width: totalsWidth, align: 'right' }).fillColor('black');
+        doc.text(`S /.${Number(venta.total).toFixed(2)} `, totalsValueX, totalsY, { width: totalsWidth, align: 'right' }).fillColor('black');
 
         // --- PIE DE PÁGINA (POSICIÓN RELATIVA) ---
         // Mover el cursor hacia abajo después de los totales
@@ -370,15 +369,15 @@ exports.getVentaById = async (req, res) => {
 
         // Obtener detalles (productos y bonificaciones)
         const detalleQuery = `
-        SELECT
-        dv.*,
-            p.nombre AS nombre_producto,
-                b.nombre AS nombre_bonificacion
+    SELECT
+    dv.*,
+        p.nombre AS nombre_producto,
+            b.nombre AS nombre_bonificacion
             FROM detalle_venta dv
             LEFT JOIN productos p ON dv.producto_id = p.producto_id
             LEFT JOIN bonificaciones b ON dv.bonificacion_id = b.bonificacion_id
             WHERE dv.compra_id = ?
-            `;
+        `;
         const [detalles] = await pool.promise().query(detalleQuery, [id]);
 
         venta.detalles = detalles;
@@ -397,7 +396,7 @@ exports.getAllVentas = async (req, res) => {
         const params = [];
 
         if (startDate && endDate) {
-            query += ` AND fecha BETWEEN ? AND ?`;
+            query += ` AND fecha BETWEEN ? AND ? `;
             params.push(startDate, endDate + ' 23:59:59');
         }
 
