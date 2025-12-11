@@ -148,7 +148,11 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, headerY + 5, { width: boxWidth, align: 'center' });
         doc.fontSize(10).font('Helvetica');
         doc.text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, headerY + 30);
-        doc.text(`Fecha: ${new Date(cotizacion.fecha).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
+        
+        const fechaObj = cotizacion.fecha_creacion ? new Date(cotizacion.fecha_creacion) : new Date();
+        const fechaStr = isNaN(fechaObj.getTime()) ? new Date().toLocaleDateString('es-ES') : fechaObj.toLocaleDateString('es-ES');
+        doc.text(`Fecha: ${fechaStr}`, boxX + 10, headerY + 45);
+        
         doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 60);
 
         // --- 2. INFORMACIÓN DE EMPRESA Y CLIENTE ---
