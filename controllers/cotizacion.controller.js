@@ -38,8 +38,8 @@ exports.createCotizacion = async (req, res) => {
 
         // 1. Insertar en la tabla principal `cotizaciones`
         const [cotizacionResult] = await connection.execute(
-            `INSERT INTO cotizaciones (cliente_nombre, cliente_ruc, cliente_direccion, cliente_telefono, cliente_email, subtotal, descuento_total, total, validez_dias, observaciones)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO cotizaciones (cliente_nombre, cliente_ruc, cliente_direccion, cliente_telefono, cliente_email, subtotal, descuento_total, total, validez_dias, observaciones, fecha)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
             [
                 cliente_nombre,
                 cliente_ruc,
@@ -149,7 +149,15 @@ exports.generatePdfCotizacion = async (req, res) => {
         doc.fontSize(14).font('Helvetica-Bold').text('COTIZACIÓN', boxX, headerY + 5, { width: boxWidth, align: 'center' });
         doc.fontSize(10).font('Helvetica');
         doc.text(`Nro: COT-${cotizacion.cotizacion_id.toString().padStart(5, '0')}`, boxX + 10, headerY + 30);
+<<<<<<< Updated upstream
         doc.text(`Fecha: ${new Date(cotizacion.fecha_creacion).toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
+=======
+        
+        // Validar que exista la fecha, si no, usar la fecha actual
+        const fechaEmision = cotizacion.fecha ? new Date(cotizacion.fecha) : new Date();
+        doc.text(`Fecha: ${fechaEmision.toLocaleDateString('es-ES')}`, boxX + 10, headerY + 45);
+        
+>>>>>>> Stashed changes
         doc.text(`Válida por: ${cotizacion.validez_dias} días`, boxX + 10, headerY + 60);
 
         // --- 2. INFORMACIÓN DE EMPRESA Y CLIENTE ---
